@@ -34,7 +34,7 @@ RUN ./build.sh
 
 ## final sever image
 FROM scratch
-
+ENV CSP_HEADER=
 COPY --from=spa-builder /app/server /server
 EXPOSE 8080
 CMD ["/server"] 
