@@ -1,6 +1,6 @@
 # Nasadenie do klastra kubernetes (Kontinuálne nasadenie cez Flux)
 
-Rovnako ako v prípade web aplikácie si ukážeme ako nasadiť náš web servis do klastra Kubernetes. Keďže už máme rozchodené kontinuálne nasadenie s využitím aplikácie [Flux](https://fluxcd.io/), bude nám stačiť pripraviť niekoľko yaml súborov a dať ich do správnych priečinkov. Nasadenie do klastra následne prebehne automaticky.
+Rovnako ako v prípade web aplikácie si ukážeme ako nasadiť náš web servis do klastra Kubernetes. Keďže už máme rozchodené kontinuálne nasadenie s využitím aplikácie [Flux], bude nám stačiť pripraviť niekoľko yaml súborov a dať ich do správnych priečinkov. Nasadenie do klastra následne prebehne automaticky.
 
 1. Vo VS Code otvorte priečinok s názvom `.../webcloud-gitops`.
 
@@ -8,36 +8,36 @@ Rovnako ako v prípade web aplikácie si ukážeme ako nasadiť náš web servis
 
 3. V priečinku `.../webcloud-gitops/apps/<pfx>-ambulance-webapi` vytvorte súbor `deployment.yaml` s nasledujúcim obsahom:
 
-   ```yaml
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: <pfx>-ambulance-webapi
-    spec:
-      replicas: 1
-      selector:
-          matchLabels:
-            pod: <pfx>-ambulance-webapi-label
-      template:
-          metadata:
-            labels:
-              pod: <pfx>-ambulance-webapi-label
-          spec:
-            containers:
-            - name: <pfx>-ambulance-webapi-container
-              image: <your-account>/ambulance-webapi:latest
-              imagePullPolicy: Always
-              ports:
-              - name: webapi-port
-                containerPort: 8080
-              resources:
-                requests:
-                  memory: "32Mi"
-                  cpu: "0.1"
-                limits:
-                  memory: "128Mi"
-                  cpu: "0.3"
-    ```
+     ```yaml
+     apiVersion: apps/v1
+     kind: Deployment
+     metadata:
+       name: <pfx>-ambulance-webapi
+     spec:
+       replicas: 1
+       selector:
+           matchLabels:
+             pod: <pfx>-ambulance-webapi-label
+       template:
+           metadata:
+             labels:
+               pod: <pfx>-ambulance-webapi-label
+           spec:
+             containers:
+             - name: <pfx>-ambulance-webapi-container
+               image: <your-account>/ambulance-webapi:latest
+               imagePullPolicy: Always
+               ports:
+               - name: webapi-port
+                 containerPort: 8080
+               resources:
+                 requests:
+                   memory: "32Mi"
+                   cpu: "0.1"
+                 limits:
+                   memory: "128Mi"
+                   cpu: "0.3"
+     ```
 
     Súbor `deployment.yaml` je deklaráciou nasadenia našej služby - tzv. _workload_ - do klastra. Všimnite si, že požaduje nasadenie jednej repliky - čo znamená, že v klastri bude vytvorený jeden _pod_.
 
@@ -78,34 +78,34 @@ deklarácii konfigurácie do špecifických prostredí - klastrov.
 
    V súbore `.../webcloud-gitops/clusters/localhost/kustomization.yaml` doplňte do časti `resources` nasledujúci riadok:
 
-   ```yaml
-   ...
-   resources:
-   ...
-   - ../../apps/<pfx>-ambulance-webapi                  # kustomization pre ambulance-webapi
-   ...
-   ```
+    ```yaml
+    ...
+    resources:
+    ...
+    - ../../apps/<pfx>-ambulance-webapi                  #  kustomization pre ambulance-webapi
+    ...
+    ```
 
 7. Vzhľadom k tomu, že systém Flux už máme lokálne nasadený, stačí nám hore uvedené zmeny archivovať do vzdialeného repozitára. Od tohto momentu sa Flux postará o nasadenie do lokálneho Kubernetes klastra.
 
    Archivujte zmeny.
 
-   ```bash
-   git add .
-   git commit -m 'pridane yaml pre ambulance-webapi'
-   git pull
-   git push
-   ```
+    ```powershell
+    git add .
+    git commit -m 'pridane yaml pre ambulance-webapi'
+    git pull
+    git push
+    ```
 
    Po pár minútach overte, že pody pre web servis sú vytvorené a sú v stave `Running` príkazom:
   
-   ```ps
-   kubectl get pods -n wac-hospital
-   ```
+    ```ps
+    kubectl get pods -n wac-hospital
+    ```
 
    Výpis indikuje, že v našom klastri máme teraz bežiace dva pody `<pfx>-ambulance-webapi` - zjednodušene dva virtuálne počítače pripojené k virtuálnej sieti kubernetes klastra. Momentálne sú tieto pody dostupné len na virtuálnej sieti systému kubernetes. Pokiaľ k nim chceme pristúpiť, môžeme využiť funkciu presmerovania portov z lokálneho systému na cieľový _service_ (prípadne _pod_) aktívneho klastra.
 
-    ```bash
+    ```powershell
     kubectl port-forward service/<pfx>-ambulance-webapi -n wac-hospital 8111:80
     ```
 
@@ -113,77 +113,77 @@ deklarácii konfigurácie do špecifických prostredí - klastrov.
 
 8. Ešte nastavíme sledovanie zmien verzie docker obrazu a ich aplikovanie do klastra obdobne ako pre webcomponent. Potrebujeme tri komponenty:
 
-   a) `ImageRepository` Flux komponent  
-   Nastavuje, ktorý docker obraz má Flux sledovať - _ambulance-webapi_. Vytvorte súbor `.../webcloud-gitops/flux-system/ambulance-webapi-image-repo.yaml` s obsahom:
+   * `ImageRepository` Flux komponent  
+      Nastavuje, ktorý docker obraz má Flux sledovať - _ambulance-webapi_. Vytvorte súbor `.../webcloud-gitops/flux-system/ambulance-webapi-image-repo.yaml` s obsahom:
 
-   ```yaml
-   apiVersion: image.toolkit.fluxcd.io/v1beta1
-   kind: ImageRepository
-   metadata:
-     name: ambulance-webapi
-     namespace: flux-system
-   spec:
-     image: <vase-docker-id>/ambulance-webapi
-     interval: 1m0s
-   ```
+        ```yaml
+        apiVersion: image.toolkit.fluxcd.io/v1beta1
+        kind: ImageRepository
+        metadata:
+          name: ambulance-webapi
+          namespace: flux-system
+        spec:
+          image: <vase-docker-id>/ambulance-webapi
+          interval: 1m0s
+        ```
 
-   > Zameňte vase-docker-id !
+        >warning:> Zameňte vase-docker-id !
 
-   A aplikujte komponent do klustra (Fluxu):
+      A aplikujte komponent do klustra (Fluxu):
 
-   ```ps
-   kubectl apply -f flux-system/ambulance-webapi-image-repo.yaml
-   ```
+        ```ps
+        kubectl apply -f flux-system/ambulance-webapi-image-repo.yaml
+        ```
 
-   b) `ImagePolicy` Flux komponent  
-   Nastavuje kritérium, podľa ktorého sa vyberie verzia docker obrazu. Vytvorte súbor `.../webcloud-gitops/flux-system/ambulance-webapi-image-policy.yaml` s obsahom:
+   * `ImagePolicy` Flux komponent  
+      Nastavuje kritérium, podľa ktorého sa vyberie verzia docker obrazu. Vytvorte súbor `.../webcloud-gitops/flux-system/ambulance-webapi-image-policy.yaml` s obsahom:
 
-    ```yaml
-    apiVersion: image.toolkit.fluxcd.io/v1beta1
-    kind: ImagePolicy
-    metadata:
-      name: ambulance-webapi
-      namespace: flux-system
-    spec:
-      imageRepositoryRef:
-        name: ambulance-webapi
-      policy:
-        semver:
-          range: '^1.0.0-0'  # selects latest version matching 1.0.0-<number>
-    ```
+        ```yaml
+        apiVersion: image.toolkit.fluxcd.io/v1beta1
+        kind: ImagePolicy
+        metadata:
+          name: ambulance-webapi
+          namespace: flux-system
+        spec:
+          imageRepositoryRef:
+            name: ambulance-webapi
+          policy:
+            semver:
+              range: '^1.0.0-0'  # selects latest version matching 1.0.0-<number>
+        ```
 
-    A aplikujte komponent do klastra (Fluxu):
+        A aplikujte komponent do klastra (Fluxu):
 
-    ```ps
-    kubectl apply -f ./flux-system/ambulance-webapi-image-policy.yaml
-    ```
+         ```ps
+         kubectl apply -f ./flux-system/ambulance-webapi-image-policy. yaml
+         ```
 
-    Skontrolujeme, aká verzia docker obrazu bola vybraná:
+        Skontrolujeme, aká verzia docker obrazu bola vybraná:
 
-    ```ps
-    flux get image policy ambulance-webapi
-    ```
+         ```ps
+         flux get image policy ambulance-webapi
+         ```
 
-    Výpis by mal obsahovať riadok:
+        Výpis by mal obsahovať riadok:
 
-    ```bash
-    imagepolicy/ambulance-webapi       True    Latest image tag for '<docker_id>/ambulance-webapi' resolved to: 1.0.0-<posledne cislo buildu>
-    ```
+         ```powershell
+         imagepolicy/ambulance-webapi       True    Latest image tag  for '<docker_id>/ambulance-webapi' resolved to: 1.0. 0-<posledne cislo buildu>
+         ```
 
-   c) Upravíme všetky súbory, kde chceme aby Flux aktualizoval verziu docker obrazu. Robí sa to pridaním špeciálneho markeru `_# {"$imagepolicy": "POLICY_NAMESPACE:POLICY_NAME"}_` na riadok, ktorý sa má upravovať.
+   * Upravíme všetky súbory, kde chceme aby Flux aktualizoval verziu docker obrazu. Robí sa to pridaním špeciálneho markeru `_# {"$imagepolicy": "POLICY_NAMESPACE:POLICY_NAME"}_` na riadok, ktorý sa má upravovať.
 
-   My upravíme iba súbor `.../webcloud-gitops/clusters/localhost/kustomization.yaml` rovnako ako v prípade webkomponentu. Do časti `images:` pridajte:
+      My upravíme iba súbor `.../webcloud-gitops/clusters/localhost/kustomization.yaml` rovnako ako v prípade webkomponentu. Do časti `images:` pridajte:
 
-    ```yaml
-    ...
-    - name: <docker_id>/ambulance-webapi
-      newName: <docker_id>/ambulance-webapi # {"$imagepolicy": "flux-system:ambulance-webapi:name"}
-      newTag: 1.0.0-1 # {"$imagepolicy": "flux-system:ambulance-webapi:tag"}
-     ```
+        ```yaml
+        ...
+        - name: <docker_id>/ambulance-webapi
+          newName: <docker_id>/ambulance-webapi # {"$imagepolicy": "flux-system:ambulance-webapi:name"}
+          newTag: 1.0.0-1 # {"$imagepolicy": "flux-system:ambulance-webapi:tag"}
+        ```
 
-   d) `ImageUpdateAutomation` Flux komponent nie je treba vytvárať. Ten, ktorý sme vytvorili pre webkomponent sleduje všetky `imagepolicy` v rovnakom namespace. A git repozitár a priečinok kde sa nachádza súbor, v ktorom treba robiť zmeny, je ten istý.
+   * `ImageUpdateAutomation` Flux komponent nie je treba vytvárať. Ten, ktorý sme vytvorili pre webkomponent sleduje všetky `imagepolicy` v rovnakom namespace. A git repozitár a priečinok kde sa nachádza súbor, v ktorom treba robiť zmeny, je ten istý.
 
-   e) Pridajte referenciu na novovytvorené súbory do kustomizácie flux systému `.../webcloud-gitops/flux-system/kustomization.yaml` pre potreby obnovi klastra:
+   Pridajte referenciu na novovytvorené súbory do kustomizácie flux systému `.../webcloud-gitops/flux-system/kustomization.yaml` pre potreby obnovi klastra:
    
     ```yaml
     apiVersion: kustomize.config.k8s.io/v1beta1

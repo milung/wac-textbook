@@ -49,6 +49,13 @@ jobs:
           type=semver,pattern={{major}}
           type=sha
           type=edge,branch=main
+    - name: Get Time
+      id: time
+      uses: nanzm/get-time-action@master
+      with:
+        timeZone: UTC+2
+        format: 'YYYYMMDDHHmmss'
+    
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
@@ -58,5 +65,8 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.builder_meta.outputs.tags }}
         labels: ${{ steps.builder_meta.outputs.labels }}
+        build-args: |
+          version=${{ steps.time.outputs.time }}
+          
 
 

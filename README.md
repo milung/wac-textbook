@@ -2,11 +2,9 @@
 
 __English summary__: This repository contains the source materials for the book "Vývoj webových aplikácii v prostredí Cloud" (Development of web applications in the Cloud environment) written in Slovak language. The book is available at http://wac-fiit.milung.eu/ .
 
-Materials are licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+Materials are licensed under the [Creative Commons Attribution 4.0 International (CC BY 4.0) license](https://creativecommons.org/licenses/by/4.0/).
 
-Markdown súborý a obrázky pre generovanie skrípt "Vývoj webových aplikácii v prostredí Cloud" (WAC).
-
-
+Markdown súbory a obrázky pre generovanie skrípt "Vývoj webových aplikácii v prostredí Cloud" (WAC).
 
 ## Postup pri práci s repozitárom
 

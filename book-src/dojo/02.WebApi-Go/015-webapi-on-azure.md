@@ -7,9 +7,9 @@ Rovnakým spôsobom si nasadíme aj webapi a potom ho prepojíme s klientom.
 
 1. Najprv overíme, či nasadený klient stále funguje. Prejdite na stránku azure portálu ([https://portal.azure.com](https://portal.azure.com)), skontrolujte, či máte vybranú správnu subscription a otvorte si *Resource group* (*WebInCloud-Dojo*), ktorú sme vytvorili pri nasadení klienta. V zozname zdrojov danej grupy vyberte `ambulance-<pfx>` zdroj a kliknite na URL, kde je aplikácia dostupná.
 
-   > Do URL cesty treba pridať `/ambulance-wl`, aby ste boli presmerovaný na správny web komponent.
+   >warning:> Do URL cesty treba pridať `/ambulance-wl`, aby ste boli presmerovaný na správny web komponent.
 
-   ![Obrázok 22. Prehľad o prostriedku Web App](../../01.Web-Components/img/01-SPA-22-WebAppOverview.png)
+   ![Prehľad o prostriedku Web App](../01.Web-Components/img/01-SPA-22-WebAppOverview.png)
 
    Ak vidíte v konzole chybu pri prístupe na `http://localhost:8080/api/waiting-list/bobulova/entry`, je všetko v poriadku. Klient sa snaží pristúpiť na webapi s adresou nakonfigurovanou v súbore `index.html`.
   
@@ -29,7 +29,7 @@ Otvorte skupinu prostriedkov (*Resource Group*) `WebInCloud-Dojo` a stlačte tla
      * V riadku *Region* zvoľte `West Europe` (dátové centrum v Holandsku).
    * Zvoľte ten istý aplikačný plán ako pre prvú webapi. Ak nie je k dispozícii, vytvorte nový a nastavte cenovú úroveň (*Pricing Tier*) na *Free F1*.
 
-   ![Vytvorenie prostriedku typu Web App](../img/dojo-22-WebAppResource.png)
+   ![Vytvorenie prostriedku typu Web App](./img/dojo-22-WebAppResource.png)
 
    Stlačte tlačidlo *Next* a vyplňte údaje pre docker:
    * *Source* na hodnotu `Container Registry`
@@ -93,7 +93,7 @@ Otvorte skupinu prostriedkov (*Resource Group*) `WebInCloud-Dojo` a stlačte tla
 
    Uložte zmeny stlačením na tlačidlo *Save*. Po vyplnení uvedených hodnôt by mala vaša konfigurácia vyzerať podobne, ako na obrázku nižšie:
 
-   ![Nastavenie Azure App Service](../img/dojo-15-app-settings.png)
+   ![Nastavenie Azure App Service](./img/dojo-15-app-settings.png)
 
    Prejdite na stránku vašej frontend aplikácie. Zobrazí sa prázdny zoznam pacientov s tlačidlom "+" na pridanie pacienta. V konzole je chyba:
 

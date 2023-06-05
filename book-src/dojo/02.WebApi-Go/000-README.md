@@ -42,19 +42,19 @@ Funkcionalita aplikácie je definovaná nasledovne:
 
 Technické ohraničenia:
 
-* Aplikácia je vytvorená v jazyku [Go](https://go.dev/)
-  s použitím [Gin Web Framework](https://gin-gonic.com/docs/)
-* Aplikačné rozhranie je popísané vo formáte [OpenAPI](https://www.openapis.org/about),
-  s použitím nástroja [Swagger](https://swagger.io/docs/specification/about/)
+* Aplikácia je vytvorená v jazyku [Go]
+  s použitím [Gin Web Framework][gin]
+* Aplikačné rozhranie je popísané vo formáte [OpenAPI],
+  s použitím nástroja [Swagger]
 * Stav čakajúcich a informácie o pacientoch sú uložené v  No-SQL databáze
-  vytvorenej pomocou knižnice [MongoDB](https://www.mongodb.com/)
+  vytvorenej pomocou knižnice [MongoDB]
 
 ## <a name="priprava"></a>Príprava na cvičenie
 
 * Vytvorená aplikácia podľa pokynov v cvičení
-  [_Web aplikácia pomocou knižnice Stencil JS_](/v2/01.Web-Components/dojo/000-README.md)
+  [_Web aplikácia pomocou knižnice Stencil JS_](../01.Web-Components/dojo/000-README.md)
 * Nainštalovaný programovací jazyk [Go](https://go.dev/doc/install)
-* Nainštalovanú aplikáciu [Postman](https://www.getpostman.com/)
-* Vytvorený účet na stránke [Swagger Hub](https://app.swaggerhub.com)
+* Nainštalovanú aplikáciu [Postman]
+* Vytvorený účet na stránke [Swagger Hub]
 * Zoznámenie sa s jazykom Go, napr. [GOLANGBOT.COM](https://golangbot.com/learn-golang-series/)
 * Zoznámenie sa s jazykom [YAML](https://yaml.org/)

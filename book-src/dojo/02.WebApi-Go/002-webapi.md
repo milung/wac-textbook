@@ -1,28 +1,28 @@
 ## Kostra web služby pomocou jazyka Go a web knižnice gin
 
-1. Swagger umožňuje generovanie kostry kódu do viacerých jazykov a frameworkov (tlačidlo _Export -> Server Stub_). Poskytuje aj možnosť vygenerovať kostru pre go web server (_go-server_), avšak v súčasnej verzii používa ako web framework knižnicu `gorilla/mux`, ktorá je v maintenance móde. My na generovanie kostry kódu použijeme nástroj [openapi-generator](https://openapi-generator.tech/) ([Alternativa](http://api-latest-master.openapi-generator.tech/index.html)), ktorý je častejšie obnovovaný, má podporu pre novšie verzie knižníc a umožňuje  úpravu šablón pre generovanie súborov. Pri vhodnom nastavení prostredia a šablón potom možno dosiahnuť opakované generovanie a obnovu kódu pri prípadnej zmene API špecifikácie.
+1. Swagger umožňuje generovanie kostry kódu do viacerých jazykov a frameworkov (tlačidlo _Export -> Server Stub_). Poskytuje aj možnosť vygenerovať kostru pre go web server (_go-server_), avšak v súčasnej verzii používa ako web framework knižnicu `gorilla/mux`, ktorá je v maintenance móde. My na generovanie kostry kódu použijeme nástroj [openapi-generator] ([Alternativa][openapi generator online]), ktorý je častejšie obnovovaný, má podporu pre novšie verzie knižníc a umožňuje  úpravu šablón pre generovanie súborov. Pri vhodnom nastavení prostredia a šablón potom možno dosiahnuť opakované generovanie a obnovu kódu pri prípadnej zmene API špecifikácie.
 
-   [Online verzia openapi-generatora](http://api.openapi-generator.tech/index.html) vyžaduje špecifikáciu v JSON formáte. Na stránke _SwaggerHub_ vo vašej Waiting List API, zvoľte tlačidlo  _Export -> Download API -> JSON Unresolved_ a uložte vygenerovaný json súbor.
+   [Online verzia openapi-generatora][openapi generator online] vyžaduje špecifikáciu v JSON formáte. Na stránke _SwaggerHub_ vo vašej Waiting List API, zvoľte tlačidlo  _Export -> Download API -> JSON Unresolved_ a uložte vygenerovaný json súbor.
 
-    ![Obrázok 4. Export JSON specifikacie](../img/dojo-04-swagger-export.png)
+    ![Export JSON specifikacie](./img/dojo-04-swagger-export.png)
 
-   Na stránke [OpenAPI Generator Online](http://api.openapi-generator.tech/index.html) použite API v časti `SERVERS`: `POST /api/gen/servers/{framework}`. Ako `Path Parameters` zadajte framework `go-gin-server` a do textového bloku `Body data`, `EXAMPLE` vložte:
+   Na stránke [OpenAPI Generator Online] použite API v časti `SERVERS`: `POST /api/gen/servers/{framework}`. Ako `Path Parameters` zadajte framework `go-gin-server` a do textového bloku `Body data`, `EXAMPLE` vložte:
 
-   ```json
-   {
-   "options": {},
-   "spec": 
-   <OBSAH JSON SUBORU VYGENEROVANEHO NA STRANKE SWAGGERHUB>
-   }
-   ```
+    ```json
+    {
+     "options": {},
+     "spec": 
+     <OBSAH JSON SUBORU VYGENEROVANEHO NA STRANKE SWAGGERHUB>
+    }
+    ```
 
    Následne stlačte tlačidlo `TRY` a z vygenerovanej linky si stiahnite zip súbor, ktorý obsahuje kostru programu.
 
-   ![Obrázok 5. Export špecifikácie do Go](../img/dojo-05-openapi-generation.png)
+   ![Export špecifikácie do Go](./img/dojo-05-openapi-generation.png)
 
 2. V súborovom systéme prejdite do priečinku, kde sa nachádza priečinok `ambulance-list` a vedľa neho vytvorte nový priečinok `ambulance-webapi`. Rozbaľte do priečinku `ambulance-webapi` obsah vygenerovaného súboru `go-gin-server-server-generated.zip` (celý obsah priečinku `go-gin-server-server`). V pracovnom priestore v aplikácii Visual Studio Code otvorte priečinok `ambulance-webapi`.
 
-    > _Poznámka_: Naše API je relatívne malé, alternatívou by bolo vytvorenie projektu pomocou štandardných príkazov jazyka Go. V takom prípade by sme ale museli ručne vytvoriť celý dátový model a ovládače API volaní.
+    >info:> Naše API je relatívne malé, alternatívou by bolo vytvorenie projektu pomocou štandardných príkazov jazyka Go. V takom prípade by sme ale museli ručne vytvoriť celý dátový model a ovládače API volaní.
 
 3. Vytvoríme `go modul` a stiahneme závislosti. Otvorte príkazový riadok, prejdite do priečinku `ambulance-webapi` a vykonajte príkazy:
 
@@ -42,109 +42,109 @@
    - Vo všetkých súboroch zmeňte meno balíka podľa príslušného priečinku, to znamená text za kľúčovým slovom `package` sa má zhodovať s názvom priečinku. Pozor na pomlčku, ktorá nie je podporovaná v mene balíka.
    - V súbore `.../ambulance-webapi/router/routers.go` pridajte import na balík `restapi` a volania funkcií z neho, a nahraďte všetky výskyty reťazca `/<user_name>/AmbulanceWaitingList/1.0.0/` reťazcom `/api/`. Po úpravach by dotknuté časti súboru mali vyzerať následovne (upravené formátovanie):
 
-   ```go
-   package router
-
-   import (
-      restapi "ambulance-webapi/rest-api"  // <== zmeny
-      "net/http"    
-      "github.com/gin-gonic/gin"
-    )
-    ...
-
-    var routes = Routes{
-     {
-        "Index",
-        http.MethodGet,
-        "/api/",
-        Index,
-      },
-
+    ```go
+    package router
+ 
+    import (
+       restapi "ambulance-webapi/rest-api"  @_important_@
+       "net/http"    
+       "github.com/gin-gonic/gin"
+     )
+     ...
+ 
+     var routes = Routes{
       {
-        "CreateAmbulanceDetails",
-        http.MethodPost,
-        "/api/waiting-list/:ambulanceId",
-        restapi.CreateAmbulanceDetails,
-      },
-
-      {
-        "DeleteCondition",
-        http.MethodDelete,
-        "/api/waiting-list/:ambulanceId/condition/:conditionCode",
-        restapi.DeleteCondition,
-      },
-
-      {
-        "StoreCondition",
-        http.MethodPost,
-        "/api/waiting-list/:ambulanceId/condition",
-        restapi.StoreCondition,
-      },
-
-      {
-        "DeleteWaitingListEntry",
-        http.MethodDelete,
-        "/api/waiting-list/:ambulanceId/entry/:entryId",
-        restapi.DeleteWaitingListEntry,
-      },
-
-      {
-        "GetAmbulanceDetails",
-        http.MethodGet,
-        "/api/waiting-list/:ambulanceId",
-        restapi.GetAmbulanceDetails,
-      },
-
-      {
-        "GetCondition",
-        http.MethodGet,
-        "/api/waiting-list/:ambulanceId/condition/:conditionCode",
-        restapi.GetCondition,
-      },
-
-      {
-        "GetConditions",
-        http.MethodGet,
-        "/api/waiting-list/:ambulanceId/condition",
-        restapi.GetConditions,
-      },
-
-      {
-        "GetWaitingListEntries",
-        http.MethodGet,
-        "/api/waiting-list/:ambulanceId/entry",
-        restapi.GetWaitingListEntries,
-      },
-
-      {
-        "GetWaitingListEntry",
-        http.MethodGet,
-        "/api/waiting-list/:ambulanceId/entry/:entryId",
-        restapi.GetWaitingListEntry,
-      },
-
-      {
-        "StoreWaitingListEntry",
-        http.MethodPost,
-        "/api/waiting-list/:ambulanceId/entry",
-        restapi.StoreWaitingListEntry,
-      },
-
-      {
-        "UpdateCondition",
-        http.MethodPost,
-        "/api/waiting-list/:ambulanceId/condition/:conditionCode",
-        restapi.UpdateCondition,
-      },
-
-      {
-        "UpdateWaitingListEntry",
-        http.MethodPost,
-        "/api/waiting-list/:ambulanceId/entry/:entryId",
-        restapi.UpdateWaitingListEntry,
-      },
-   }
-   ```
+         "Index",
+         http.MethodGet,
+         "/api/",
+         Index,
+       },
+ 
+       {
+         "CreateAmbulanceDetails",
+         http.MethodPost,
+         "/api/waiting-list/:ambulanceId",
+         restapi.CreateAmbulanceDetails,
+       },
+ 
+       {
+         "DeleteCondition",
+         http.MethodDelete,
+         "/api/waiting-list/:ambulanceId/condition/:conditionCode",
+         restapi.DeleteCondition,
+       },
+ 
+       {
+         "StoreCondition",
+         http.MethodPost,
+         "/api/waiting-list/:ambulanceId/condition",
+         restapi.StoreCondition,
+       },
+ 
+       {
+         "DeleteWaitingListEntry",
+         http.MethodDelete,
+         "/api/waiting-list/:ambulanceId/entry/:entryId",
+         restapi.DeleteWaitingListEntry,
+       },
+ 
+       {
+         "GetAmbulanceDetails",
+         http.MethodGet,
+         "/api/waiting-list/:ambulanceId",
+         restapi.GetAmbulanceDetails,
+       },
+ 
+       {
+         "GetCondition",
+         http.MethodGet,
+         "/api/waiting-list/:ambulanceId/condition/:conditionCode",
+         restapi.GetCondition,
+       },
+ 
+       {
+         "GetConditions",
+         http.MethodGet,
+         "/api/waiting-list/:ambulanceId/condition",
+         restapi.GetConditions,
+       },
+ 
+       {
+         "GetWaitingListEntries",
+         http.MethodGet,
+         "/api/waiting-list/:ambulanceId/entry",
+         restapi.GetWaitingListEntries,
+       },
+ 
+       {
+         "GetWaitingListEntry",
+         http.MethodGet,
+         "/api/waiting-list/:ambulanceId/entry/:entryId",
+         restapi.GetWaitingListEntry,
+       },
+ 
+       {
+         "StoreWaitingListEntry",
+         http.MethodPost,
+         "/api/waiting-list/:ambulanceId/entry",
+         restapi.StoreWaitingListEntry,
+       },
+ 
+       {
+         "UpdateCondition",
+         http.MethodPost,
+         "/api/waiting-list/:ambulanceId/condition/:conditionCode",
+         restapi.UpdateCondition,
+       },
+ 
+       {
+         "UpdateWaitingListEntry",
+         http.MethodPost,
+         "/api/waiting-list/:ambulanceId/entry/:entryId",
+         restapi.UpdateWaitingListEntry,
+       },
+    }
+    ```
 
    - Upravte súbor `.../ambulance-webapi/main.go` do nižšie uvedenej podoby:
 
@@ -153,7 +153,7 @@
 
       import (
         "log"
-        "ambulance-webapi/router"  // <== zmena z pôvodného sw "go"
+        "ambulance-webapi/router"   @_important_@ // <== zmena z pôvodného sw "go"
       )
       
       func main() {
@@ -165,19 +165,19 @@
 
 5. Spustíme aplikáciu z adresára `.../ambulance-webapi`
 
-   ```bash
-   go run .
-   ```
+    ```bash
+    go run .
+    ```
 
    V prehliadači otvorte stránku [http://localhost:8080/api](http://localhost:8080/api),
    po presmerovaní sa zobrazí text `Hello World!`.
 
-   > Pozn: Port, na ktorom váš server naštartuje je definovaný v hlavnej funkcii `main`
+    >info:> Port, na ktorom váš server naštartuje je definovaný v hlavnej funkcii `main`
 
 6. Prejdime si teraz štruktúru vygenerovaného programu. Súbor `.../ambulance-webapi/main.go`
    obsahuje vstupný bod programu, ktorým je funcia `main()`. Jej úlohou je
    naštartovať web server (volaním funkcie `router.Run`) a odovzdať riadenie frameworku
-   [`Gin`](https://github.com/gin-gonic/gin), ktorý zabezpečuje obsluhu vstupno/výstupných volaní na sieťovom rozhraní počítača.
+   [Gin], ktorý zabezpečuje obsluhu vstupno/výstupných volaní na sieťovom rozhraní počítača.
 
    V súbore `.../ambulance-webapi/routers.go` vo funkcii `NewRouter()`je vytvorený objekt `router` typu `gin.Engine`, ktorý je inicializovaný pomocou poľa štruktúr `routes`, čím je zabezpečené obslúženie REST API.
 

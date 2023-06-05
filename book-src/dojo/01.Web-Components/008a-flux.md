@@ -107,7 +107,7 @@ kubectl config use-context docker-desktop
 
 ## Nastavenie zdojov a kustomizácií
 
-1. Flux potrebuje prístup na repozitár, v ktorom sú/budú uložené konfigurácie (manifesty) kubernetes objektov. Najprv si vygenerujeme PAT (personal access token): prejdite na stránku `Azure DevOps`, do svojho _WebCloud_ projektu. Kliknite na ikonku postavy v pravom hornom rohu obrazovky a potom na `Personal access tokens`.
+1. Flux potrebuje prístup na repozitár, v ktorom sú/budú uložené konfigurácie (manifesty) kubernetes objektov. Najprv si vygenerujeme PAT (personal access token): prejdite na stránku [Azure DevOps], do svojho _WebCloud_ projektu. Kliknite na ikonku postavy v pravom hornom rohu obrazovky a potom na `Personal access tokens`.
 
    ![PAT](./img/dojo-personal-access-token.jpg)
 
@@ -122,7 +122,7 @@ kubectl config use-context docker-desktop
     flux create source git ambulance-gitops-repo --git-implementation=libgit2  --url=$giturl --branch=$branch --username=git --password=$pat --interval=60s 
     ```
  
-    > Pokiaľ je vaša hlavná vetva nazvaná inak ako `main` - napríklad `master`,  použite príslušný názov pre hodnotu premennej `$branch`.
+    >warning:> Pokiaľ je vaša hlavná vetva nazvaná inak ako `main` - napríklad `master`,  použite príslušný názov pre hodnotu premennej `$branch`.
 
    Overíme si, že bol `git source` vytvorený:
 
@@ -158,7 +158,7 @@ kubectl config use-context docker-desktop
 
    Tento _GitRepository_ objekt s menom __ambulance-gitops-repo__ sleduje git repozitár na danej adrese (`url`) a každú minútu (`interval`) si urobí interný klon celého repozitára. Má nastavený 20s `timeout` na git operácie a na prihlásenie používa meno a heslo (PAT), uložené v `secret` objekte, ktorý bol vytvorený automaticky.
 
-    > _Poznámka_: Odporúčame si PAT "zálohovať", v prípade, že sa niečo stane s celým klastrom a _secret_ bude vymazaný. Zálohovaný PAT použijeme v kapitole [Obnova lokálneho klastra v novom prostredí](./011b-obnovenie-klastra.md), kde si ukážeme, ako obnoviť lokálny klaster v prípade, že bol _secret_ vymazaný.
+    >warning:> Odporúčame si PAT "zálohovať", v prípade, že sa niečo stane s celým klastrom a _secret_ bude vymazaný. Zálohovaný PAT použijeme v kapitole [Obnova lokálneho klastra v novom prostredí](./011b-obnovenie-klastra.md), kde si ukážeme, ako obnoviť lokálny klaster v prípade, že bol _secret_ vymazaný.
 
 3. Vytvoríme objekt typu `Kustomization` (Flux), vysvetlenie bude neskôr:
 

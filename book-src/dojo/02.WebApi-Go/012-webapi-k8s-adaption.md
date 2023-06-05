@@ -65,4 +65,4 @@ kubectl port-forward service/<pfx>-ambulance-webapi -n wac-hospital 8111:80
 
 a v prehliadači otvorte stránku [http://localhost:8111/api](http://localhost:8111/api), na ktorej uvidíte správu "Hello World!".
 
-> Poznámka: V prípade, že premenné nie sú nastavené správne, sa chyba prejaví až pri prvej požiadavke na databázu.
+>warning:> V prípade, že premenné nie sú nastavené správne, sa chyba prejaví až pri prvej požiadavke na databázu.

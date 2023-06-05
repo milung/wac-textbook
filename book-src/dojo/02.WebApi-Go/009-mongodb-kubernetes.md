@@ -29,7 +29,7 @@ Aj pri nasadení do Kubernetes chceme, aby bol prístup do databázy chránený 
     kubectl apply -k ./infrastructure/mongo/.secrets
     ```
 
-    > Funkcia _secretGenerator_ automaticky zakódovala meno aj heslo do formátu _base64_.
+    >info:> Funkcia _secretGenerator_ automaticky zakódovala meno aj heslo do formátu _base64_.
 
     Pridajte referenciu na novovytvorený súbor do kustomizácie flux systému `.../webcloud-gitops/flux-system/kustomization.yaml` pre potreby obnovi klastra (hoci nemá nič spoločné s flux systémom rozhodli sme sa pre zjednodušenie použiť rovnaký súbor):
    
@@ -176,7 +176,7 @@ Aj pri nasadení do Kubernetes chceme, aby bol prístup do databázy chránený 
 
 ### Mongo Express
 
-1. Pripravíme si manifesty pre _Mongo Express_ - deployment a servis.
+1. Pripravíme si manifesty pre [MongoExpress] - deployment a servis.
 
     V tom istom adresári vytvorte súbor `mongo-express-deployment.yaml`
 
@@ -271,29 +271,29 @@ Aj pri nasadení do Kubernetes chceme, aby bol prístup do databázy chránený 
 
 2. Teraz nami vytvorenú mongo "infraštruktúru" nasadíme do lokálneho Kubernetes klastra. V súbore `.../webcloud-gitops/clusters/localhost/kustomization.yaml` doplňte do časti `resources` nasledujúci riadok:
 
-   ```yaml
-   ...
-   resources:
-   ...
-   - ../../infrastructure/mongo
-   ...
-   ```
+    ```yaml
+    ...
+    resources:
+    ...
+    - ../../infrastructure/mongo
+    ...
+    ```
 
    Vzhľadom k tomu, že systém Flux už máme lokálne nasadený, stačí nám hore uvedené zmeny archivovať do vzdialeného repozitára. Od tohto momentu sa Flux postará o nasadenie do lokálneho Kubernetes klastra.
 
    Archivujte zmeny.
 
-   ```bash
-   git add .
-   git commit -m 'pridane yaml pre mongo'
-   git pull
-   git push
-   ```
+    ```powershell
+    git add .
+    git commit -m 'pridane yaml pre mongo'
+    git pull
+    git push
+    ```
 
    Po pár minútach overte, že pody pre mongo a mongo express sú vytvorené a sú v stave `Running` príkazom:
   
-   ```ps
-   kubectl get pods -n wac-hospital
-   ```
+    ```ps
+    kubectl get pods -n wac-hospital
+    ```
 
    V prehliadači otvorte stránku [http://localhost:30003]. Následne môžte otestovať funkčnosť databázy.

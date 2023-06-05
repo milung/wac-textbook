@@ -13,38 +13,35 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
 
 3. Vykonajte príkaz pre vytvorenie nového projektu založeného na StencilJS knižnici:
 
-    ```ps
-    npm init stencil
-    ```
+   ```ps
+   npm init stencil
+   ``` 
 
-    >info:> V rámci vykonávania tohto príkazu vám budú doinštalované všetky chýbajúce knižnice.
+   >info:> V rámci vykonávania tohto príkazu vám budú doinštalované všetky chýbajúce knižnice. 
+   Ako druh projektu zvoľte `components` a ako meno `ambulance-list`. StencilJS umožňuje vytvoriť aj samostatnú SPA/PWA aplikáciu, v našom prípade máme ale záujem iba o vytvorenie
+   sady webových komponentov, ktoré budeme používať v spoločnej aplikácii. Z praktického
+   hľadiska je rozdiel najmä vo vytváraní konečného balíka pre nasadenie našej aplikácie/webového komponentu. 
+   Po ukončení príkazu je v pracovnom priečinku vytvorený nový priečinok  `ambulance-list`, ktorý obsahuje kostru aplikácie. V ňom  nájdete súbor `package.json`, ktorý popisuje základné atribúty
+   projektu, ako jeho názov, meno autora, verziu, a podobne. Ďalej obsahuje zoznam
+   knižníc `dependencies` potrebných počas nasadenia aplikácie, a tiež zoznam knižníc
+   `devDependencies` potrebných počas vývoja aplikácie. Dalšou dôležitou sekciou v
+   tomto súbore je objekt `scripts`, ktorý popisuje príkazy často používané pri vývoji.
+   Tieto príkazy možno vykonať pomocou príkazu `npm run <názov-skriptu>` a je tu možné
+   doplniť aj vlastné príkazy podľa potreby vývojového tímu. 
+   Ďalším dôležitým súborom je `stencil.config.ts`. Tento súbor popisuje nastavenia projektu,
+   ktoré sa využívajú počas kompilácie, vývoja a generovania komponentov projektu. Pri inicializácii
+   obsahuje najmä základné nastavenie variantov - `outputTargets` generovaných počas kompilácie projektu. Pre potreby vývoja upravte túto konfiguráciu tak, aby boli automaticky generované mapy zdrojového kódu (`sourceMaps`): 
 
-    Ako druh projektu zvoľte `components` a ako meno `ambulance-list`. StencilJS umožňuje vytvoriť aj samostatnú SPA/PWA aplikáciu, v našom prípade máme ale záujem iba o vytvorenie
-    sady webových komponentov, ktoré budeme používať v spoločnej aplikácii. Z praktického
-    hľadiska je rozdiel najmä vo vytváraní konečného balíka pre nasadenie našej aplikácie/webového komponentu.
-
-    Po ukončení príkazu je v pracovnom priečinku vytvorený nový priečinok  `ambulance-list`, ktorý obsahuje kostru aplikácie. V ňom  nájdete súbor `package.json`, ktorý popisuje základné atribúty
-    projektu, ako jeho názov, meno autora, verziu, a podobne. Ďalej obsahuje zoznam
-    knižníc `dependencies` potrebných počas nasadenia aplikácie, a tiež zoznam knižníc
-    `devDependencies` potrebných počas vývoja aplikácie. Dalšou dôležitou sekciou v
-    tomto súbore je objekt `scripts`, ktorý popisuje príkazy často používané pri vývoji.
-    Tieto príkazy možno vykonať pomocou príkazu `npm run <názov-skriptu>` a je tu možné
-    doplniť aj vlastné príkazy podľa potreby vývojového tímu.
-
-    Ďalším dôležitým súborom je `stencil.config.ts`. Tento súbor popisuje nastavenia projektu,
-    ktoré sa využívajú počas kompilácie, vývoja a generovania komponentov projektu. Pri inicializácii
-    obsahuje najmä základné nastavenie variantov - `outputTargets` generovaných počas kompilácie projektu. Pre potreby vývoja upravte túto konfiguráciu tak, aby boli automaticky generované mapy zdrojového kódu (`sourceMaps`):
-
-    ```ts
-    ...
-    export const config: Config = {
-        namespace: 'ambulance-list',
-        sourceMap: true,  // vložený text @_add_@
-        outputTargets: [ 
-    ... 
-    ```
-
-    Ďalšími vytvorenými adresármi sú adresár zdrojových súborov `src` a adresár `node_modules` obsahujúci externé knižnice/moduly, od ktorých je naša aplikácia závislá. Priečinok `node_modules` je potrebné vynechať z riadenia verzií zdrojového kódu, to znamená pridať do `.gitignore` súboru.
+   ```ts
+   ...
+   export const config: Config = {
+       namespace: 'ambulance-list',
+       sourceMap: true,  // vložený text @_add_@
+       outputTargets: [ 
+   ... 
+   ``` 
+   
+   Ďalšími vytvorenými adresármi sú adresár zdrojových súborov `src` a adresár `node_modules` obsahujúci externé knižnice/moduly, od ktorých je naša aplikácia závislá. Priečinok `node_modules` je potrebné vynechať z riadenia verzií zdrojového kódu, to znamená pridať do ` gitignore` súboru.
 
 4. Takto vytvorená kostra programu obsahuje funkčný `Hello world` komponent. Prejdite do priečinka `ambulance-list` a zadajte príkazy
 

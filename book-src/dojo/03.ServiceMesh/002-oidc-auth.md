@@ -14,7 +14,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
    Súbor uložte - budete vyzvaný na prechod do privilegovaného módu, respektíve musíte tento súbor otvoriť a upraviť s administrátorskými oprávneniami.
 
-   > IP adresa pridelená Vášmu počítaču sa môže zmeniť, pri každom ďalšom sedení preto musíte overiť, aká IP adresa je vášmu počítaču pridelená a zmeniť záznam v tomto súbore. V niektorých sieťach majú jednotlivé zariadenia, vrátane pracovných počítačov, pridelené stále FQDN. V týchto prípadoch môžete použiť toto označenie a nemusíte upravovať súbor `etc/hosts`. Použitie označenia `localhost` v ďalšom cvičení ale nebude fungovať.
+   >warning:> IP adresa pridelená Vášmu počítaču sa môže zmeniť, pri každom ďalšom sedení preto musíte overiť, aká IP adresa je vášmu počítaču pridelená a zmeniť záznam v tomto súbore. V niektorých sieťach majú jednotlivé zariadenia, vrátane pracovných počítačov, pridelené stále FQDN. V týchto prípadoch môžete použiť toto označenie a nemusíte upravovať súbor `etc/hosts`. Použitie označenia `localhost` v ďalšom cvičení ale nebude fungovať.
 
 2. Aby sme získali prístup k identite používateľov platformy GitHub, musíme na tejto platforme zaregistrovať našu aplikáciu. Používatelia budú neskôr vyzvaní na poskytnutie súhlasu so zdieľaním ich identity s našou aplikáciou. Prihláste sa so svojim účtom do platformy GitHub a prejdite na stránku [https://github.com/settings/developers](https://github.com/settings/developers). Zvoľte voľbu _Register a new application_. Vyplňte formulár na zobrazenej stránke:
 
@@ -25,11 +25,11 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
    Prvé tri položky budú prezentované používateľom pri poskytovaní súhlasu so zdieľaním informácií. Posledná položka je dôležitá v samotnom protokole OIDC - používatelia budú po autentifikácii na stránke GitHub presmerovaní jedine na túto URL, a poskytovateľ identít akceptuje jedine požiadavky o autentifikovanie používateľov, ktoré presmerujú používateľa na niektorú z registrovaných _authorization callback_ URL. Týmto spôsobom je zabránené, aby sa škodlivá stránka mohla vydávať za vašu aplikáciu a získať prístup k údajom používateľa bez jeho predchadzajúceho súhlasu.
 
-   ![Registrácia aplikácie v GitHub](../img/github-oauth-app.png)
+   ![Registrácia aplikácie v GitHub](./img/github-oauth-app.png)
 
    Po vyplnení stlačte ovládací prvok  _Register Application_ a na ďalšej stránke stlačte na ovládací prvok _Generate a new client secret_. Poznačte si identifikátor klienta - _Client ID_, a zobrazené heslo - _Client Secret_. Nakoniec stlačte tlačidlo _Update application_.
 
-   > Návody a odkazy na konfiguráciu použitej služby s inými poskytovateľmi identít nájdete [tu](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
+   >info:> Návody a odkazy na konfiguráciu použitej služby s inými poskytovateľmi identít nájdete [tu](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
 3. Vytvorte súbor `.../webcloud-gitops/clusters/localhost-infra/.secrets/client.env` s nasledujúcim obsahom (musíte použiť hodnoty špecifické pre vašu individuálnu konfiguráciu):
 
@@ -250,19 +250,19 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
    Synchronizujte repozitár `...\webcloud-gitops` s jeho vzdialenou verziou - _commit_, _push_. Pomocou príkazu `kubectl -n ingress-nginx get pods -w` overíte, kedy bude pod `oauth2-proxy` nasadený do Vášho systému a v stave _Running_. Pomocou príkazu `kubectl -n ingress-nginx get services -w` overíte, kedy bude služba `oauth2-proxy` nasadená do Vášho systému a v stave _Active_.
 
-   > __Dôležitá poznámka__: Ak sa nenaštartuje service _oauth2-proxy_ môže to znamenať, že na porte 443 alebo 80 vášho počítača počúva iný proces. Použite Google (alebo rovno tool [CurrPorts](https://www.nirsoft.net/utils/cports.html#DownloadLinks)) na zistenie, ktorá aplikácia to je a zastavte ju. V systémoch _Windows_ to môže byť obtiažne, najčastejšie je to však _Internet Information Service_. Na jeho zastavenie spustite _Internet Information Services Manager_ a servis zastavte stlačením tlačidla _Stop_.
+   >build_circle:> Ak sa **nenaštartuje service _oauth2-proxy_** môže to znamenať, že na porte 443 alebo 80 vášho počítača počúva iný proces. Použite Google (alebo rovno tool [CurrPorts](https://www.nirsoft.net/utils/cports.html#DownloadLinks)) na zistenie, ktorá aplikácia to je a zastavte ju. V systémoch _Windows_ to môže byť obtiažne, najčastejšie je to však _Internet Information Service_. Na jeho zastavenie spustite _Internet Information Services Manager_ a servis zastavte stlačením tlačidla _Stop_.
 
-   ![Internet Information Services Manager](../img/iss-manager.png)
+   ![Internet Information Services Manager](./img/iss-manager.png)
 
 7. Otvorte v prehliadači novú záložku a otvorte _Nástroje pre vývojárov -> Sieť_.  V tejto záložke prejdite na stránku [https://wac-hospital.loc](https://wac-hospital.loc). Nezabudnite, že v súbore `etc/host` musíte mať správne pridelenú IP adresu k záznamu `wac-hospital.loc`. Prehliadač vás upozorní na bezpečnostné riziko z dôvodu použitia neovereného TLS certifikátu. Zvoľte _Pokračovať_ a _Rozumiem bezpečnostnému riziku_.
 
-    > V niektorých prípadoch môže byť voľba _Pokračovať_ nedostupná. V takom prípade, ponechajte okno prehliadača ako aktívnu aplikáciu a na klávesnici vyťukajte `THISISUNSAFE`. Táto možnosť (_back-doors_) je v prehliadačoch Google ponechaná pre dobre informovaných profesionálov, akými sú napríklad softvéroví inžinieri.
+    >build_circle:> V niektorých prípadoch môže byť voľba _Pokračovať_ nedostupná. V takom prípade, ponechajte okno prehliadača ako aktívnu aplikáciu a na klávesnici vyťukajte `THISISUNSAFE`. Táto možnosť (_back-doors_) je v prehliadačoch Google ponechaná pre dobre informovaných profesionálov, akými sú napríklad softvéroví inžinieri.
 
     Na obrazovke vidíte prihlasovaciu stránku _OAuth2 Proxy_ (našej konfigurovanej služby) s voľbou _Sign in with GitHub_. Stlačte na túto voľbu.
 
-    ![Prihlasovacia stránka OAuth2 Proxy](../img/oauth2-sign-in.png)
+    ![Prihlasovacia stránka OAuth2 Proxy](./img/oauth2-sign-in.png)
 
-    > Konfiguráciou služby OAuth2 Proxy možno prihlasovaciu stránku zmeniť, prípadne tento krok preskočiť a byť presmerovaný priamo na stránky GitHub.
+    >info:> Konfiguráciou služby OAuth2 Proxy možno prihlasovaciu stránku zmeniť, prípadne tento krok preskočiť a byť presmerovaný priamo na stránky GitHub.
 
     Následne budete presmerovaný na stránku GitHub, kde budete vyzvaný na udelenie súhlasu so zdieľaním vašich identifikačných údajov s aplikáciou _WAC Hospital_. Súhlas udeľte, po čom budete presmerovaný do aplikácie vo vašom klastri.
 

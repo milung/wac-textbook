@@ -4,4 +4,4 @@ Náš systém pozostáva z jednotlivých mikroslužieb, ktoré navzájom spolupr
 
 _Obrázok znázorňuje žiadaný stav._
 
-![Prepojenie komponentov](../img/prepojenie-komponentov.png)
+![Prepojenie komponentov](./img/prepojenie-komponentov.png)

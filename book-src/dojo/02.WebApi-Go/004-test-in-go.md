@@ -9,7 +9,7 @@ Príkazom `go test` sa spustia všetky funkcie, ktoré spĺňajú nasledovné po
 * Meno funkcie začína `Test` a pokračuje akýmkoľvek textom začínajúcim veľkým písmenom, napríklad `TestExample`.
 * Názov súboru končí príponou `_test.go`, napríklad `api-admins_test.go`.
 
-> _Poznámka_: Okrem funkcií začínajúcich na `Test` spúšťa `go test` príkaz aj [iné typy funkcií](https://pkg.go.dev/cmd/go#hdr-Testing_functions) a to takzvané `benchmark` a `example` funkcie.
+>info:> Okrem funkcií začínajúcich na `Test` spúšťa `go test` príkaz aj [iné typy funkcií](https://pkg.go.dev/cmd/go#hdr-Testing_functions) a to takzvané `benchmark` a `example` funkcie.
 
 Vzhľadom k tomu, že v rámci tohto kurzu kladieme dôraz na vysvetlenie detailov týkajúcich sa kontinuálneho dodávania aplikácie, testovanie web služby vynecháme, avšak, aby sme pre účely kontinuálnej integrácie mohli zaviesť krok zameraný na testovanie, vytvorte súbor `.../ambulance-webapi/router/router_test.go`. Pridajte nasledovný jednoduchý testovací kód.
 
@@ -31,7 +31,7 @@ func TestExample(t *testing.T) {
 
 Z priečinku `.../ambulance-webapi` vykonajte testy vo všetkých (pod)priečinkoch:
 
-```bash
+```powershell
 go test ./...
 ```
 

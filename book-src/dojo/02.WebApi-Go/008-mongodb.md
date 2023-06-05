@@ -1,6 +1,6 @@
 ## Inštalácia a nastavenie MongoDB databázy
 
-Na perzistenciu údajov budeme používať dokumentovú databázu _MongoDB_, konkrétne jej Docker obraz. Súčasne budeme používať aplikáciu _MongoExpress_, ktorá nám umožňuje spravovať pripojenú _MongoDB_ z používateľského rozhrania. Databázu urobíme prístupnú len pre používateľov s heslom, čo zodpovedá reálnemu použitiu.
+Na perzistenciu údajov budeme používať dokumentovú databázu [MongoDB], konkrétne jej Docker obraz. Súčasne budeme používať aplikáciu [MongoExpress], ktorá nám umožňuje spravovať pripojenú _MongoDB_ z používateľského rozhrania. Databázu urobíme prístupnú len pre používateľov s heslom, čo zodpovedá reálnemu použitiu.
 
 1. Stiahnite si obraz kontajnera _MongoDB_ pomocou príkazu:
 
@@ -8,7 +8,7 @@ Na perzistenciu údajov budeme používať dokumentovú databázu _MongoDB_, kon
     docker pull mongo:6.0.3
     ```
 
-    > _Poznámka_: Verzia 6.0.3 bola najaktuálnejšia v čase písania skrípt.
+    >info:> Verzia 6.0.3 bola najaktuálnejšia v čase písania skrípt.
     >
     > Zámerne nepoužívame poslednú (_latest_) verziu obrazu, aby sme predišli prípadným problémom, keby sa počas vývoja zmenilo v novej verzii mongodb správanie, prípadne API.
 
@@ -18,7 +18,7 @@ Na perzistenciu údajov budeme používať dokumentovú databázu _MongoDB_, kon
     docker volume create hospital-volume
     ```
 
-    > _Poznámka_: Uvedeným príkazom Docker zabezpečí rezervovaný diskový priestor pre kontainer na vašom lokálnom disku. Tento sa bude používať počas vývoja aplikácie pred komitnutím. V kubernetes klastri použijeme `Kubernetes persistent volume`.
+    >info:> Uvedeným príkazom Docker zabezpečí rezervovaný diskový priestor pre kontainer na vašom lokálnom disku. Tento sa bude používať počas vývoja aplikácie pred komitnutím. V kubernetes klastri použijeme `Kubernetes persistent volume`.
 
 3. Vytvorte docker sieť typu `bridge` príkazom:
 
@@ -35,7 +35,7 @@ Na perzistenciu údajov budeme používať dokumentovú databázu _MongoDB_, kon
     $env:MONGODB_PASSWORD="password"
     ```
 
-    > _Poznámka_: Odporúčame nastaviť tieto premenné prostredia ako systémové, aby príklady fungovali aj pri použití nového okna (_Visual Studio Code_, _PowerShell_, ...).
+    >warning:> Odporúčame nastaviť tieto premenné prostredia ako systémové, aby príklady fungovali aj pri použití nového okna (_Visual Studio Code_, _PowerShell_, ...).
 
 5. Naštartujte _MongoDB_ kontajner vykonaním príkazu:
 
@@ -48,7 +48,7 @@ Na perzistenciu údajov budeme používať dokumentovú databázu _MongoDB_, kon
 
    Overte, že vám kontajner beží (v aplikácii _Docker for Desktop_ alebo príkazom `docker ps`).
 
-   > _Poznámka_: V prípade, že databáza už existovala a bola vytvorená s iným _root user name_ a _root password_, aktuálne zadávané parametre sa ignorujú (bez chybového hlásenia!). V takom prípade je nutné odstrániť existujúcu databázu, t.j. odstrániť starý a vytvoriť nový persistent volume.
+   >info:> V prípade, že databáza už existovala a bola vytvorená s iným _root user name_ a _root password_, aktuálne zadávané parametre sa ignorujú (bez chybového hlásenia!). V takom prípade je nutné odstrániť existujúcu databázu, t.j. odstrániť starý a vytvoriť nový persistent volume.
 
 6. Stiahnite si obraz kontajnera _MongoExpress_ pomocou príkazu:
 
@@ -64,6 +64,6 @@ Na perzistenciu údajov budeme používať dokumentovú databázu _MongoDB_, kon
 
     Význam parametrov sa zhoduje s popisom parametrov pre _MongoDB_ kontajner. Heslo a meno používateľa musia byť rovnaké, ako sme použili pri spúšťaní _MongoDB_ kontajnera. Parameter prostredia `ME_CONFIG_MONGODB_SERVER` sa musí zhodovať s názvom _MongoDB_ kontajnera vytvoreného v predchádzajúcích krokoch.
 
-8. Overte, či aplikácia _MongoExpress_ funguje a či je pripojená na vašu databázu. Zadajte adresu `localhost:8081` do vášho prehliadača.
+8. Overte, či aplikácia _MongoExpress_ funguje a či je pripojená na vašu databázu. Zadajte adresu `http://localhost:8081` do vášho prehliadača.
 
-   ![Obrázok 1. MongoExpress](../img/dojo-08-mongo-express.png)
+   ![MongoExpress](./img/dojo-08-mongo-express.png)

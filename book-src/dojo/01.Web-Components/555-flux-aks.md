@@ -1,16 +1,16 @@
 ## Nasadenie Flux a aplikácie na AKS
 
-> __Poznámka:__ Táto kapitola nie je súčasť cvičení predmetu WAC. Je tu ako referencia, ako sme postupovali pri nasadzovaní Fluxu a celej aplikácie na AKS. Kto má chuť, čas a kubernetes klaster na cloude, môže si to vyskúšať.
+>info:> Táto kapitola nie je súčasť cvičení predmetu WAC. Je tu ako referencia, ako sme postupovali pri nasadzovaní Fluxu a celej aplikácie na AKS. Kto má chuť, čas a kubernetes klaster na cloude, môže si to vyskúšať.
 
-Nasledujú veľmi stručne popísané kroky, ako sme nasadili Flux na AKS. Je to zjednodušený spôsob, ako riadiť nasadenie z viacerých tímov (študentov) pomocou GitOps. Na internete nájdete návody, ako je to odporúčané robiť s väčším prihliadnutím na bezpečnosť (napr. [https://github.com/fluxcd/flux2-multi-tenancy](https://github.com/fluxcd/flux2-multi-tenancy)).
+Nasledujú veľmi stručne popísané kroky, ako sme nasadili [Flux] na [AKS]. Je to zjednodušený spôsob, ako riadiť nasadenie z viacerých tímov (študentov) pomocou GitOps. Na internete nájdete návody, ako je to odporúčané robiť s väčším prihliadnutím na bezpečnosť (napr. [https://github.com/fluxcd/flux2-multi-tenancy](https://github.com/fluxcd/flux2-multi-tenancy)).
 
 - Uvedené príkazy sú väčšinou veľmi konkrétne pre náš prípad. Nezabudnite zmeniť mená komponentov a iné špecifické údaje pre váš prípad.
 
 - (Privátny) Repozitár obsahujúci nižšie spomínané konfigurácie sa nachádza tu: [https://milung@dev.azure.com/milung/WebCloud-Dojos-22/_git/ambulance-gitops](https://milung@dev.azure.com/milung/WebCloud-Dojos-22/_git/ambulance-gitops). Adresárová štruktúra v ňom je komplikovanejšia, ako tu popisovaná, lebo navyše obsahuje aj _lokálny_ flux setup.
 
-- Výsledná aplikácia je prístupná tu: [https://wac-2023.germanywestcentral.cloudapp.azure.com/](https://wac-2023.germanywestcentral.cloudapp.azure.com/)
+- Výsledná aplikácia je [prístupná tu][common-cluster]
 
-> Pozn: Náš _GitOps_ git repozitár je na azure devops. Niektoré príkazy môžu byť pre iných poskytovateľov repozitárov iné, napr. pre Github, Gitlab...
+>info:> Náš _GitOps_ git repozitár je na azure devops. Niektoré príkazy môžu byť pre iných poskytovateľov repozitárov iné, napr. pre [Github], [Gitlab] ...
 
 Kroky sú bez podrobnejšieho popisu, predpokladá sa, že čitateľ má skúsenosti s Fluxom.
 
@@ -171,8 +171,8 @@ Na konci kapitoly je obrázok znázorňujúci tu opisované adresáre a ich vzá
 
 _Obrázok znázorňuje git repozitáre, ich adresárovú štruktúru a prepojenia medzi adresármi, ktoré rú realizované cez Kustomization.yaml alebo (flux) "git source" a "kustomization" objektami (súbormi). Niektoré krabičky sú adresáre, niektoré súbory, dúfam, že to viac pomôže ako zmätie._
 
-![Obrázok 2. aks flux setup](../img/dojo-flux-aks-setup.png)
+![AKS flux setup](./img/dojo-flux-aks-setup.png)
 
 ### Pridanie aplikácií do `apps-repo`
 
-Pre náš konkrétny prípad je to popísané v kapitole [Nasadenie aplikácie na produkčný kubernetes klaster](/v2/02.Web-Components/dojo/010-production-deployment.md)
+Pre náš konkrétny prípad je to popísané v kapitole [Nasadenie aplikácie na produkčný kubernetes klaster](./010d-production-deployment.md)

@@ -5,11 +5,11 @@ V ďalšom kroku vytvoríme archív pre zdrojový kód webovej služby
 Prihláste sa do svojho účtu v [Microsoft Azure DevOps Services](https://azure.microsoft.com/en-us/services/devops/)
 a prejdite do projektu _WebCloud-<vaše priezvisko>_. Vytvorte nový git repozitár
 
-![Obrázok 10. Vytvorenie repozitára](../img/dojo-10-create-repository.png)
+![Vytvorenie repozitára](./img/dojo-10-create-repository.png)
 
  a nazvite ho `ambulance-webapi`.
 
-![Obrázok 5. Vytvorenie repozitára](../img/dojo-05-create-repository.png)
+![Vytvorenie repozitára](./img/dojo-05-create-repository.png)
 
 Otvorte okno príkazového riadku a prejdite do priečinku `.../ambulance-webapi`.
 Zadajte nasledujúce príkazy za účelom inicializácie Git repozitára
@@ -20,7 +20,7 @@ git init
 git remote add origin https://dev.azure.com/<account>/WebCloud-<vaše priezvisko>/_git/ambulance-webapi
 ```
 
-> _Poznámka_: Prvým príkazom sme zmenili nastavenie názvu hlavnej vetvy z `master` na `main`.
+>info:> Prvým príkazom sme zmenili nastavenie názvu hlavnej vetvy z `master` na `main`.
 
 Archivujte váš kód pomocou príkazov
 
