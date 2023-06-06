@@ -1,0 +1,3 @@
+## Archív starších verzií cvičení
+
+Skriptá pre predmet "Vývoj webových aplikácii v prostredí CLoud" pripravujeme od roku 2019. V rámci tohto obdobia sme obsah niekoľko krát prepracovali, tak aby sme reflektovali stav najnovších poznatkov a technológií. V tomto adresári nájdete archív starších verzií cvičení. Ich obsah už ale nie je aktualizovaný, preto je možné, že niektoré časti už nebudú fungovať, vzhľadom na zmeny v príslušných technológiách a službách.
