@@ -40,6 +40,7 @@ Príklad `_toc.md`:
 [#include dojo/web/_toc.md]
 <hr />
 ```
+
 ### Poznámky s ikonami
 
 Blokovú citáciu s ikonou môžete umiestniť pomocou nasledujúcej syntaxe: `>$icon-name:> Text blokovej citácie`. Názov ikony je názov ikony z knižnice [fontawesome](https://fontawesome.com/icons?d=gallery). Za menom ikony nasledujú znaky `:>` a pred ním je znak `$`.  Ak názov ikony nie je prefixovaný znakom `$`, potom je ikona prevzatá z knižnice [Material Symbols](https://fonts.google.com/icons).

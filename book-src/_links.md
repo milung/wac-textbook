@@ -64,3 +64,11 @@
 [WireShark]:https://www.wireshark.org/
 [cors]:https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 [viper]:https://github.com/spf13/viper
+[shadow-dom]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
+[custom-elements]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements
+[npmjs.com]:https://www.npmjs.com/
+[promise]:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[material design]:https://material.io/
+[Development Containers]:https://containers.dev/
+[devcontainers cli]:https://github.com/devcontainers/cli
+[powershell]:https://docs.microsoft.com/en-us/powershell/
