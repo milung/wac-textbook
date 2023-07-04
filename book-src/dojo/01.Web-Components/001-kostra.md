@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply registry-1.docker.io/milung/wac-ufe-001
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-001
 ```
 
 ---

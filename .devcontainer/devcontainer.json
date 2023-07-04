@@ -8,7 +8,7 @@
 		"args": { },
 		"context": ".."
 	},
-	//;"overrideCommand": false,	
+	"overrideCommand": false,	
 
 	"features": {
 		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {},
@@ -21,12 +21,10 @@
 		3380
 	],
 
-	// "mounts": [
-	// 	"source=${localWorkspaceFolder}/book-src,target=/usr/src/app/book-src/,type=bind,consistency=cached"
-	// ],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "yarn install",
+	"mounts": [
+		"source=${localWorkspaceFolder}/book-src,target=/usr/src/app/book-src,type=bind,consistency=cached"
+	],
 
 	// Configure tool-specific properties.
 	"customizations": {
