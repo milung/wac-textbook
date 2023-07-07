@@ -45,14 +45,20 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
 
 4. Takto vytvorená kostra programu obsahuje funkčný `Hello world` komponent. Prejdite do priečinka `${WAC_ROOT}/ambulance-ufe` a zadajte príkazy
 
-    ```ps
-    npm install
-    npm run start
-    ```
+   ```ps
+   npm install
+   npm run start
+   ```
 
-   Prvý príkaz nainštaluje knižnice, na ktorých je náš projekt závislý a druhý príkaz spustí aplikáciu. Po chvíli môžete v prehliadači vidieť výstup tejto aplikácie
+   Prvý príkaz nainštaluje knižnice, na ktorých je náš projekt závislý a druhý  príkazspustí aplikáciu. Po chvíli môžete v prehliadači vidieť výstup tejto aplikácie
 
    ![Kostra aplikácie](./img/dojo-01-kostra.png)
+
+   >build_circle:> Pokiaľ sa Vám pri vykonávaní príkazu objavý chyba odkadzujúca  na `Puppeteer` postupujte podľa pokynov v kapitole [Riešenie problémov](../99.Problems-Resolutions/02.puppeteer.md). Dočasne môžete tento problém  opraviťnastavením premennej prostredia `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` na  hodnotu`true`: 
+   > 
+   > ```ps
+   > $env:PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+   > ```
 
 5. Teraz vytvoríme prvý web komponent, ktorý bude zobrazovať zoznam čakajúcich pacientov na vyšetrenie. Vizuálny dizajn vychádza zo štýlu [Material Design](https://material.io/).
 

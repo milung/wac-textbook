@@ -49,7 +49,7 @@ Používajte tieto ikony:
 
 - `>info:>` pre doplňujúce informácie 
 - `>warning:>` pre dôležité informácie
-- `>build-circle:>` pre riešenie možných problémov
+- `>build_circle:>` pre riešenie možných problémov
 - `>$apple:>` pre Mac Os špecifické informácie
 
 ### Zvýraznené bloky kódu
