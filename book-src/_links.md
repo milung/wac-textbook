@@ -3,6 +3,7 @@
 [Angular]:https://angular.io/
 [api-first]:https://swagger.io/resources/articles/adopting-an-api-first-approach/
 [axios]:https://axios-http.com/
+[azure]:https://azure.microsoft.com/
 [azure pipelines]:https://docs.microsoft.com/en-us/azure/devops/pipelines/get-started/what-is-azure-pipelines?view=azure-devops
 [azure-devops]:https://azure.microsoft.com/en-us/services/devops/
 [azure-portal]:https://portal.azure.com
@@ -19,6 +20,7 @@
 [docker-containers]:https://www.docker.com/resources/what-container
 [docker-desktop]:https://www.docker.com/products/docker-desktop
 [docker-hub]:https://hub.docker.com/
+[docker hub]:https://hub.docker.com/
 [flux]:https://fluxcd.io/
 [gin]:https://gin-gonic.com/docs/
 [git]:https://git-scm.com/
@@ -35,9 +37,11 @@
 [k8s-api]:https://kubernetes.io/docs/concepts/overview/kubernetes-api/
 [k8s-controller]:https://kubernetes.io/docs/concepts/architecture/controller/
 [k8s-crd]:https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/
+[kubectl]:https://kubectl.docs.kubernetes.io/
+[kubectx]:https://github.com/ahmetb/kubectx
 [kubernetes]:https://kubernetes.io/
 [kustomize]:https://kustomize.io/
-[lens]:https://k8slens.dev/
+[lens]:https://github.com/MuhammedKalkan/OpenLens
 [Lit]:https://lit.dev/
 [material design]:https://material.io/
 [md-webc]:https://github.com/material-components/material-web
@@ -50,12 +54,14 @@
 [openapi generator online]:http://api.openapi-generator.tech/index.html
 [openapi-generator]:https://openapi-generator.tech/
 [openapi]:https://www.openapis.org/about
+[paas]:https://azure.microsoft.com/en-in/resources/cloud-computing-dictionary/what-is-paas/
 [Postman]:https://www.getpostman.com/
 [powershell]:https://docs.microsoft.com/en-us/powershell/
 [promise]:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [rancher-desktop]:https://rancherdesktop.io/
 [React]:https://reactjs.org/ 
 [Redux]:https://redux.js.org/
+[REST API]:https://en.wikipedia.org/wiki/Representational_state_transfer
 [REST Client]:https://marketplace.visualstudio.com/items?itemName=humao.rest-client
 [shadow-dom]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
 [shsdc]: https://www.siemens-healthineers.com/sk/development-center
@@ -64,7 +70,7 @@
 [swagger hub]:https://app.swaggerhub.com/home
 [swagger]:https://swagger.io/docs/specification/about/
 [tdd]:https://en.wikipedia.org/wiki/Test-driven_development
-[troubleshooting](/dojo/99.Problems-Resolutions/000-README.md)
+[troubleshooting]:/dojo/99.Problems-Resolutions/000-README.md
 [twelves]: https://12factor.net/ 
 [typescript]:https://www.typescriptlang.org/
 [viper]:https://github.com/spf13/viper

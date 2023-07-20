@@ -29,7 +29,7 @@ nie je to ale podmienkou.
    a pridajte do repozitára cvičiacich ako spolupracovníkov, tak aby mali k repozitáru prístup.
    Tento úkon im umožní analyzovať prípadné problémy vo Vašom kóde.
 
-4. Vo VS Code prejdite do priečinka `${WAC_ROOT}/ambulance-list` a inicializujte lokálny git repozitár príkazmi:
+4. Vo VS Code prejdite do priečinka `${WAC_ROOT}/ambulance-ufe` a inicializujte lokálny git repozitár príkazmi:
 
     ```ps
     git config --global init.defaultBranch main
@@ -38,7 +38,7 @@ nie je to ale podmienkou.
 
     >info:> Prvým príkazom sme zmenili nastavenie názvu hlavnej vetvy na `main`.
 
-5. Otvorte súbor `${WAC_ROOT}/ambulance-list/.gitignore` a skontrolujte, že obsahuje riadky so záznamom
+5. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/.gitignore` a skontrolujte, že obsahuje riadky so záznamom
   `node_modules/`, `dist/`, `www/`, `loader/`. Tento súbor určuje, ktoré súbory a podpriečinky sa nemajú archivovať, čo vo väčšine prípadov znamená súbory,
   ktoré sú vytvárané počas kompilácie zdrojových súborov a balíky, ktoré je možné získať automatizovaným spôsobom z dostupných zdrojov a iných archívov.
 
