@@ -66,6 +66,7 @@
 [shadow-dom]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
 [shsdc]: https://www.siemens-healthineers.com/sk/development-center
 [single-spa]:https://single-spa.js.org/
+[sops]:
 [stencil]:https://stenciljs.com/
 [swagger hub]:https://app.swaggerhub.com/home
 [swagger]:https://swagger.io/docs/specification/about/

@@ -1,5 +1,13 @@
 # Kontinuálne nasadenie pomocou nástroja Flux (lokálne do k8s v rámci Docker Desktop)
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-007
+```
+
+---
+
 [Flux] patrí v súčasnosti medzi najpoužívanejšie nástroje na
 kontinuálne nasadenie. Funguje na princípe _Pull Deployment_ a plne podporuje metódy
 [GitOps]. V skratke, GitOps sa skladá z troch hlavných komponentov:
@@ -12,8 +20,8 @@ súboroch v git repozitári a slúži ako "jediný zdroj pravdy".
 [Flux] je založený na sade rozšírení [kubernetes API][k8s-api], tzv. [_Custom resources_][k8s-crd], ktoré
 kontrolujú, ako sa zmeny v git repozitároch aplikujú do kubernetes klastra. Dva základné objekty, s ktorými budeme pracovať, sú:
 
-- [`GitRepository`](https://fluxcd.io/docs/components/source/api/#source.toolkit.fluxcd.io/v1beta1.GitRepository) objekt - zrkadlí konfigurácie z daného git repozitára
-- [`Kustomization`](https://fluxcd.io/docs/components/kustomize/api/#kustomize.toolkit.fluxcd.io/v1beta2.Kustomization) objekt - presne špecifikuje adresár v rámci repozitára a frekvenciu synchronizácie.
+- [`GitRepository`](https://fluxcd.io/flux/components/source/gitrepositories/) objekt - zrkadlí konfigurácie z daného git repozitára
+- [`Kustomization`](https://fluxcd.io/flux/components/kustomize/kustomization/) objekt - presne špecifikuje adresár v rámci repozitára a frekvenciu synchronizácie.
 
 >warning:> `Flux Kustomization` objekt a `Kustomize Kustomization` objekt
 > sú dva rôzne objekty. V ďalšom texte sa budú miešať, preto sa budeme na
@@ -23,182 +31,298 @@ Na obrázku sú znázornené komponenty Flux.
 
 ![Flux gitops](./img/dojo-flux-gitops-toolkit.png)
 
-Ukážeme si inštaláciu a konfiguráciu Flux na lokálnom kubernetes klastri, ktorý
-poskytuje aplikácia Docker Desktop.
+Ukážeme si inštaláciu a konfiguráciu Flux na lokálnom kubernetes klastri, ktorý poskytuje aplikácia Docker Desktop.
 
 Na kubernetes klastri v dátovom centre (Azure, AWS, Google, ...) Flux nainštaluje administrátor daného klastra.
 
 >info:> Na konci tejto kapitoly je obrázok, ktorý znázorňuje všetky komponenty tu spominané a ich vzájomné prepojenie.
 
-## Inštalácia Flux CLI
+## Príprava konfigurácie
 
-Flux je možné nainštalovať [viacerými spôsobmi](https://fluxcd.io/docs/installation/).
-My použijeme manažér SW balíkov [Chocolatey].
+V tejto časti si najpr nakonfigurujeme všetky potrebné súbory a
+uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do kubernetes klastra.
 
->$apple:> V prípade Mac OS a Linux môžeme použiť štandardného správcu balíkov. V prípade Mac OS napríklad Homebrew, použite `brew install fluxcd/tap/flux`. V tomto prípade netreba inštalovať Chocolatey.
+1. Vytvorte nový adresár `${WAC_ROOT}/ambulance-gitops/infrastructure/fluxcd` a v ňom vytvorte súbor `kustomization.yam` s obsahom:
 
-1. Ak nemáte, nainštalujte [Chocolatey] podľa návodu na ich [stránke](https://chocolatey.org/install)
-alebo zadajte nasledovný príkaz ako administrátor v Poweshell-i:
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1beta1
+   kind: Kustomization
 
-    ```ps
-    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net. ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager] ::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient). DownloadString('https://community.chocolatey.org/install.ps1'))
+   resources:
+   - https://github.com/fluxcd/flux2//manifests/install?ref=v2.0.1
+   ```
+
+   Týmto spôsobom sme vytvorili závislosť na konkrétnom vydaní systému [Flux CD][flux]. Do súboru
+   ``${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml` pridajte referenciu na flux cd konfiguráciu:
+
+   ```yaml
+   ...
+   resources:
+   - namespace.yaml
+   - ../../../infrastructure/ufe-controller
+   - ../../../infrastructure/fluxcd @_add_@
     ```
 
-   Teraz môžeme používať utilitu `choco` z príkazového riadku na inštalovanie softvérových balíkov.
+2. Vytvorte adresár `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops` a v ňom súbor `git-repository.yaml`:
 
-2. Zatvorte a znovu otvorte powershell (ako administrátor). Zadajte:
+   ```yaml
+   apiVersion: source.toolkit.fluxcd.io/v1
+   kind: GitRepository
+   metadata:
+     name: gitops-repo
+     namespace: wac-hospital
+   spec:
+     interval: 1m0s
+     ref:
+       branch: main
+     secretRef:
+       name: repository-pat
+     timeout: 1m0s
+     url: https://github.com/<your-account>/ambulance-gitops @_important_@
+   ```
 
-    ```ps
-    choco install flux
+    Tento súbor definuje git repozitár a vetvu, ktorý bude Flux CD sledovať a zabezpečovať priebežné nasadenie podľa konfigurácie v tomto repozitári. Pre prístup bude používať _personal access token_ (PAT), ktorý si vygenerujete neskôr.
+
+3. V tom istom priečinku vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/prepare.kustomization.yaml`: 
+
+   ```yaml
+   apiVersion: kustomize.toolkit.fluxcd.io/v1
+   kind: Kustomization
+   metadata:
+     name: prepare
+     namespace: wac-hospital
+   spec:
+     wait: true
+     interval: 42s
+     path: clusters/localhost/prepare
+     prune: true
+     sourceRef:
+       kind: GitRepository
+       name: gitops-repo
     ```
 
-   Po úspešnej inštalácii nám Flux poskytuje utilitu `flux` ako rozhranie na
-   prácu z príkazového riadku. Nasledujúci príkaz vypíše verziu flux:
+    Tento súbor definuje, že Flux CD bude sledovať zmeny v priečinku `clusters/localhost/prepare` a ak sa zmenia, tak ich aplikuje do kubernetes klastra.
+
+4. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/install.kustomization.yaml`:
+
+   ```yaml
+   apiVersion: kustomize.toolkit.fluxcd.io/v1
+   kind: Kustomization
+   metadata:
+     name: install
+     namespace: wac-hospital
+   spec:
+     wait: true
+     dependsOn:  @_important_@
+     - name: prepare @_important_@
+     interval: 42s
+     path: clusters/localhost/install
+     prune: true
+     sourceRef:
+       kind: GitRepository
+       name: gitops-repo
+   ```
+
+    Tento súbor definuje, že Flux CD bude sledovať zmeny v priečinku `clusters/localhost/install` a ak sa zmenia, tak ich aplikuje do kubernetes klastra. Všimnite si, že sme zároveň určili, že táto konfigurácia je závisla od nasadenia a pripravenosti konfigurácie `prepare`.
+
+5. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/cd.kustomization.yaml`:
+
+   ```yaml
+   apiVersion: kustomize.toolkit.fluxcd.io/v1
+   kind: Kustomization
+   metadata:
+     name: cd
+     namespace: wac-hospital
+   spec:
+     wait: true
+     interval: 42s
+     path: clusters/localhost
+     prune: true
+     sourceRef:
+       kind: GitRepository
+       name: gitops-repo
+   ```
+
+    Tento súbor definuje, že Flux CD bude sledovať konfiguráciu v priečinku `clusters/localhost/` a ak sa zmení, tak zmeny aplikuje do kubernetes klastra - tzn ak budeme chcieť zmeniť detaily priebežnej integrácia, tak bude postačovať ak ich zapíšeme do nášho repozitára.
+
+6. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/kustomization.yaml`, ktorý vyššie uvedené súbory zintegruje:
+
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1beta1
+   kind: Kustomization
+
+   commonLabels:
+    app.kubernetes.io/part-of: wac-hospital
+
+   namespace: wac-hospital
+
+   resources:
+    - prepare.kustomization.yaml
+    - cd.kustomization.yaml
+    - install.kustomization.yaml
+    - git-repository.yaml
+   ```
+
+7. V priečinku `${WAC_ROOT}/ambulance-gitops/clusters/localhost` vytvorte súbor `kustomization.yaml`:
+
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1beta1
+   kind: Kustomization
+   
+   
+   commonLabels:
+     app.kubernetes.io/name: wac-hospital
+     app.kubernetes.io/instance: development
+     app.kubernetes.io/version: "0.1"
+
+   resources:
+      - gitops
+   ```
+
+   Táto konfigurácia sa odkazuje na priečinok `gitops`, ktorý sme vytvorili v predchádzajúcom kroku. Znamená to, že konfigurácia klastra je riadená zdrojmi Flux CD, ktorý zabezpečuje priebežné nasadenie podľa konfigurácie v git repozitári na príslušných cestách.
+
+8. Pokiaľ je náš repozitár verejný, mohol by FluxCD získať informácie bez potreby konfigurovania prístupových práv. Keďže v praxi je bežnejšie, že konfigurácie špecifických ňovať, predpokladáme, že je tento repozitár privátny. Musíme preto nakonfigurovať pre Flux CD prístupové údaje - viď manifest v kroku 2.
+
+   Prejdite na stránku [GitHub], prihláste sa a následne prejdite na stránku [Developer Settings](https://github.com/settings/apps). _Z hlavnej stránky sa tu môžete dostať stlačením ikony Vášho avatara, menu "Settings" a potom "Developer settings"._ Na ľavej strane vyberte _Personal access tokens->Tokens (classic)_ a stlačte tlačidlo _Generate new token_. Prihláste sa, zadajte meno tokenu, napr. _WAC-FluxCD token_, a _Expiration_ nastavte  na _Custom defined_ (dátum aspoň do konca semestra). V časti _Scopes_ označte položku _repo_. Stlačte tlačidlo _Generate token_ a __NEZABUDNITE SI ULOŽIŤ DO SCHRÁNKY__ vygenerovaný PAT.
+
+   ![Vytvorenie Personal Access Token-u](./img/008a-01-GitHubPAT.png)
+
+   Následne musíme toto heslo uložiť do kubernetes klastra. V kontexte GitOps máme teraz niekoľko možností ako postupovať. Tu si ukážeme zatiaľ jednoduchší postup, a to, že heslá a iné dôverné informácie nebudú súčasťou nášho repozitára, ale ich budeme mať k dispozícii len lokálne. Tento postup sa ale skomplikuje v momente, kedy budeme musieť pracovať s viac ako len s jedným heslom alebo klastrom. V takom prípade je oveľa vhodnejšie použiť tzv. [_SOPS - Service Operations_](https://fluxcd.io/flux/guides/mozilla-sops/), kedy sú šifrované heslá a verejný kľúč uložené priamo v repozitári a súkromý kľúč, potrebný na odšifrovanie dôverných informácií je prístupný len v samotnom klastri, kde ho ručne nasadzuje jeho administrátor. Druhý spôsob si preto ukážeme až v inej kapitole.
+
+   Vytvorte priečinok `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets` a v ňom súbor `repository-pat.yaml`:
+
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: repository-pat
+     namespace: wac-hospital
+
+   type: Opaque
+   stringData:
+     username: <yur-acount> # zvyčajne môže byť akékoľvek meno @_important_@
+     password: <your-personal-access-token>  # vygenerovaný PAT @_important_@
+   ```
+
+   V tom istom priečinku vytvorte súbor `kustomization.yaml`:
+
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1beta1
+   kind: Kustomization
+
+   commonLabels:
+     app.kubernetes.io/part-of: wac-hospital
+
+   namespace: wac-hospital
+
+   resources:
+     - repository-pat.yaml
+   ```
+
+   Nakoniec vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/.gitignore` s obsahom:
+
+   ```plain
+   *
+   !.gitignore
+   !kustomization.yaml
+   ```
+
+   Posledným krokom sme zabezpečili to, aby bol súbor `kustomization.yaml` prítomný v git repozitári, ale súbor `repository-pat.yaml` nie. Týmto spôsobom sme zabezpečili, že heslo nebude súčasťou nášho git repozitára. Nevýhodou je, že v prípade ak dôjde k strate lokálnych údajov, musíme heslo vygenerovať znova.
+
+   >warning:> Uloženie citlivých údajov v súbore na disku je tiež vystavené riziku, že sa k nim dostane neoprávnená osoba. Uistite sa, že k Vášmu počítaču a uvedenému priečinku má prístup iba oprávnená osoba, prípadne citlivé súbory po nasadení zmažte a vytvorte nanovo až v prípade potreby.
+
+9. Otestujte správnosť Vašej konfigurácie príkazmi vykonanými z priečnka `${WAC_ROOT}/ambulance-gitops/`:
+
+   ```ps
+   kubectl kustomize clusters/localhost
+   kubectl kustomize clusters/localhost/prepare
+   kubectl kustomize clusters/localhost/install
+   kubectl kustomize clusters/localhost/secrets
+   ```
+
+   Pokiaľ všetky príkazy prebehli bez chybového hlásenia, archivujte svoj repozitár:
 
     ```ps
-    flux -v
+    git add .
+    git commit -m 'fluxcd configuration'
+    git push
     ```
 
 ## Bootstraping Flux
 
-Nasadíme Flux-ové komponenty do aktuálneho kubernetes klastra. Najprv sa vždy
-uistite, že máte nastavený správny aktuálny klaster (kontext) a ak nie, zmeňte
-ho na lokálny (docker-desktop).
+Aby sme mohli začať využívať služby [Flux], musíme ich prvotne nasadiť do klastra manuálne. Po prvom nasadení, dôjde k synchronizácii stavu medzi klastrom a našim repozitár, a pri ďalšej práci nam preto bude postačovať, keď smeny konfigurácie uložíme do repozitára. Jednou z výhod tohto prístupu je aj to, že môžeme riadiť kto z vývojového tímu potrebuje mať prístup ku jednotlivým nasadeniam/klastrom - v prípade vývoja formou DevOps predpokladáme, že to je väčšina vývojarov, a zároveň môžeme riadiť aké oprávnenia sú jednotlivým členom poskytnuté.
 
-```ps
-kubectl config get-contexts
-kubectl config use-context docker-desktop
-```
+>info:> V tomto cvičení nasadzuje [Flux] formou referencie na zverejnené manifesty v repozitári [fluxcd/flux2](https://github.com/fluxcd/flux2). Alernatívne spôsob inštalácia je opísaný v [dokumentácii Fluxu](https://fluxcd.io/flux/installation/).
 
-1. V priečinku `webcloud-gitops` vytvorte priečinok `flux-system`. Vojdite do neho a vykonajte príkaz:
+1. Nasadíme Flux operátor do nášho klastra. Uistite sa, že máte vybraný správny kontext - `kubectl config get-contexts`, predite do priečinku `${WAC_ROOT}/ambulance-gitops/` a vykonajte príkaz
 
+   ```ps
+   kubectl apply -k infrastructure/fluxcd
+   ```
+
+    Týmto príkazom sme nasadili Flux do klastra. Skontrolujte, či bol Flux nasadený a či je všetko v poriadku, prípadne počkajte kým sú všetky pody v stvar `Running`:
+  
     ```ps
-    flux install --export > gotk-components.yaml
-    ```
- 
-    >warning:> Ak nefunguje (Chyba: _install failed: Rel: can't make..._), skúste ho
-    > vykonať na disku C.  
-    > POZOR, nezabudnite v tom prípade zadať celú cestu k
-    > súboru, t.j. `D:\....\flux-system\gotk-components.yaml`. V niektorých   prípadoch môže byť nutné tento príkaz vykonať z privilegovaného shellu (_PowerShell->Run As Administrator_)
+   kubectl get all -n flux-system
+   ```
 
-   Týmto príkazom sme zatiaľ Flux nenainštalovali (nenasadili) do klastra,
-   iba sme vytvorili súbor `gotk-components.yaml`, ktorý obsahuje definície
-   (manifesty) kubernetes objektov používaných Fluxom.
+2. Do klastra potrebujeme umiestniť prístupové udáje k nášmu repozitáru. Stale v priečinku `${WAC_ROOT}/ambulance-gitops/` vykonajte príkazy:
 
-2. Nasadíme Flux do aktuálneho klastra. Vykonajte príkaz v priečinku `flux-system`:
+   ```ps
+   kubectl create namespace wac-hospital
+   kubectl apply -k clusters/localhost/secrets
+   ```
 
-    ```ps
-    kubectl apply -f ./gotk-components.yaml
-    ```
+3. Teraz nasadíme našu konfiguráciu pre klaster `localhost`. V priečinku `${WAC_ROOT}/ambulance-gitops/` vykonajte príkaz:
 
-   Skontrolujte, či boli Flux radiče (_controllers_) naštartované a či je všetko v poriadku:
+   ```ps
+   kubectl apply -k clusters/localhost
+   ```
 
-    ```ps
-    flux check
-    ```
+   Týmto príkazom sme do klatra priamo nasadili zdroje z priečinku `${WAC_ROOT}/ambulance-gitops/clusters/localhost\gitops`. Pomocou zdroja `gitops-repo` typu `GitRepository` vytvorí Flux lokálnu kópiu určenej vetvy nášho repozitára. Následne, v neurčenom poradí, pomocou zdroja `cd` typu `Kustomization.kustomize.toolkit.fluxcd.io` aplikuje v klastri konfiguráciu z priečinka `clusters/localhost`, čím zabezpečí obnovenie konfigurácie samotného predpisu priebežnéhi nasadenia. Zároveň pomocou zdroja `prepare` tiež typu  `Kustomization.kustomize.toolkit.fluxcd.io`, nainštaluje do klastra služby, ktoré tam naša aplikácia implicitne predpokladá. V tomto prípade to je služba `ufe-controller` a samotný operátor [Flux CD][flux], ktorý môžeme takto napríklad obnoviť na novšiu verziu.
 
-   Ešte sa môžeme pozrieť, aké komponenty bežia v namespace `flux-system`:
+   Po aplikovaní a priravenosti konfigurácie pomocou zdroja `prepare` sa začne aplikovať konfigurácia uvedená v zdroji `install` typu `Kustomization.kustomize.toolkit.fluxcd.io`, ktorá nasadí vlastné služby a zdroje nášho projektu.
 
-    ```ps
-    kubectl get all -n flux-system
-    ```
+   [Flux Cd][flux] pravidelne kontroluje či nedošlo k zmenáv v repozitári alebo či stav klastra nie je odlišný konfigurácie určenej niektorým zo zdrojov typu `Kustomization`. Pri akejkoľvek zistenej zmene sa pokúsi dosiahnuť stav totožný so stavom predpísanym v konfigurácii. V prípade, že sa zmení konfigurácia v repozitári, Flux CD automaticky zmení konfiguráciu v klastri.
 
-   Vidíme, že boli nasadené 4 radiče bežiace v štyroch podoch - `source-controller`, `kustomize-controller`, `notification-controller` a `helm-controller`.
+   >build_circle:> Niekedy potrebujeme dočasne zmeniť stav zdrojov v klastri, napríklad pri analýze hláseného problému, môžeme chcieť dočasne zmeniť úroveň logov generovaných našou mikroslužbou. Pokiaľ pridáte v klastri zdroju anotáciu `kustomize.toolkit.fluxcd.io/reconcile: disabled`, tak stav zdroja sa nezmení až do momentu, kedy túto anotáciu odstránite. Anotáciu môžete aplokovať napríklad príkazom:
+   >
+   > ```ps
+   > kubectl annotate deployment <name> kustomize.toolkit.fluxcd.io/reconcile=disabled
+   > ```
+   >
+   > Nezabudnite túto anotáciu odstrániť po skončení analýzy problému.
 
-## Nastavenie zdojov a kustomizácií
+   Priebežne overte stav Vášho nasadenia príkazom:
 
-1. Flux potrebuje prístup na repozitár, v ktorom sú/budú uložené konfigurácie (manifesty) kubernetes objektov. Najprv si vygenerujeme PAT (personal access token): prejdite na stránku [Azure DevOps], do svojho _WebCloud_ projektu. Kliknite na ikonku postavy v pravom hornom rohu obrazovky a potom na `Personal access tokens`.
+   ```ps
+   kubectl get gitrepository -n wac-hospital
+   kubectl get kustomization -n wac-hospital
+   ```
+  
+   Výstup by mal vyzerať obdobne ako na nasledujúcom výpise:
 
-   ![PAT](./img/dojo-personal-access-token.jpg)
+   ```plain
+   kubectl get gitrepository -n wac-hospital
+   NAME          URL                                          AGE    READY   STATUS
+   gitops-repo   https://github.com/milung/ambulance-gitops   119s   True    stored artifact for revision 'main@sha1:...'
 
-   Na ďalšej stránke vyberte `New Token`. Zadajte meno tokenu, napr. _Flux token_, Expiration na _Custom defined_ (dátum aspoň do konca semestra). V časti `Scopes` zadajte _Custom defined_ a vyberte iba v podčasti `Code` checkbox _Full Access_. Stlačte `Create` a __NEZABUDNITE SI ULOŽIŤ__ vygenerovaný PAT.
+   kubectl get kustomization -n wac-hospital         
+   NAME      AGE   READY   STATUS
+   cd        16m   True    Applied revision: main@sha1...
+   install   16m   True    Applied revision: main@sha1:...
+   prepare   11m   True    Applied revision: main@sha1:...
+   ```
 
-2. V kubernetes klastri vytvoríme zdroj - objekt typu `GitRepository`, ktorým Flux-u povieme, ktorý repozitár má sledovať. V podstate ide o jednoduchý manifest yaml, ale nemusíme ho písať sami - Flux ho vygeneruje za nás. V priečinku _webcloud-gitops_ vykonajte príkazy:
+   Pokiaľ je stav `READY` na hodnote `True`, znamená to, že Flux CD úspešne
+   nasadil konfiguráciu do klastra. 
 
-    ```ps
-    $pat="<vygenerovaný personal access token>"
-    $giturl="<cesta ku projektu na dev.azure.com>/_git/ambulance-gitops"
-    $branch="main"
-    flux create source git ambulance-gitops-repo --git-implementation=libgit2  --url=$giturl --branch=$branch --username=git --password=$pat --interval=60s 
-    ```
- 
-    >warning:> Pokiaľ je vaša hlavná vetva nazvaná inak ako `main` - napríklad `master`,  použite príslušný názov pre hodnotu premennej `$branch`.
+   >build_circle:> Ak je stav `READY` na hodnote `False`, skontrolujte 
+   položku `Status` vo výpise príkazu `kubectl describe kustomization <name> -n wac-hospital`,
+   a opravte prípadnu chybu. Aplikujte opravu komitom vášich zmien do repozitára. Pokiaľ sa chyba týka
+   zdroja `gitops-repo`, vykonajte aj príkaz `kubectl apply -k clusters/localhost`, v opačnom prípade je komit do repozitára postačujúci.
 
-   Overíme si, že bol `git source` vytvorený:
-
-    ```ps
-    flux get sources all
-    ```
-
-   Vygenerujeme a uložíme si manifest do súboru - predpokladáme vykonávanie príkazu v priečinku `.../webcloud-gitops/flux-system`:
-
-    ```ps
-    flux export source git ambulance-gitops-repo > ambulance-gitops-repo.yaml
-    ```
-
-   Yaml súbor vyzerá nasledovne:
-
-    ```yaml
-    ---
-    apiVersion: source.toolkit.fluxcd.io/v1beta1
-    kind: GitRepository
-    metadata:
-      name: ambulance-gitops-repo
-      namespace: flux-system
-    spec:
-      gitImplementation: libgit2
-      interval: 1m0s
-      ref:
-        branch: main
-      secretRef:
-        name: ambulance-gitops-repo
-      timeout: 20s
-      url: <cesta ku projektu na dev.azure.com>/_git/ambulance-gitops
-    ```
-
-   Tento _GitRepository_ objekt s menom __ambulance-gitops-repo__ sleduje git repozitár na danej adrese (`url`) a každú minútu (`interval`) si urobí interný klon celého repozitára. Má nastavený 20s `timeout` na git operácie a na prihlásenie používa meno a heslo (PAT), uložené v `secret` objekte, ktorý bol vytvorený automaticky.
-
-    >warning:> Odporúčame si PAT "zálohovať", v prípade, že sa niečo stane s celým klastrom a _secret_ bude vymazaný. Zálohovaný PAT použijeme v kapitole [Obnova lokálneho klastra v novom prostredí](./011b-obnovenie-klastra.md), kde si ukážeme, ako obnoviť lokálny klaster v prípade, že bol _secret_ vymazaný.
-
-3. Vytvoríme objekt typu `Kustomization` (Flux), vysvetlenie bude neskôr:
-
-    ```ps
-    flux create kustomization ambulance-localhost-kustomization  --source=ambulance-gitops-repo --path="./clusters/localhost" --prune=true  --interval=40s
-    ```
-
-   A overíme, či bol vytvorený:
-
-    ```ps
-    flux get kustomizations
-    ```
-
-   Rovnako ako predtým, uložíme si vygenerovaný manifest do súboru:
-
-    ```ps
-    flux export kustomization ambulance-localhost-kustomization >  ambulance-localhost-kustomization.yaml
-    ```
-
-   Yaml súbor vyzerá nasledovne:
-
-    ```yaml
-    ---
-    apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-    kind: Kustomization
-    metadata:
-      name: ambulance-localhost-kustomization
-      namespace: flux-system
-    spec:
-      interval: 40s
-      path: ./clusters/localhost
-      prune: true
-      sourceRef:
-        kind: GitRepository
-        name: ambulance-gitops-repo
-    ```
-
-   Tento `Kustomization` objekt sa každých 40s (`interval`) pozrie, či sa zmenil obsah priečinka _clusters/localhost_ (`path`), prípadne súborov v ňom, v rámci repozitára, ktorý je definovaný objektom `GitRepository`. Ak áno, Flux porovná zmeny s posledným stavom a vykoná kubernetes príkazy, aby sa stav referencovaných objektov v klastri zhodoval s požadovaným stavom v priečinku. Ak v ňom nájde súbor _Kustomization.yaml_ (Kustomize type), použije iba ten.
-
-   To znamená, že akonáhle sme vytvorili objekt `Kustomization` (flux), Flux sa pozrel do daného priečinku, našiel tam _kustomization.yaml_ (kustomize) a aplikoval ho do nášho klastra. Pozrime sa, aké objekty vytvoril v namespace __wac-hospital__.
+   Nakoniec overte, či sú všetky nasadené zdroje pripravené a či sú všetky pody v stave `Running`:
 
     ```ps
     kubectl get all -n wac-hospital
@@ -226,22 +350,22 @@ kubectl config use-context docker-desktop
      replicaset.apps/ufe-controller-594bc6f989             2         2          2       78m
     ```
 
-   Pre každý z našich dvoch komponentov (ambulance-ufe a ufe-controller) boli vytvorené nasledovné objekty:
-   - 1x service
-   - 1x deployment
-   - 1x replicaset (vytvorený automaticky pre každý deployment)
-   - 2x pody (v deploymente sme mali uvedené 2 repliky)
+    Pre každý z našich dvoch komponentov (ambulance-ufe a ufe-controller) boli vytvorené nasledovné objekty:
+    - 1x service
+    - 1x deployment
+    - 1x replicaset (vytvorený automaticky pre každý deployment)
+    - 2x pody (v deploymente sme mali uvedené 2 repliky)
 
-   Zadajte do prehliadača adresu [http://localhost:30331/](http://localhost:30331/).
-   Mali by ste vidieť stránku s aplikačnou obálkou s integrovanou mikro aplikáciou. Po stlačení na odkaz _Zoznam čakajúcich_ by ste mali vidieť nasledujúci výstup:
+    Zadajte do prehliadača adresu [http://localhost:30331/](http://localhost:30331/).
+    Mali by ste vidieť stránku s aplikačnou obálkou s integrovanou mikro aplikáciou. Po stlačení na odkaz _Zoznam čakajúcich_ by ste mali vidieť nasledujúci výstup:
 
-   ![Integrovaný zoznam čakajúcich](./img/dojo-appshell-list.png)
+    ![Integrovaný zoznam čakajúcich](./img/dojo-appshell-list.png)
 
-### Overenie funkcionality priebežného nasadenia
+## Overenie funkcionality priebežného nasadenia
 
-V princípe máme prvú verziu priebežného deploymentu hotovú. Ak sa teraz zmení niektorý z yaml manifestov vo `webcloud-gitops` repozitári (musí byť ale referencovaný z `.../webcloud-gitops/clusters/localhost` adresára), tak Flux zabezpečí, že sa zmeny automaticky prejavia aj v klastri. Vyskúšame si to.
+V princípe máme prvú verziu priebežného nasadenia hotovú. Ak sa teraz zmení niektorý z yaml manifestov v `ambulance-gitops` repozitári (musí byť ale referencovaný z `${WAC_ROOT}/ambulance-gitops/clusters/localhost` adresára), tak [Flux] zabezpečí, že sa zmeny automaticky prejavia aj v klastri. Vyskúšame si to.
 
-V súbore `.../webcloud-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml` zmeňte počet replík na 1, uložte zmeny a archivujte ich (_commit_ a _push_) do vzdialeného repozitára.
+V súbore `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml` zmeňte počet replík na 1, uložte zmeny a archivujte ich (_commit_ a _push_) do vzdialeného repozitára.
 
 Po chvíli overte, že sa zmeny prejavili v klastri. Výstup nasledujúceho príkazu by mal ukazovať 1 pod s menom _ambulance-ufe-deployment_.
 
