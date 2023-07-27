@@ -1,5 +1,13 @@
 ## Flux - sledovanie a aplikovanie zmien verzie docker obrazu
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-008a
+```
+
+---
+
 Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `.../webcloud-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml`). Keď vyrobíme novú verziu kontajnera, máme dve možnosti, ako ju automaticky nasadiť do klastra.
 
 * Kontajner označíme jednoznačným tagom (napr. buildversion) a v rámci priebežnej integrácie pridáme krok, ktorý zmení spomínaný `deployment.yaml` a nastaví v ňom danú verziu kontajnera. Integračný krok upravený súbor _commit_-ne do repozitára, Flux zmenu zaregistruje a urobí zmeny v kubernetes klastri.
