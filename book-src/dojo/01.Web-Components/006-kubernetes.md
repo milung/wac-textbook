@@ -30,8 +30,10 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
     |- infrastructure
     |  L ufe-controller
     |
+    |- components
     |- clusters
        L localhost
+           
     ```
 
     Aplikáciu budeme nasadzovať s využitím aplikácie [kustomize] pre  riadenie konfigurácií v systéme kubernetes.  [Kustomize] je natívnou  súčasťou systému kubernetes a je tiež integrovaná do aplikácie `kubectl`. Často používanou  alternatívou k tejto aplikácii je aplikácia [Helm]. Účel použitia je pri  týchto aplikáciách rovnaký, Helm sa zameriava na techniku šablón, ktoré sú parametrizované konfiguráciou pre špecifické nasadenie. [Kustomize] šablóny odmieta, keďže nie sú priamo  nasaditeľné alebo použiteľné a pracuje na princípe prispôsobovania funkčných manifestov pomocou  čiastkových úprav - _patch_-ov - pre špecifické nasadenie. V tomto cvičení preferujeme  [Kustomize] najmä z dôvodu, že manifesty si v základnej forme zachovávajú syntaktickú a  sémantickú presnosť definovanú [Kubernetes API][k8s-api].
@@ -41,6 +43,8 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
     Priečinok `infrastructure` bude obsahovať komponenty systému, ktoré sa buď inštalujú typicky len raz počas životného cyklu klastra alebo sú zdieľané medzi tímami a sú potrebné k behu  ostatných subsystémov. Čo presne je súčasťou priečinku `infrastructure` sa môže líšiť prípad od prípadu, v zásade tam patria zdieľané služby s inými aplikáciami, ktoré na niektorých klastroch už sú predpripravené a nie je možné ich "preinštalovať" v rámci daného projektu/tímu, a na  iných klastroch ich treba predinštalovať, aby bola zabezpečená funkčnosť dodávanej aplikácie.
 
     Priečinok `apps` obsahuje komponenty systému, ktoré projektový tím zabezpečuje pre všetky  cieľové prostredia - klastre - a má ich plne pod kontrolou.
+
+    Priečinok `components` umožňuje zdieľať konfiguráciu medzi jednotlivými variantami nasadenie, napríklad pokiaľ by náš systém mal možnosť použiť rôzne systémy DBMS, mohli by sme príslušné konfigurácie a úpravy existujúcich komponentov umiestniť do tohto priečinka. V našom prípade budeme tento priečinok primárne používať na definíciu jednotlivých verzií nášho systému.
 
     >info:> V týchto cvičeniach používame takzvanú [_MonoRepo_](https://fluxcd.io/flux/guides/repository-structure/#monorepo) štruktúru repozitára pre priebežné nasadenie. Nie je to ale jediná možnosť, viac možností je opísaných vo [flux dokumentácii](https://fluxcd.io/flux/guides/repository-structure/).
 
@@ -281,9 +285,6 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
     resources:
     - namespace.yaml                            # namespace je tiež zdrojom pre tento klaster
     - ../../../infrastructure/ufe-controller       # kustomization pre ufe-controller
-    
-    commonLabels:
-      app.kubernetes.io/part-of: wac-hospital
 
     patches: 
     - path: patches/ufe-controller.service.yaml    # úprava služby ufe-controller

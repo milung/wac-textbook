@@ -1,4 +1,4 @@
-## Polo-automatické nasadenie (automatická aktualizácia docker obrazu z dockerhub)
+# Polo-automatické nasadenie (automatická aktualizácia docker obrazu z dockerhub)
 
 ---
 
@@ -59,22 +59,44 @@ aktualizovala, keď sa zmení jej docker obraz na Docker Hube.
         password: ${{ secrets.DOCKERHUB_TOKEN }}
    ```
 
-   Premenné `secrets.DOCKERHUB_USERNAME` a `secrets.DOCKERHUB_TOKEN` nastavíme v krokoch nižšie.
+   Premenné `secrets.DOCKERHUB_USERNAME` a `secrets.DOCKERHUB_TOKEN` nastavíme v krokoch nižšie. Dáľší krok vytvorí [meta údaje](https://github.com/docker/metadata-action) pre vytvorenie obrazu, špecificky sú pre nás dôležité údaje `tags` :
+
+   ```yaml
+   ...
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: |
+          <pfx>/ufe-controller @_important_@
+
+        tags: |
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=branch,suffix={{date '.YYYYMMDD.HHmm'}} # napr `main.20210930.1200` @_important_@
+          type=ref,event=tag
+          type=semver,pattern={{version}} # napr pri tagu  `v1.0.0`
+          type=semver,pattern={{major}}.{{minor}} # napr `1.0`
+          type=semver,pattern={{major}}
+          type=raw,value=latest,enable={{is_default_branch}} # `latest` pre každý komit do main vetvy @_important_@
+   ```
+
+   >info:> V tomto cvičení vždy vytvárame obraz s tagom `<pfx>/ambulance-ufe:latest` pre zjednodušenie ďalšieho postupu. V reálnym projektoch sa `latest` tag vytvorí len pri oficiálnych otestovaných vydaniach novej verzie - napríklad pri pridaní tagu vo formáte `v1.0.1`.
 
    Ďalej pridáme krok na vytvorenie viac-platformového obrazu:
 
    ```yaml
     ...
+    
     - uses: docker/build-push-action@v2
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           file: ./build/docker/Dockerfile
           push: true
-          tags: <pfx>/ambulance-ufe:latest 
+          tags: ${{ steps.meta.outputs.tags }} @_important_@
+          labels: ${{ steps.meta.outputs.labels }}
    ```
-
-   >info:> V tomto cvičení vytvárame vždy obraz s tagom `<pfx>/ambulance-ufe:latest` pre zjednodušenie ďalšieho postupu. V reálnym projektoch sa bežne stretnete s nastavením `tags: {{ steps.meta.outputs.tags}}` pričom použitá premenná je generovaná GitHub akciou [docker/metadata-action](https://github.com/docker/metadata-action) a umožňuje generovať rôzne tagy v závislosti od udalosti vykonanej nad našim repozitárom (napr _pull request_, alebo vytvorenie _release_-u).
 
 3. Pre úspešny beh priebežnej integrácie je nutné ešte nastaviť premenné `secrets.DOCKERHUB_USERNAME` a `secrets.DOCKERHUB_TOKEN`. Prejdite na stránku [Docker Hub], Rozbaľte menu označené názvom Vášho účtu a zvoľte _Account Settings_. V záložke _Security_ nájdete tlačidlo _New Access Token_.
 

@@ -83,7 +83,7 @@ uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do k
 
     Tento súbor definuje git repozitár a vetvu, ktorý bude Flux CD sledovať a zabezpečovať priebežné nasadenie podľa konfigurácie v tomto repozitári. Pre prístup bude používať _personal access token_ (PAT), ktorý si vygenerujete neskôr.
 
-3. V tom istom priečinku vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/prepare.kustomization.yaml`: 
+3. V tom istom priečinku vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/prepare.kustomization.yaml`:
 
    ```yaml
    apiVersion: kustomize.toolkit.fluxcd.io/v1
