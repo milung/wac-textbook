@@ -1,4 +1,4 @@
-## Flux - sledovanie a aplikovanie zmien verzie docker obrazu
+# Flux - sledovanie a aplikovanie zmien verzie docker obrazu
 
 ---
 
@@ -130,7 +130,20 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
          author:
            email: fluxcdbot@users.noreply.github.com
            name: fluxcd_bot
-         messageTemplate: '{{range .Updated.Images}}{{println .}}{{end}}'
+         messageTemplate: |
+            Automated image update
+            
+            Automation name: {{ .AutomationObject }}
+            
+            Files:
+            {{ range $filename, $_ := .Updated.Files -}}
+            - {{ $filename }}
+            {{ end -}}
+            
+            Images:
+            {{ range .Updated.Images -}}
+            - {{.}}
+            {{ end -}}
        push:
          branch: main  @_important_@
      update:
@@ -178,6 +191,14 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
    ![Zmena verzie kontajnera](./img/008b-01-FluxBotCommit.png)
 
    Overíme celý CI/CD cyklus explicitne. V priečinku `${WAC_ROOT}/ambulance-ufe` zmeňte kód komponentu `ambulance-ufe`, napr. zmeňte meno pacienta v zozname, komitnite a synchronizujte zmeny. Po chvíli, keď prebehne CI a vytvorí sa nový obraz na DockerHub-e, skontrolujte históriu na stránke [GitHub] v repozitári _ambulance-gitops_ (stlačte na nápis _N commits_ na vrchu zoznamu súborov), a potom zadajte v prehliadači adresu [http://localhost:30331/](http://localhost:30331/) a pozrite si zoznam pacientov.
+
+   Po overení si obnovte stav repozitára - flux cd do neho zapísal nové zmeny:
+
+   ```ps
+   git fetch
+   git pull
+   ```
+  
 
 ---
 

@@ -7,6 +7,7 @@
 [azure pipelines]:https://docs.microsoft.com/en-us/azure/devops/pipelines/get-started/what-is-azure-pipelines?view=azure-devops
 [azure-devops]:https://azure.microsoft.com/en-us/services/devops/
 [azure-portal]:https://portal.azure.com
+[babel]:https://babeljs.io/
 [bit]:https://bit.dev/
 [bitbucket]:[https://bitbucket.org/]
 [chocolatey]:https://chocolatey.org/
@@ -33,6 +34,7 @@
 [Inversify]:https://github.com/inversify/InversifyJS
 [jest]:https://jestjs.io/
 [jquery]:https://jquery.com/
+[jsonschema]:https://json-schema.org/
 [jsx]:https://reactjs.org/docs/introducing-jsx.html
 [k8s-api]:https://kubernetes.io/docs/concepts/overview/kubernetes-api/
 [k8s-controller]:https://kubernetes.io/docs/concepts/architecture/controller/
@@ -48,12 +50,14 @@
 [micro-fe]:https://martinfowler.com/articles/micro-frontends.html
 [mongodb]:https://www.mongodb.com/
 [mongoexpress]:https://github.com/mongo-express/mongo-express
+[navigation api]:https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API
 [nginx]:https://www.nginx.com/
 [nodejs]:https://nodejs.org/en/
 [npmjs.com]:https://www.npmjs.com/
 [openapi generator online]:http://api.openapi-generator.tech/index.html
 [openapi-generator]:https://openapi-generator.tech/
 [openapi]:https://www.openapis.org/about
+[openlens]:https://github.com/MuhammedKalkan/OpenLens
 [paas]:https://azure.microsoft.com/en-in/resources/cloud-computing-dictionary/what-is-paas/
 [Postman]:https://www.getpostman.com/
 [powershell]:https://docs.microsoft.com/en-us/powershell/

@@ -1,241 +1,447 @@
-## Editor položiek a navigácia
+# Editor položiek a navigácia
+
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-009
+```
+
+---
 
 Po úvodných krokoch, ktoré nám pomôžu automatizovať našu prácu počas ďalšieho vývoja, budeme
 teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tejto časti budeme riešiť, ako pridávať a navigovať sa medzi jednotlivými položkami.
 
-1. Vytvoríme nový komponent pre náš editor. Prejdite do priečinku `.../ambulance-list` a vykonajte nasledujúci príkaz:
+## Komponent pre editáciu záznamov
+
+1. Vytvoríme nový komponent pre náš editor. Prejdite do priečinku `${WAC_ROOT}/ambulance-ufe` a vykonajte nasledujúci príkaz:
 
      ```ps
      npm run generate
      ```
 
-    Ako meno elementu zvolte `<pfx>-ambulance-wl-editor` a pri ďalších otázkach zvoľte predvolené možnosti. V adresári `.../ambulance-list/src/components/<pfx>-ambulance-wl-editor` máme teraz predpripravenú šablónu pre náš nový komponent.
+    Ako meno elementu zvolte `<pfx>-ambulance-wl-editor` a pri ďalších otázkach zvoľte predvolené možnosti. V adresári `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor` máme teraz predpripravenú šablónu pre náš nový komponent.
 
-    Ďalej nainštalujte knižnice pre nové Material Design elementy, ktoré budeme používať
+2. V súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` upravte metódu `render` do tvaru:
 
-     ```ps
-     npm install --save-dev @material/mwc-textfield @material/mwc-select @material/ mwc-slider @material/mwc-fab @material/mwc-button
-     ```
-
-2. Upravte súbor `.../ambulance-list/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx`:
-
-    ```tsx
-    import { Component, Host, h, Prop } from '@stencil/core';
+   ```tsx
     
-    @Component({
-      tag: '<pfx>-ambulance-wl-editor',
-      styleUrl: '<pfx>-ambulance-wl-editor.css',
-      shadow: true,
-    })
+    render() {
+      return (
+        <Host>
+          <md-filled-text-field label="Meno a Priezvisko" >
+            <md-icon slot="leadingicon">person</md-icon>
+          </md-filled-text-field>
+  
+          <md-filled-text-field label="Registračné číslo pacienta" >
+            <md-icon slot="fingerprint">person</md-icon>
+          </md-filled-text-field>
+  
+          <md-filled-text-field label="Čakáte od" disabled>
+            <md-icon slot="leadingicon">watch_later</md-icon>
+          </md-filled-text-field>
+  
+          <md-filled-select label="Dôvod návštevy">
+            <md-icon slot="leadingicon">sick</md-icon>
+            <md-select-option value="folowup" headline="Kontrola"></md-select-option>
+            <md-select-option value="nausea" headline="Nevoľnosť"></md-select-option>
+            <md-select-option value="fever" headline="Horúčka"></md-select-option>
+            <md-select-option value="ache-in-throat" headline="Bolesti hrdla"></md-select-option>
+          </md-filled-select>
+  
+          <div class="duration-slider">
+            <span class="label">Predpokladaná doba trvania:&nbsp; </span>
+            <span class="label">{this.duration}</span>
+            <span class="label">&nbsp;minút</span>
+            <md-slider
+              min="2" max="45" value={this.duration} ticks labeled
+              oninput={this.handleSliderInput.bind(this)}></md-slider>
+          </div>
+  
+          <md-divider></md-divider>
+          <div class="actions">
+            <md-tonal-button id="delete"
+              onClick={() => this.editorClosed.emit("delete")}>
+              <md-icon slot="icon">delete</md-icon>
+              Zmazať
+            </md-tonal-button>
+            <span class="stretch-fill"></span>
+            <md-outlined-button id="cancel"
+              onClick={() => this.editorClosed.emit("cancel")}>
+              Zrušiť
+            </md-outlined-button>
+            <md-filled-button id="confirm"
+              onClick={() => this.editorClosed.emit("store")}>
+              <md-icon slot="icon">save</md-icon>
+              Uložiť
+            </md-filled-button>
+          </div>
+        </Host>
+      );
+    }
+   ```
+
+   a dolňte následujúci kód do triedy `<Pfx>AmbulanceWlEditor`:
+
+   ```tsx
+    import { Component, Host, Prop, State, h, EventEmitter, Event } from '@stencil/core'; @_add_@
+    ...
     export class <Pfx>AmbulanceWlEditor {
     
-      @Prop()
-      duration: number = 15;
- 
-      handleSliderInput(event: Event )
-      {
-          this.duration = +(event.target as HTMLInputElement).value;
-      }
-    
-      render() {
-        return (
-          <Host>
-            <mwc-textfield icon="person" label="Meno a Priezvisko"></mwc-textfield>
-            <mwc-textfield icon="fingerprint" label="Registračné číslo pacienta"></ mwc-textfield>
-            <mwc-textfield icon="watch_later" label="Čakáte od" disabled></ mwc-textfield>
-            <mwc-select icon="sick" label="Dôvod návštevy">
-              <mwc-list-item value="folowup">Kontrola</mwc-list-item>
-              <mwc-list-item value="nausea">Nevoľnosť</mwc-list-item>
-              <mwc-list-item value="fever">Teploty</mwc-list-item>
-              <mwc-list-item value="ache-in-throat">Bolesti hrdla</mwc-list-item>
-            </mwc-select>
-            <div class="duration-slider">
-              <span class="label">Predpokladaná doba trvania:&nbsp; </span>
-              <span class="label">{this.duration}</span>
-              <span class="label">&nbsp;minút</span>
-              <mwc-slider discrete withTickMarks step="5" max="45" value={this. duration} 
-                oninput={this.handleSliderInput.bind(this)}></mwc-slider>
-            </div>
-             <div class="actions">
-               <mwc-button id="delete"  icon="delete" label="Zmazať"></mwc-button>
-               <span class="stretch-fill"></span>
-               <mwc-button id="cancel" label="Zrušiť"></mwc-button>
-               <mwc-button id="confirm" icon="save" label="Uložiť"></mwc-button>
-             </div>
-          </Host>
-        );
-      }   
-    }
+      @Prop() entryId: string; @_add_@
+      @_add_@
+      @Event({eventName: "editor-closed"}) editorClosed: EventEmitter<string>; @_add_@
+      @_add_@
+      @State() private duration = 15 @_add_@
+      @_add_@
+      private handleSliderInput(event: Event) {  @_add_@
+        this.duration = +(event.target as HTMLInputElement).value;  @_add_@
+      } @_add_@
+    ...
     ```
 
-   V kóde si všimnite zverejnenú vlastnosť nášho elementu `duration` a spôsob, akým pri zmene hodnoty `mwc-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. Neskôr obdobným spôsobom zabezpečíme prenos údajov z/do ostatných vstupných elementov.
+   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `CustomElement<string>`.
 
-   Ďalej upravte súbor `.../ambulance-list/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.css`:
+3. V kóde sme použili nové elementy z knižnice `@material/web`. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/global/app.ts` a doplňte načítanie príslušnych komponentov:
 
-    ```css
-    :host {
-      display: block;
-    }
-    
-    mwc-textfield, mwc-select,  mwc-button {
-      margin: 1ex;
-      display: block;
-    }
-    
-    .duration-slider {
-      display: flex;
-      align-content: space-around;
-    }
-    
-    .duration-slider .label {
-      flex: 0 0 auto;
-      font-size: var(--mdc-typography-subtitle1-font-size, 1rem);  
-      color: var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6));
-      font-family: Roboto;
-      align-self: center;
-    }
-    
-    mwc-slider {
-      display: inline-block;
-      flex: 1 1 auto;
-      min-width: 30ex; 
-    }
-    
-    mwc-button#cancel{ 
-     --mdc-theme-primary: black;
-    }
-    
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-    
-      border-top: 2px solid var(--mdc-theme-secondary, #018786);
-      padding-top: 1ex;
-    }
-    
-    .stretch-fill {
-      flex: 10 0 0;
-    }
-    ```
+   ```ts
+   import '@material/web/list/list'  
+   import '@material/web/list/list-item'   
+   import '@material/web/icon/icon'
+   import '@material/web/textfield/filled-text-field'  @_add_@
+   import '@material/web/select/filled-select'  @_add_@
+   import '@material/web/select/select-option'  @_add_@
+   import '@material/web/slider/slider'  @_add_@
+   import '@material/web/button/filled-button'  @_add_@
+   import '@material/web/button/tonal-button'  @_add_@
+   import '@material/web/button/outlined-button'  @_add_@
+   import '@material/web/divider/divider'  @_add_@
+   ...
+   ```
 
-   Upravte súbor `.../ambulance-list/src/utils/global.ts` tak, aby obsahoval závislosti na nové _Material Design_ komponenty
-
-    ```ts
-    import '@material/mwc-list'; 
-    import '@material/mwc-icon';
-    import '@material/mwc-textfield';
-    import '@material/mwc-select';
-    import '@material/mwc-slider';
-    import '@material/mwc-fab';
-    import '@material/mwc-button';
- 
-    export default function() { // or export default async function()
-      // components initialization code
-    }
-    ```
-
-   Nakoniec prejdite do súboru `.../ambulance-list/src/index.html` a upravte telo html stránky do podoby
+4. V súbore `${WAC_ROOT}/ambulance-ufe/src/index.html`  upravte telo html stránky do podoby
 
     ```html
     ...
     <body>
          <<pfx>-ambulance-wl-list></<pfx>-ambulance-wl-list>
-         <<pfx>-ambulance-wl-editor></<pfx>-ambulance-wl-editor>
+         <<pfx>-ambulance-wl-editor></<pfx>-ambulance-wl-editor> @_add_@
     </body>
     ...
     ```
 
-   V priečinku `.../ambulance-list` vykonajte príkaz:
+    V priečinku `${WAC_ROOT}/ambulance-ufe` vykonajte príkaz:
 
     ```ps
     npm run start
     ```
 
-   V prehliadači otvorte stránku [http://localhost:3333/](http://localhost:3333/), na ktorej uvidíte oba vytvorené komponenty
+   V prehliadači otvorte stránku [http://localhost:3333/](http://localhost:3333/). Vidíte oba naše komponenty, pričom komponent `<pfx>-ambulance-wl-list` zatiaľ pôsobí neusporiadane.
 
-   ![Prvé zobrazenie editore](./img/dojo-editor-component-1.png)
+5. Upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.css`:
 
-    Skontrolujte funkčnosť jednotlivých elementov. Momentálne máme oba komponenty dizajnovo navrhnuté, teraz musíme naimplementovať aplikačnú logiku aplikácie. V prvom rade chceme, aby bol každý z týchto komponentov zobrazený na samostatných podstránkach (v zmysle SPA - to znamená bez načítavania stránky z web servera). Na to budeme potrebovať nový komponent, ktorý v závislosti od aktuálnej adresy stránky zobrazí príslušný komponent.
+   ```css
+    :host {
+      --_wl-editor_gap: var(--wl-gap, 0.5rem);
 
-3. Aby sme umožnili navigáciu medzi našimi dvoma komponentami, použijeme knižnicu [stencil-router-v2](https://github.com/ionic-team/stencil-router-v2). V zásade sa ale len jedná o dynamické zobrazovanie jedného z uvedených komponentov v závislosti od aktuálnej lokácie. Keďže naše komponenty sú vnorené v hierarchii stránok, musíme tiež riešiť problém odstránenia základnej cesty k nášmu komponentu.
+      display: flex;
+      flex-direction: column;  
+      gap: var(--_wl-editor_gap);
+      padding: var(--_wl-editor_gap);
+    }
 
-   V priečinku `.../ambulance-list` vykonajte príkaz
+    .duration-slider {
+      display: flex;
+      flex-direction: row;
+      align-content: space-around;
+      align-items: center;
+    }
 
-    ```ps
-    npm install stencil-router-v2 --save-dev
-    ```
+    .actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 1rem;
 
-   a vygenerujte nový komponent `<pfx>-ambulance-wl-app`
+    }
+
+    .stretch-fill {
+      flex: 10 0 0;
+    }
+
+    md-divider {
+      margin-bottom: var(--_wl-editor_gap);
+    } 
+   ```
+
+   Pomocou CSS štýlu [Flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Basic_concepts_of_flexbox) sme rozmiestnili jednotlivé prvky v našom komponente a umožnili sme nastaviť medzeru medzi jednotlivými prvkami pomocou [vlastného CSS štýlu](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) `--wl-gap`. Po uložení a skompilovaní by ste mali vidieť nasledujúci výsledok:
+
+  ![Zobrazenie editora](./img/009-01-Editor.png)
+
+  >info:> Ak chcete dosiahnuť responzívny dizajn Vašej stránky, odporúčame v maximálnej miere využívat [CSS Flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Basic_concepts_of_flexbox) a [CSS Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout/Basic_concepts_of_grid_layout), ako aj využívanie relatívnych jednotiek ako sú `rem`, `em`, `vw`, a `vh`.
+
+   Skontrolujte funkčnosť jednotlivých elementov. Momentálne máme oba komponenty dizajnovo navrhnuté, teraz musíme naimplementovať aplikačnú logiku aplikácie. V prvom rade chceme, aby bol každý z týchto komponentov zobrazený na samostatných podstránkach (v zmysle SPA - to znamená bez načítavania stránky z web servera). Na to budeme potrebovať nový komponent, ktorý v závislosti od aktuálnej adresy stránky zobrazí príslušný komponent.
+
+## Navigácia medzi komponentami
+
+Momentálne zobrazujeme ako zoznam čakájúcich pacientav, tak aj editor pre jednotlivé záznamy na jednej stránke. Našim cieľom je dosiahnuť, aby sa zoznam zobrazoval na adrese [http://localhost:3333/list](http://localhost:3333/list) a editor na adrese [http://localhost:3333/entry/<id-položky>](http://localhost:3333/ambulance-wl/entry/0), a by mal používateľ možnosť navigácie medzi tímito prvkami, a zároveň aby bola zachovaná funkcia navigačných tlačidiel. Zároveň chceme aby bolo možné našu aplikáciu obslúžiť aj keď je umiestnená na inej ako koreňovej adrese servere, ako napríklad na adrese `http://wac-hospital.wac/<pfx>-ambulance/`. K tomu budeme potrebovať nový komponent, ktorého úlohou bude zobraziť jeden z našich komponentov v závislosti od aktuálnej adresy stránky a zároveň reagovať na zmeny v navigácii.
+
+Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je umožniť jednostránkovým aplikácia získať kontrolu nad požiadavkami k zmene stránky a podľa potreby zabrániť alebo povoliť načítanie novej stránky. Toto API ale momentálne _(august 2023)_ nie je k dispozícii pre všetky prehliadače. Pomôžeme si vytvorením zjednodušenej [polyfill](https://developer.mozilla.org/en-US/docs/Glossary/Polyfill) implementácie. Táto implementácia nie je síce plnohodnotná, pre naše potreby je ale dostatočná.
+
+>info:> Zabezpečenie prepojenia adresy stránky - URL jednotlivých záznamov - s aktuálnym záznamom, je pri vývoji _Single  Page Web Application_ dôležitý koncept. Používateľovi to umožňuje vytváranie záložiek, ku ktorým sa môže neskôr vrátiť, alebo zdieľanie URL, ktorá ukazuje k špecifickému záznamu.
+
+1. Vytvorte nový súbor `${WAC_ROOT}/ambulance-ufe/src/global/navigation.ts` a vložte doňho nasledujúci kód:
+
+   ```ts
+   class PolyNavigationDestination {
+        constructor(url: string) {
+            this.url = url;
+        }
+        url: string;
+   }
+
+   class PolyNavigateEvent extends Event {
+        constructor(destination: string | URL, info?: any) {
+            super('navigate', { bubbles: true, cancelable: true });
+            
+            let rebased  = new URL(destination,  document.baseURI)
+            this.canIntercept = location.protocol === rebased.protocol
+            && location.host === rebased.host && location.port === rebased.port;
+            this.destination = new PolyNavigationDestination(rebased.href);
+            this.info = info;
+        }
+
+        destination: PolyNavigationDestination;
+        canIntercept: boolean = true;
+        info: any
+    }
+   ```
+
+   Tento kód definuje dve nové triedy, ktoré budeme používať na reprezentáciu [udalosti navigácie](https://developer.mozilla.org/en-US/docs/Web/API/NavigateEvent), ktoré budeme používať v prípade, že prehliadač nepodporuje [Navigation API].
+
+   Ďalej do súboru doplňte nasledujúci kód:
+
+   ```ts
+   ...
+   declare global {
+     interface Window { navigation: any; }
+   }
+
+   export function registerNavigationApi() {
+      if (!window.navigation) {
+          // simplified version of navigation api
+          window.navigation = new EventTarget();
+          const oldPushState = window.history.pushState;
+
+          window.history.pushState = (f => function pushState() {
+              var ret = f.apply(this, arguments);
+              let url = arguments[2];
+              window.navigation.dispatchEvent(new PolyNavigateEvent(url));
+              return ret;
+          })(window.history.pushState);
+
+          window.addEventListener("popstate", () => {
+              window.navigation.dispatchEvent(new PolyNavigateEvent(document.location.href));
+          });
+
+          let previousUrl = '';
+          const observer = new MutationObserver(function () {
+              if (location.href !== previousUrl) {
+                  previousUrl = location.href;
+                  window.navigation.dispatchEvent(new PolyNavigateEvent(location.href));
+              }
+          });
+
+          const config = { subtree: true, childList: true };
+          observer.observe(document, config);
+          window.onunload = () => {
+              observer.disconnect();
+          }
+
+          window.navigation.navigate = (
+              url: string, 
+              options: {state?: any; info?: any; history?: "auto" | "replace" | "push";}
+          ) => {
+              oldPushState(options?.state || {}, '', url);
+              window.navigation.dispatchEvent(new PolyNavigateEvent(url), options?.info);
+          }
+
+          window.navigation.back = (
+            _options?: {info?: any;}
+          ) => {
+              window.history.back();
+              return {
+                  commited: Promise.resolve(),
+                  finished: new Promise<void>( resolve => setTimeout( () => resolve()  , 0))
+              }
+          }
+      }
+   }
+   ```
+
+   Táto funkcia najprv overí či prehliadač už podporuje [Navigation API]. Pokiaľ tomu tak nie je, tak preťaží metódu [`window.history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushStatevyužíva) - táto metóda je bežne využívana v SPA aplikáciach na dosiahnutie obdobného účelu ako _Navigation API_. Ďalej sa zaregistrujeme na udalosť [`popstate`], ktorá je generovaná pri stlačení navigácie "Späť" v prehliadači, a nakoniec zaregistrujeme [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver), ktorým budeme pozorovať zmeny hodnoty `href` na [Location](https://developer.mozilla.org/en-US/docs/Web/API/Location). Týmto sme obalili všetky spôsoby, ktoré môžu indikovať zmenu adresy pri činnosti našej aplikácii v prehliadači, a vo všetkých prípadoch generujeme udalosť `PolyNavigateEvent`, simulujúc tak funkcionalitu [Navigation API].
+
+   Ďalej sme vytvorili funkciu [`navigate`](https://developer.mozilla.org/en-US/docs/Web/API/Navigation/navigate), ktorá umožňuje vyvolať navigáciu v našej aplikácii. Táto funkcia je však len obalom pre volanie `window.history.pushState` a generovanie udalosti `PolyNavigateEvent`. Ostatné metódy a udalosti [Navigation API] sme neimplementovali, pretože ich v našej aplikácii nepotrebujeme. Obdobným spôsobom je naimplementovaná aj funkcia [`back`](https://developer.mozilla.org/en-US/docs/Web/API/Navigation/back).
+
+   Nakoniec upravte súbor `${WAC_ROOT}/ambulance-ufe/src/global/app.ts` a doplňte načítanie príslušného kódu:
+
+   ```ts
+    import { registerNavigationApi } from './navigation.js' @_add_@
+
+    export default function() { 
+        registerNavigationApi() @_add_@
+    }
+   ```
+
+2. Vygenerujte nový komponent `<pfx>-ambulance-wl-app` vykonaním nasledujúceho príkazu v priečinku `${WAC_ROOT}/ambulance-ufe`:
 
     ```ps
     npm run generate
     ```
 
-   Upravte súbor `.../ambulance-list/src/components/<pfx>-ambulance-wl-app/<pfx>-ambulance-wl-app.tsx` do tvaru (nahraďte `<pfx>` vaším prefixom)
+   V súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-app/<pfx>-ambulance-wl-app.tsx` zmeňte metódu `render` do tvaru:
 
     ```tsx
-    import { Component, Host, h, Prop } from '@stencil/core';
-    import { createRouter, Route, match } from 'stencil-router-v2';
-    
-    @Component({
-      tag: '<pfx>-ambulance-wl-app',
-      styleUrl: '<pfx>-ambulance-wl-app.css',
-      shadow: true,
-    })
-    export class <Pfx>AmbulanceWlApp { 
-      @Prop({ attribute: "base-path" }) basePath: string = "";
-      
-      @Prop() ambulance: string = "";
- 
-      static Router;
-    
-      connectedCallback() { 
-        <Pfx>AmbulanceWlApp.Router = <Pfx>AmbulanceWlApp.Router || createRouter();
+    render() {
+      let element = "list"
+      let entryId = "@new"
+
+      if ( this.relativePath.startsWith("entry/"))
+      {
+        element = "editor";
+        entryId = this.relativePath.split("/")[1]
       }
-    
-      // rebases path relative to base-path property
-      rebase(path): string {
-        if(this.basePath.endsWith("/")) {
-          this.basePath = this.basePath.substring(0, this.basePath.length-1);
-        }
-        return this.basePath + path;
+
+      const navigate = (path:string) => {
+        const absolute = new URL(path, new URL(this.basePath, document.baseURI)).pathname;
+        window.navigation.navigate(absolute)
       }
-    
-      render() {
-        return (
-          <Host>
-            <<Pfx>AmbulanceWlApp.Router.Switch>
-              <Route
-                path={match(this.rebase("/entry/:id"))}
-                render={(params) => (
-               <<pfx>-ambulance-wl-editor entry-id={params.id} ></ <pfx>-ambulance-wl-editor>
-                )}
-              />
-              <Route
-                path={this.rebase("/")}>
-                <<pfx>-ambulance-wl-list></<pfx>-ambulance-wl-list>
-              </Route>
-              <Route 
-                path={this.rebase("")} to={this.rebase("/")}> 
-              </Route>
-            </<Pfx>AmbulanceWlApp.Router.Switch>
-          </Host>
-        );
-      }  
+
+      return (
+        <Host>
+          { element === "editor" 
+          ? <pfx-ambulance-wl-editor entry-id={entryId}
+              oneditor-closed={ () => navigate("./list")} >
+            </pfx-ambulance-wl-editor>
+          : <pfx-ambulance-wl-list></pfx-ambulance-wl-list>
+          }
+          
+        </Host>
+      );
     }
     ```
 
-   Ďalej upravte v súbore `.../ambulance-list/src/index.html` telo stránky do tvaru:
+    Táto metóda zobrazí jeden z našich dvoch komponentov v závislosti od hodnoty vlastnosti triedy `relativePath`. V prípade, že je adresa stránky v tvare `editor/<id>`, tak zobrazíme komponent `<pfx>-ambulance-wl-editor` a nastavíme mu atribút `entry-id` na hodnotu `<id>`. Tento atribút bude slúžiť na identifikáciu záznamu, ktorý chceme upraviť. V prípade, že je adresa stránky v tvare `list`, alebo v ľubovoľnom inom tvare, tak zobrazíme komponent `<pfx>-ambulance-wl-list`. V prípade editora zaregistrujeme obsluhu udalosti `onEditor-closed`, ktorá sa vyvolá pri stlačení tlačidla "Zrušiť" alebo "Uložiť" v komponente `<pfx>-ambulance-wl-editor`. V tomto prípade zavoláme funkciu `window.navigation.navigate()`, ktorá vyvolá navigáciu na zoznam čakajúcich.
 
-    ```html
+    >info:> V zásade by sme pri zavretí editora mohli volať aj metódu `window.navigation.back()`, ktorá by nám umožnila vrátiť sa na predchádzajúcu stránku. To by ale viedlo k nekonzistentnému správaniu aplikácie, pretože by sme sa mohli dostať do stavu, kedy by sme sa mohli vrátiť na stránku, ktorá nie je zoznamom čakajúcich. Preto je lepšie použiť metódu `window.navigation.navigate()`, ktorá nám explicitne umožní navigáciu na zoznam čakajúcich.
+
+    Ďalej v tom istom súbore upravte triedu `<Pfx>AmbulanceWlApp`, tak aby obsahovala nasledujúci kód:
+
+   ```tsx
+    import { Component, Host, Prop, State, h } from '@stencil/core'; @_add_@
+    @_add_@
+    declare global {@_add_@
+      interface Window { navigation: any; } @_add_@
+    }
+    ...
+    export class PfxAmbulanceWlApp { 
+
+      @State() private relativePath = ""; @_add_@
+      @_add_@
+      @Prop() basePath: string=""; @_add_@
+      @_add_@
+      componentWillLoad() { @_add_@
+        const baseUri = new URL(this.basePath, document.baseURI || "/").pathname; @_add_@
+        @_add_@
+        const toRelative = (path: string) => { @_add_@
+          if (path.startsWith( baseUri)) { @_add_@
+            this.relativePath = path.slice(baseUri.length) @_add_@
+          } else { @_add_@
+            this.relativePath = "" @_add_@
+          } @_add_@
+        } @_add_@
+        @_add_@
+        window.navigation?.addEventListener("navigate", (ev: Event) => { @_add_@
+          let path = new URL((ev as any).destination.url).pathname; @_add_@
+          toRelative(path);   @_add_@
+        }); @_add_@
+        @_add_@
+        toRelative(location.pathname) @_add_@
+      } @_add_@
+
+      render() {
+        ...
+   ```
+
+   V metóde `componentWillLoad()` sme zaregistrovali obsluhu udalosti `navigate`, ktorá sa vyvolá pri navigácii v našej aplikácii. V tejto obsluhe sme získali cestu k aktuálnej stránke a uložili sme ju do vlastnosti `relativePath`. Táto vlastnosť bude slúžiť na rozhodnutie, ktorý z našich komponentov zobrazíme. Attribút elementu `base-path`, zároveň umožňuje aby sme našu aplikáciu mohli nasadiť aj na inej ako koreňovej adrese servera respektíve viac vnorenej ako je `baseUri` dokumentu.
+
+3. Dôležitým aspektom je práca s `document.baseURI`. Táto vlastnosť určuje, aká je bázova URL nášho dokumentu (rozumej stránky), voči ktorej sa potom určuje relatívna cesta. Za normálnych okolností je táto adresa zhodná s adresou z ktorej sme našu stránku načítali, teda adresa ktorú sme prvotne zadali do prehliadača. Pretože v prípade jednostránkových aplikácii môže byť táto adresa odlišná ako samotná adresa aplikácie - napríklad ak by sme v prehliadači zadali adresu [http://localhost:3333/editor/id](http://localhost:3333/editor/id), tak by náš kód nepracoval správne, respektíve by musel implicitne predpokladať, na akej ceste je vlastne táto aplikácia nasadená. Pre správnu funkčnosť je preto v prípade jednostránkových aplikácii nutné nastaviť `baseUri` dokumentu a prípadne umožniť aj konfiguráciu tejto hodnoty pomocou premennej prostredia, pokiaľ plánujeme naše komponenty dodávať aj ako samostatný HTTP server.
+
+   Potrebnú zmenu vykonáme v súbore `${WAC_ROOT}/ambulance-ufe/src/index.html` tým, že do sekcie `<head>` pridáme elemet `<base>`:
+
+   ```html
+    <!DOCTYPE html>
+    <html dir="ltr" lang="en">
+      <head>
+        <base href="/"/> @_add_@
+    ....
+   ```
+
+   následne v tom istom súbore použijeme náš nový komponent `<pfx>-ambulance-wl-app`:
+
+   ```html
     <body>
-          <pfx-ambulance-wl-app base-path="/ambulance-wl/" ambulance="bobulova"></ pfx-ambulance-wl-app>
+      <<pfx>-ambulance-wl-list></<pfx>-ambulance-wl-list> @_remove_@
+      <<pfx>-ambulance-wl-editor></<pfx>-ambulance-wl-editor> @_remove_@
+      <!-- web application root component -->
+      <<pfx>-ambulance-wl-app base="/ambulance-wl/"></<pfx>-ambulance-wl-app> @_add_@
+     
     </body>
-    ```
+   ```
 
-   Pokiaľ nie je aktívny, tak naštartujte vývojový web server (`npm run start`) a v prehliadači prejdite na stránku  [http://localhost:3333/ambulance-wl](http://localhost:3333/ambulance-wl), kde uvidíte komponent so zoznamom čakajúcich. Následne prejdite na stránku  [http://localhost:3333/ambulance-wl/entry/0](http://localhost:3333/ambulance-wl/entry/0), kde uvidíte komponent editácie jednotlivých záznamov.
+4. Pokiaľ nie je aktívny, tak naštartujte vývojový web server (`npm run start`) a v prehliadači prejdite na stránku  [http://localhost:3333/ambulance-wl](http://localhost:3333/ambulance-wl), kde uvidíte komponent so zoznamom čakajúcich. Následne prejdite na stránku  [http://localhost:3333/ambulance-wl/entry/0](http://localhost:3333/ambulance-wl/entry/0), kde uvidíte komponent editácie jednotlivých záznamov. Po stlačení na niektoré s tlačidiel sa dostanete späť na zoznam čakajúcich pacientov.
 
-4. Upravte testovacie súbory tak, aby sme mohli odovzdať naše zmeny do projektu. Otvorte a upravte súbor `.../ambulance-list/src/components/<pfx>-ambulance-wl-app/test/<pfx>-ambulance-wl-app.spec.tsx` do tvaru:
+5. Aby bola naša interakcia úplna, upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/pfx-ambulance-wl-list.tsx` a doplnťe nasledujúce časti kódu:
+
+   ```tsx
+   import { Component, Event, EventEmitter,  Host, h } from '@stencil/core'; @_impotant_@
+   ...
+   export class PfxAmbulanceWlList { 
+
+    @Event({ eventName: "entry-clicked"}) entryClicked: EventEmitter<string> @_add_@
+    ...
+    render() {
+    return (
+      <Host>
+        <md-list>   
+          {this.waitingPatients.map((entry, index) =>   @_important_@
+            <md-list-item   
+              headline={entry.name}   
+              supportingText={"Predpokladaný vstup: " + this.isoDateToLocale(entry.estimatedStart)}   
+              onClick={ () => this.entryClicked.emit(index.toString())} @_add_@
+            > 
+        ...
+   ```
+
+   Tento kód zabezpečí, že pri kliknutí na záznam v zozname čakajúcich pacientov sa vyvolá udalosť `entry-clicked`, ktorá bude obsahovať index záznamu, ktorý chceme upraviť. Túto udalosť budeme obsluhovať v komponente `<pfx>-ambulance-wl-app` a vyvoláme navigáciu na stránku editora. Upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-app/<pfx>-ambulance-wl-app.tsx` a doplňte nasledujúce časti kódu:
+
+   ```tsx
+    ...
+    render() {
+      ...
+
+      return (
+       ...
+          : <pfx-ambulance-wl-list 
+              onentry-clicked={ (ev: CustomEvent<string>)=> navigate("./entry/" + ev.detail) } > @_add_@
+            </pfx-ambulance-wl-list>
+        ...
+   ```
+
+   V aplikácii teraz môžete slačiť na položku v zozname, čo vytvorá navigáciu na stránku editora.
+
+   >info:> Zámerne obsluhujeme navigáciu len v elemente `<pfx>-ambulance-wl-app.tsx`. Element zoznam čakajúcich možno takto použiť aj v iných kontextoch a stlačenie na položku môže vyvolať alternatívnu reakciu bez nutnosti ďalej upravovať samotný element zoznamu čakajúcich. Týmto sme dosiahli znovupoužiteľnosť elementu `<pfx>-ambulance-wl-list` v iných kontextoch. Podobne možno použiť v iných kontextoch aj element editora.
+
+6. Upravte testovacie súbory tak, aby sme mohli odovzdať naše zmeny do projektu. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-app/test/<pfx>-ambulance-wl-app.spec.tsx` a upravte do tvaru:
 
     ```ts
     import { newSpecPage } from '@stencil/core/testing';
@@ -244,50 +450,90 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     describe('<pfx>-ambulance-wl-app', () => {
     
       it('renders editor', async () => {
-        <Pfx>AmbulanceWlApp.Router = null;
         const page = await newSpecPage({
-          url: `http://localhost/ambulance-wl/entry/@new`,
+          url: `http://localhost/entry/@new`,
           components: [<Pfx>AmbulanceWlApp],
-          html: `<<pfx>-ambulance-wl-app ambulance={this.ambulance}  base-path="/ ambulance-wl"></<pfx>-ambulance-wl-app>`,
+          html: `<<pfx>-ambulance-wl-app base-path="/"></<pfx>-ambulance-wl-app>`,
         });
+        page.win.navigation = new EventTarget()
         const child = await page.root.shadowRoot.firstElementChild;
         expect(child.tagName.toLocaleLowerCase()).toEqual ("<pfx>-ambulance-wl-editor");
         
       });
-    
+
       it('renders list', async () => {
-        <Pfx>AmbulanceWlApp.Router = null;
         const page = await newSpecPage({
           url: `http://localhost/ambulance-wl/`,
           components: [<Pfx>AmbulanceWlApp],
-          html: `<<pfx>-ambulance-wl-app ambulance={this.ambulance}  base-path="/ ambulance-wl"></<pfx>-ambulance-wl-app>`,
+          html: `<<pfx>-ambulance-wl-app base-path="/ambulance-wl/"></<pfx>-ambulance-wl-app>`,
         });
+        page.win.navigation = new EventTarget()
         const child = await page.root.shadowRoot.firstElementChild;
         expect(child.tagName.toLocaleLowerCase()).toEqual("<pfx>-ambulance-wl-list");
-        
       });
     });
     ```
 
-   Ďalej upravte súbor `.../ambulance-list/src/components/<pfx>-ambulance-wl-editor/test/<pfx>-ambulance-wl-editor.spec.tsx`
+   Ďalej upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/test/<pfx>-ambulance-wl-editor.spec.tsx`
 
     ```ts
     import { newSpecPage } from '@stencil/core/testing';
     import { <Pfx>AmbulanceWlEditor } from '../<pfx>-ambulance-wl-editor';
     
-    describe('<pfx>-ambulance-wl-editor', () => {
-      it('displays 3 buttons', async () => {
+    describe('<pfx>-ambulance-wl-editor buttons', () => {
+      it(' shall be of different type', async () => {
         const page = await newSpecPage({
           components: [<Pfx>AmbulanceWlEditor],
-          html: `<<pfx>-ambulance-wl-editor entry-id="@new"></ <pfx>-ambulance-wl-editor>`,
+          html: `<<pfx>-ambulance-wl-editor entry-id="@new"></<pfx>-ambulance-wl-editor>`,
         });
-        const items = await page.root.shadowRoot.querySelectorAll("mwc-button");
-        expect(items.length).toEqual(3);
+        let items: any = await page.root.shadowRoot.querySelectorAll("md-filled-button");
+        expect(items.length).toEqual(1);
+        items = await page.root.shadowRoot.querySelectorAll("md-outlined-button");
+        expect(items.length).toEqual(1);
+
+        items = await page.root.shadowRoot.querySelectorAll("md-tonal-button");
+        expect(items.length).toEqual(1);
       });
     });
     ```
 
-   Archivujte zmeny a synchronizujte so vzdialeným repozitárom.
+7. Archivujte zmeny a synchronizujte so vzdialeným repozitárom:
 
-    >info:> Zabezpečenie prepojenia adresy stránky - URL jednotlivých záznamov - s aktuálnym záznamom, je pri vývoji _Single  Page Web Application_ dôležitý koncept. Používateľovi to umožňuje vytváranie záložiek, ku ktorým sa môže neskôr  vrátiť, alebo zdieľanie URL, ktorá ukazuje k špecifickému záznamu.
-    >info:> Funkcia rebase je v tomto prípade pomerne jednoduchá, v niektorých prípadoch však môže vyžadovať použitie  regulárnych výrazov alebo dodatočnej logiky, napríklad, ak by základná cesta obsahovala variabilný index ambulancie.
+   ```ps
+   git add .
+   git commit -m "entry editor and navigation"
+   git push
+   ```
+
+8. Poslednou zmenou je úprava web komponentu ktorý sa má zobraziť v micro Front-End applikácii. K tomu nám poztačí úprava konfigurácie. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` a v sekcii `navigation` zadajte nové meno elementu:
+
+   ```yaml
+    navigation:
+    navigation:
+    - element: <pfx>-ambulance-wl-list @_remove_@
+
+    # aplication context element
+    - element: <pfx>-ambulance-wl-app    @_add_@
+   ```
+
+   Zmeny archivujte príkazmi v priečinku `${WAC_ROOT}/ambulance-gitops`:
+
+   ```ps
+    git add .
+    git commit -m "entry editor and navigation"
+    git push
+   ```
+
+   Pokiaľ nie je Váš [Docker Desktop] klaster aktívny, naštartujte ho. Po chvíli, keď operátor [Flux CD] obnoví všetky zmeny - obnovenie verzie obrazu, nasadenie zmien v konfigurácii, prejdite na stránku [http://localhost:3031](http://localhost:3031) a následne vyberte aplikáciu _Zoznam čakajúcich ..._. Mala by sa Vám zobraziť stránka s komponentom `<pfx>-ambulance-wl-list`. Po kliknutí na záznam by sa Vám mal zobraziť editor záznamu. Po stlačení na tlačidlo "Zrušiť" by ste sa mali vrátiť na zoznam čakajúcich. Hoci sme v súbore `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` explicitne nenastavili atribút `base-path`, tento je k elementu automaticky pridávaný službou `ufe-controller` na základe hodnoty atribútu `path` .
+
+   >build_circle:> V prípade problémov s nasadením zmien v konfigurácii, môžete overiť stav jednotlivých zdrojov v klustri príkazmi:
+   >
+   > ```ps
+   > kubectl -n wac-hospital get gitrepository 
+   > kubectl -n wac-hospital get kustomization 
+   > kubectl -n wac-hospital get imagerepository
+   > kubectl -n wac-hospital get imagepolicy
+   > kubectl -n wac-hospital get imageupdateautomation
+   > ```
+   >
+   > Pripadne použité obdobné príkazy, len miesto `get` použite `describe` pre detailnejší výpis. Odporúčame mať nainštalovaný nástroj [OpenLens] a využívať ho na efektívnejšiu analýzu próblem v klastri.

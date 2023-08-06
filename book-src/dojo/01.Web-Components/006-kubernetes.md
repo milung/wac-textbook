@@ -186,7 +186,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
    metadata: 
      name: <pfx>-ambulance-ufe
    spec:   
-     module-uri: http://<pfx>-ambulance-ufe.wac-hospital/build/ambulance-list esm.js  
+     module-uri: http://<pfx>-ambulance-ufe.wac-hospital/build/ambulance-ufe.esm.js  
                         # module web komponentu pre tento mikroFE 
                         # - umiestnený v namespace wac-hospital
      navigation:
