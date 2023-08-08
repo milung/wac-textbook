@@ -33,7 +33,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
           </md-filled-text-field>
   
           <md-filled-text-field label="Registračné číslo pacienta" >
-            <md-icon slot="fingerprint">person</md-icon>
+            <md-icon slot="leadingicon">fingerprint</md-icon>
           </md-filled-text-field>
   
           <md-filled-text-field label="Čakáte od" disabled>
@@ -213,6 +213,16 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
         destination: PolyNavigationDestination;
         canIntercept: boolean = true;
         info: any
+        isIntercepted = false;
+
+        intercept(_options?: any ) {
+            this.isIntercepted = true;
+            // options are ignored in this implementation, e.g. no handler or scroll
+        }
+
+        scroll(_options?: any ) {
+            // not implemented 
+        }
     }
    ```
 
@@ -261,8 +271,13 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
               url: string, 
               options: {state?: any; info?: any; history?: "auto" | "replace" | "push";}
           ) => {
-              oldPushState(options?.state || {}, '', url);
-              window.navigation.dispatchEvent(new PolyNavigateEvent(url), options?.info);
+            const ev = new PolyNavigateEvent(url);
+            window.navigation.dispatchEvent(new PolyNavigateEvent(url), options?.info);
+            if (ev.isIntercepted) {
+                oldPushState(options?.state || {}, '', url);
+            } else {
+                window.open(url, "_self");
+            }
           }
 
           window.navigation.back = (
@@ -337,7 +352,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
     Ďalej v tom istom súbore upravte triedu `<Pfx>AmbulanceWlApp`, tak aby obsahovala nasledujúci kód:
 
    ```tsx
-    import { Component, Host, Prop, State, h } from '@stencil/core'; @_add_@
+    import { Component, Host, Prop, State, h } from '@stencil/core'; @_important_@
     @_add_@
     declare global {@_add_@
       interface Window { navigation: any; } @_add_@
@@ -361,6 +376,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
         } @_add_@
         @_add_@
         window.navigation?.addEventListener("navigate", (ev: Event) => { @_add_@
+          if ((ev as any).canIntercept) { (ev as any).intercept(); }  @_add_@
           let path = new URL((ev as any).destination.url).pathname; @_add_@
           toRelative(path);   @_add_@
         }); @_add_@
@@ -372,7 +388,9 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
         ...
    ```
 
-   V metóde `componentWillLoad()` sme zaregistrovali obsluhu udalosti `navigate`, ktorá sa vyvolá pri navigácii v našej aplikácii. V tejto obsluhe sme získali cestu k aktuálnej stránke a uložili sme ju do vlastnosti `relativePath`. Táto vlastnosť bude slúžiť na rozhodnutie, ktorý z našich komponentov zobrazíme. Attribút elementu `base-path`, zároveň umožňuje aby sme našu aplikáciu mohli nasadiť aj na inej ako koreňovej adrese servera respektíve viac vnorenej ako je `baseUri` dokumentu.
+   V metóde `componentWillLoad()` sme zaregistrovali obsluhu udalosti `navigate`, ktorá sa vyvolá pri navigácii v našej aplikácii. Volaním metódy `intercept()` sme prehliadaču dali vedieť, že zmenu URL obsulhujeme z našeho kódu. V tejto obsluhe sme potom získali cestu k aktuálnej stránke a uložili sme ju do vlastnosti `relativePath`. Táto vlastnosť bude slúžiť na rozhodnutie, ktorý z našich komponentov zobrazíme. Attribút elementu `base-path`, zároveň umožňuje aby sme našu aplikáciu mohli nasadiť aj na inej ako koreňovej adrese servera respektíve viac vnorenej ako je `baseUri` dokumentu.
+
+   >warning:> Nie vo všetkých aplikáciach budete chcieť volať `intercept()` pre akúkoľvek URL adresu, toto je špecifické pre naše cvičenie. V prípade, že by sme nevolali `intercept()`, tak by sa prehliadač pokúsil načítať stránku z web servera.
 
 3. Dôležitým aspektom je práca s `document.baseURI`. Táto vlastnosť určuje, aká je bázova URL nášho dokumentu (rozumej stránky), voči ktorej sa potom určuje relatívna cesta. Za normálnych okolností je táto adresa zhodná s adresou z ktorej sme našu stránku načítali, teda adresa ktorú sme prvotne zadali do prehliadača. Pretože v prípade jednostránkových aplikácii môže byť táto adresa odlišná ako samotná adresa aplikácie - napríklad ak by sme v prehliadači zadali adresu [http://localhost:3333/editor/id](http://localhost:3333/editor/id), tak by náš kód nepracoval správne, respektíve by musel implicitne predpokladať, na akej ceste je vlastne táto aplikácia nasadená. Pre správnu funkčnosť je preto v prípade jednostránkových aplikácii nutné nastaviť `baseUri` dokumentu a prípadne umožniť aj konfiguráciu tejto hodnoty pomocou premennej prostredia, pokiaľ plánujeme naše komponenty dodávať aj ako samostatný HTTP server.
 
@@ -480,8 +498,8 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
     import { newSpecPage } from '@stencil/core/testing';
     import { <Pfx>AmbulanceWlEditor } from '../<pfx>-ambulance-wl-editor';
     
-    describe('<pfx>-ambulance-wl-editor buttons', () => {
-      it(' shall be of different type', async () => {
+    describe('<pfx>-ambulance-wl-editor', () => {
+      it('buttons shall be of different type', async () => {
         const page = await newSpecPage({
           components: [<Pfx>AmbulanceWlEditor],
           html: `<<pfx>-ambulance-wl-editor entry-id="@new"></<pfx>-ambulance-wl-editor>`,

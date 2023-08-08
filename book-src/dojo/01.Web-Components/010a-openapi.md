@@ -196,6 +196,8 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Naša špecifikácia teraz popisuje akým spôsobom môžeme získať zoznam čakajúcich pacientov v ambulancii. Pristúpime k integrácii s našou aplikáciou.
 
+   >info:> Naše API `getWaitingListEntries` vracia priamo pole záznamov, čo je v prípade WebAPI považované za chybu návrhu. Naše API by malo byť pripravené aj pre väčší rozsah dát a podporovať získanie len ich [čiastočného rozsahu](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design#filter-and-paginate-data). Pre zjednodušenie ale tento aspekt nebudeme v našej aplikácii riešiť, pri návrhu konkrétneho API v praxi sa ale najprv zoznámte so [zásadami návrhu RESTfull API](https://book.restfulnode.com/).
+
 3. V prvom kroku si pripravíme experimentálny - _mock_ - server poskytujúcu špecifikované API na základe príkladov v špecifikácii. Nainštalujte do projektu nové závislosti potrebné pre vývoj aplikácie:
 
    ```ps
@@ -235,7 +237,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
     Otvorte nový príkazový riadok a zadajte nasledujúci prikaz:
 
     ```ps
-    curl http://localhost:5000/api/waiting-list/bobulava
+    curl http://localhost:5000/api/waiting-list/bobulova
     ```
 
     Na výstupe sa objeví výpis vo formáte JSON obsahujúci zoznam čakajúcich pacientov v ambulancii. Tento výpis je generovaný na základe príkladu v špecifikácii. Teraz máme k dispozícii službu, ktorá je schopná simulovať naše REST API. Zastavte spustené mock API (_CTRL+C_).
@@ -248,7 +250,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/openapitools.json` a vložte do neho nasledujúci obsah:
 
-   ```json{
+   ```json
    "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
     "generator-cli": {
       "useDocker": true,
@@ -269,7 +271,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    }
    ```
 
-   Tento súbor konfiguruje beh generátoru kódu. Budeme používať Docker verziu generátora, preto je nutné pri generovaní kódu mať aktívneho docker démona, napríklad [Docker for Desktop][docker-desktop]. Alternatívne riešenie vyžaduje mať nainštalovaný systém JAVA SDK. Okrem iných parametrom určuje cestu k našej špecifikácii - `glob` - a tiež cestu - `output` - kde sa bude generovať klient typu `typescript-axios`. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl/.openapi-generator-ignore` a vložte do neho nasledujúci obsah:
+   Tento súbor konfiguruje beh generátoru kódu. Budeme používať Docker verziu generátora, preto je nutné pri generovaní kódu mať aktívny docker démon, napríklad [Docker for Desktop][docker-desktop]. Alternatívne riešenie vyžaduje mať nainštalovaný systém JAVA SDK. Okrem iných parametrom určuje cestu k našej špecifikácii - `glob` - a tiež cestu - `output` - kde sa bude generovať klient typu `typescript-axios`. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl/.openapi-generator-ignore` a vložte do neho nasledujúci obsah:
 
    ```text
    .npmignore
@@ -297,7 +299,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    V priečinku `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl` teraz nájdete nový kód ktorý obsahuje implementáciu klienta pre nami špecifikované API v programovacom jazyku [TypeScript] s využitím knižnice [Axios].
 
-   >info:> V našom prípade generujeme klientský kód ako súčasť našej aplikácie. Často sa ale generuje klientský kód vo forme knižníc, aby sa API dalo používať medzi rôznymi aplikáciami, najmä ak naše API je všeobecne použiteľné. V takom prípade by sme vytvorli samostatný projekt, ktorého obsah vy bol generovaný zo špecifikácie, napríklad s odkaz na URL tejto špecifikácie, a tento projekt by sme publikovali do [npmjs.com]. Vhodnou automatizáciou by sme boli schopný automaticky vytvárať rôzne knižnice v rôznych jazykoch pre tú istú špecifikáciu.
+   >info:> V našom prípade generujeme klientský kód ako súčasť našej aplikácie. Často sa ale generuje klientský kód vo forme knižníc, aby sa API dalo používať medzi rôznymi aplikáciami, najmä ak naše API je všeobecne použiteľné. V takom prípade by sme vytvorli samostatný projekt, ktorého obsah by bol generovaný zo špecifikácie, napríklad z odkazu na URL tejto špecifikácie, a tento projekt by sme publikovali do [npmjs.com]. Vhodnou automatizáciou by sme boli schopný automaticky vytvárať rôzne knižnice v rôznych jazykoch pre tú istú špecifikáciu.
 
    &nbsp;
 
@@ -309,7 +311,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    npm install --save axios
    ```
 
-   Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx` a dupravte kód:
+   Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx` a upravte kód:
 
    ```tsx
    import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core'; 
@@ -324,7 +326,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
       waitingPatients: WaitingListEntry[];
 
-      private async getWaitingPatientsAsync(): Promise<WaitingListEntry[]> {   @_replace_@
+      private async getWaitingPatientsAsync(): Promise<WaitingListEntry[]> {   @_important_@
         ... odstránte pôvodný kód ... @_remove_@
         // be prepared for connectivitiy issues
         try { @_add_@
@@ -380,7 +382,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
             ? <pfx-ambulance-wl-editor entry-id={entryId}
               oneditor-closed={ () => navigate("./list")}
             ></pfx-ambulance-wl-editor>
-            : <pfx-ambulance-wl-list  ambulance-id={this.ambulanceId} api-base={this.apiBase} @_replace_@
+            : <pfx-ambulance-wl-list  ambulance-id={this.ambulanceId} api-base={this.apiBase} @_important_@
               onentry-clicked={ (ev: CustomEvent<string>)=> navigate("./entry/" + ev.detail) } >
               </pfx-ambulance-wl-list>
             }
@@ -392,7 +394,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    ```html
    <body style="font-family: 'Roboto'; ">
-      <<pfx>-ambulance-wl-app ambulance-id="bobulova" api-base="http://localhost:5000/api"></<pfx>-ambulance-wl-app> @_replace_@
+      <<pfx>-ambulance-wl-app ambulance-id="bobulova" api-base="http://localhost:5000/api"></<pfx>-ambulance-wl-app> @_important_@
    </body>
    ```
 
@@ -426,8 +428,8 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    npm run test
    ```
 
-   zobrazí sa Vám výpise chyba _SyntaxError: Cannot use import statement outside a module_ odkazujúca na kód z knižnice [axios]. Táto chyba je obdobná ako v prípade použitia
-   knižnice [@material/web][md-webc], spôsobená roznými predpokladmi o používanej verzii jazyka ECMScript a podpore najnovších spôsobov načítavanie modulov medzi týmito knižnicami a testovacou knižnicou [Jest]. Knižnicu [Jest] môžme nakonfigurovať pomocou použitia tzv. [Transmerov kód - _Code Transformers_](https://jestjs.io/docs/code-transformation).
+   zobrazí sa Vám vo výpise chyba _SyntaxError: Cannot use import statement outside a module_ odkazujúca na kód z knižnice [axios]. Táto chyba je obdobná ako v prípade použitia
+   knižnice [@material/web][md-webc], spôsobená rôznými predpokladmi o používanej verzii jazyka ECMScript a podpore najnovších spôsobov načítavanie modulov medzi týmito knižnicami a testovacou knižnicou [Jest]. Knižnicu [Jest] môžme nakonfigurovať pomocou použitia tzv. [Transformerov kódu - _Code Transformers_](https://jestjs.io/docs/code-transformation).
 
    Najpr si doinštalujeme potrebné balíčky. V adresári `${WAC_ROOT}/ambulance-ufe` vykonajte nasledujúci príkaz:
 
@@ -462,7 +464,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Opäť vykonajte príkaz `npm run test` a tentokrát by testy mali prebehnúť úspešne.
 
-9. Pokiaľ si prezrieme test v súbore `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/test/pfx-ambulance-wl-list.spec.tsx`, pochopíme, že náš test je úspešný len z dôvodu, že pri neúspešnom pripojení sa k serveru je zoznam pacientov správny. Bolo by preto vhodnejšie, keby sme boli schopný simulovať spojenie s API serverom. Na to použijeme knižnicu [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter). Nainštalujte si túto knižnicu do projektu:
+9. Pokiaľ si prezrieme test v súbore `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/test/pfx-ambulance-wl-list.spec.tsx`, pochopíme, že náš test je úspešný len z dôvodu, že pri neúspešnom pripojení sa k serveru je zoznam pacientov prázdny. Bolo by preto vhodnejšie, keby sme boli schopný simulovať spojenie s API serverom. Na to použijeme knižnicu [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter). Nainštalujte si túto knižnicu do projektu:
 
    ```ps
    npm install --save-dev axios-mock-adapter
@@ -499,21 +501,21 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
       beforeAll(() => { mock = new MockAdapter(axios); }); @_add_@
       afterEach(() => { mock.reset(); }); @_add_@
 
-      it('renders sample entries', async () => { @_replace_@
+      it('renders sample entries', async () => { @_important_@
         // simulate API response using sampleEntries 
         mock.onGet().reply(200, sampleEntries); @_add_@
 
         // set proper attributes
         const page = await newSpecPage({
           components: [<Pfx>AmbulanceWlList],
-          html: `<<pfx>-ambulance-wl-list ambulance-id="test-ambulance" api-base="http://test/api"></<pfx>-ambulance-wl-list>`, @_replace_@
+          html: `<<pfx>-ambulance-wl-list ambulance-id="test-ambulance" api-base="http://test/api"></<pfx>-ambulance-wl-list>`, @_important_@
         });
         const wlList = page.rootInstance as PfxAmbulanceWlList;
         const expectedPatients = wlList?.waitingPatients?.length;
 
         const items = page.root.shadowRoot.querySelectorAll("md-list-item");
         // use sample entries as expectation
-        expect(expectedPatients).toEqual(sampleEntries.length); @_replace_@
+        expect(expectedPatients).toEqual(sampleEntries.length); @_important_@
         expect(items.length).toEqual(expectedPatients);
       });
     ...
@@ -553,7 +555,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Všimnite si ako simulujeme chybovú odpoveď z API serveru pomocou metódy `networkError`. V teste očakávame, že sa zobrazí chybové hlásenie a že sa nezobrazí žiadny záznam v zozname pacientov.
 
-   >info:> Testovaniu negatívný scénarov - takzvaných `rainy days use cases` - je v praxi potrebné venovať náležitú pozernosť. Vývoj častokrát prebieha v umelých prostrediach, za ideálnych podmienok sieťového pripojenia a pri dostatku systémových zdrojov. Obmedzenia v reálnych prostrediach môžu mať za dôsledok oneskorenie dodania produktu, alebo úplne odmietnutie produktu zo strany používateľov.
+   >info:> Testovaniu negatívný scénarov - takzvaných _rainy days use cases_ - je v praxi potrebné venovať náležitú pozernosť. Vývoj častokrát prebieha v umelých prostrediach, za ideálnych podmienok sieťového pripojenia a pri dostatku systémových zdrojov. Obmedzenia v reálnych prostrediach môžu mať za dôsledok oneskorenie dodania produktu, alebo úplne odmietnutie produktu zo strany používateľov. Ako bolo uvedené, v tomto cvičení sa testovaniu venujeme len okrajovo, rozsah tu uvedených testov by bol v praxi nedostatočný.
 
 10. (_Voliteľné_) Pokiaľ chcete využívať testovacie prostredie [Jest] priamo, napríklad chcete využiť niektoré z popúlárnych rozšírení ako napríklad [vscode-jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest), doplňte do projektu konfiguráciu pre správny beh [jest cli](https://jestjs.io/docs/cli) nástrojov. Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/jest.config.js` s nasledujúcim obsahom:
 
@@ -610,7 +612,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
         - name: ambulance-id @_add_@
           value: bobulova @_add_@
         ...
-        hash-suffix: v1alpha2 @_replace_@
+        hash-suffix: v1alpha2 @_important_@
    ```
 
    Následne v priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte komit a push:

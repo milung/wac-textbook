@@ -1,6 +1,8 @@
-## Nasadenie aplikácie na produkčný kubernetes klaster
+# Nasadenie aplikácie na produkčný kubernetes klaster
 
-Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster privátny, zmeny v ňom môže robiť iba gitops team. Má podobnú štruktúru ako náš `webcloud-gitops` repozitár. Gitops team zabezpečí, aby produčný klaster obsahoval infraštruktúru potrebnú na nasadenie a beh našich aplikácií.
+Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster privátny, zmeny v ňom môže robiť iba gitops team. Má podobnú štruktúru ako náš `ambulance-gitops` repozitár. Na rozdiel od lokálneho klastra, zabezpečuje prítomnosť infraštruktúry externý Gitops team (cvičiaci). Študenti majú k dispozícii konfiguráciu ku klastru, pomocou ktorej môžu ku klastru pristúpiť a nasadiť svoje aplikácie do namespace `wac-hospital`. V tomto kroku si pripravíme konfiguráciu pre nasadenie do klastra. Predpokladáme, že repozitár Vašej konfigurácia, ako aj obrazy softvérových kontajnerov sú verejne prístupné a nie je nutné použiť autentifikáciu. Pokiaľ tomu tak nie je musíte do konfigurácie doplniť aj príslušné autentifikačné údaje vo forme kubernetes objektov _Secret_.
+
+
 
 Pre účely cvičenia bol na pridávanie aplikácií do klastra vytvorený druhý git repozitár `Apps-repo` na stránke *github.com*:
 [Gitops pre spoločný klaster][gitops-class]  
