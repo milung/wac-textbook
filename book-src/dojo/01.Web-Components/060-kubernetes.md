@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-006
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-060
 ```
 
 ---
@@ -15,7 +15,7 @@ V tomto cvičení si ukážeme, ako nasadiť našu aplikáciu do klastra [Kubern
 
 Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci `Docker Desktop` aplikácie, viď obrázok:
 
-![Kubernetes v Docker for desktop](./img/dojo-docker-kubernetes.png)
+![Kubernetes v Docker for desktop](./img/060-01-docker-kubernetes.png)
 
 1. V priečinku `${WAC_ROOT}` vytvorte nový priečinok s názvom `ambulance-gitops`. Vo VS Code pridajte tento priečinok do aktuálneho pracovného priestoru pomocou voľby menu _File->Add Folder to Workspace..._
 
@@ -365,13 +365,13 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
 
     V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Po stlačení na odkaz _Zoznam čakajúcich_ by ste mali vidieť nasledujúci výstup:
 
-    ![Integrovaný zoznam čakajúcich](./img/dojo-appshell-list.png)
+    ![Integrovaný zoznam čakajúcich](./img/060-02-appshell-list.png)
 
     >build_circle:> Na niektorých systémoch nemusia byť `NodePort`-s prístupne na adrese `localhost`. Pozrite si akým spôsobom sú prístupné na vašom systéme. Na systéme [Docker Desktop][docker-desktop] je možné použiť adresu `host.docker.internal` alebo `localhost` s portom `30331`.
 
 Nasledujúci obrázok znázorňuje deployment a komunikačnú schému nasadenej aplikácie.
 
-![Komunikácia medzi micro-frontend radičom a nasadeným WebComponent](./img/dojo-k8s-ufe-komunikacia.png)
+![Komunikácia medzi micro-frontend radičom a nasadeným WebComponent](./img/060-03-k8s-ufe-komunikacia.png)
 
 Overili sme, že manuálne nasadenie našej aplikácie do Kubernetes klastra
 funguje. V ďalšej časti si ukážeme, ako zabezpečiť kontinuálne nasadenie

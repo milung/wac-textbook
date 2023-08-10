@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-004a
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-041
 ```
 
 ---
@@ -115,6 +115,6 @@ Softvérové kontajnery sú vytvárané z ich obrazov, čo je binárna forma rep
 
     Na stránke [Docker Hub][docker-hub] by ste po ukončení týchto príkazov mali vidieť  váš nový obraz softvérového kontajnera
 
-    ![Zverejnený obraz kontajnera](./img/dojo-novy-kontajner.png)
+    ![Zverejnený obraz kontajnera](./img/041-01-novy-kontajner.png)
 
     >info:> V prípade, že sa vám nepodarí zverejniť obraz kontajnera, skontrolujte, či ste sa  úspešne prihlásili na stránke [Docker Hub][docker-hub] a či ste použili správne používateľské meno.

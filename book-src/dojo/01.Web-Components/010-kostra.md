@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-001
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-010
 ```
 
 ---
@@ -52,7 +52,7 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
 
    Prvý príkaz nainštaluje knižnice, na ktorých je náš projekt závislý a druhý  príkazspustí aplikáciu. Po chvíli môžete v prehliadači vidieť výstup tejto aplikácie
 
-   ![Kostra aplikácie](./img/dojo-01-kostra.png)
+   ![Kostra aplikácie](./img/010-01-kostra.png)
 
    >build_circle:> Pokiaľ sa Vám pri vykonávaní príkazu objavý chyba odkadzujúca  na `Puppeteer` postupujte podľa pokynov v kapitole [Riešenie problémov](../99.Problems-Resolutions/02.puppeteer.md). Dočasne môžete tento problém  opraviťnastavením premennej prostredia `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` na  hodnotu`true`: 
    > 
@@ -262,6 +262,6 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
 
     a prejdite do prehliadača na stránku [http://localhost:3333](http://localhost:3333). Mali by ste vidieť stránku so zoznamom čakajúcich:
 
-    ![Zoznam čakajúcich](./img/dojo-02-zoznam.png)
+    ![Zoznam čakajúcich](./img/010-02-zoznam.png)
 
 8. Na záver odstránime priečinok `${WAC_ROOT}/ambulance-ufe/src/components/my-component` obsahujúci komponent vygenerovaný ako ukážku knižnicou _Stencil JS_.

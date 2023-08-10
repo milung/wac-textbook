@@ -1,0 +1,13 @@
+# Nasadenia tímového projektu na lokálnom klastri
+
+>info:> Táto kapitola je len zhrnutím postupu pre prácu študentov, nebude na cvičeniach preberaná.
+
+Súčasťou semestrálneho projektu je jeho nasadenie na spoločnom klastri. Postup je v zásade obdobný ako v prípade aplikácie _<pfx>-ambulance-ufe_.
+
+1. Vytvorte samostatný repozitár pre web komponent Vášej aplikácie, neskôr aj pre webapi Vašej aplikácie, a implementujte tieto služby, ako to je ukázané na cvičeniach. Pripravte nové vydanie aplikácie.
+
+2. Vytvorte nový repozitár pre nasadenie - gitops - Vašej aplikácie. Pokiaľ pracujte samostatne, môžete použit aj repozitár `ambulance-gitops` vytvorený na cvičeniach a len ho rozšíriť - doplniť konfigurácie Vašej aplikácie v príslušných adresároch `${WAC_ROOT}/ambulance-gitops/apps`, 
+`${WAC_ROOT}/ambulance-gitops/clusters/localhost/install` a `${WAC_ROOT}/ambulance-gitops/clusters/wac-aks/install`. V prípade tímovej práce, odporúčame vytvoriť nový repozitár so zdielaním prístupom členov tímu.
+
+3. Obdobne ako je uvedené v kapitole [Nasadenie aplikácie na produkčný kubernetes klaster](./111-production-deployment), nasaďte Váš projekt do spoločného klastra.
+

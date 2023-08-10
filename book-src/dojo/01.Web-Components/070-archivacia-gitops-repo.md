@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-007
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-070
 ```
 
 ---
@@ -15,7 +15,7 @@ vytvorili adresár _webcloud-gitops_, ktorý obsahuje popis nasadenia nášho pr
    sa prihláste do svojho účtu, a vytvorte nový repozitár s názvom `ambulance-gitops`. V menu odznačte _Add a README_ a
    vyberte _None_ pre _.gitignore_ súbor a stlačte `Create`.
 
-   ![GitOps repozitár](./img/007-01-GitOpsRepo.png)
+   ![GitOps repozitár](./img/070-01-GitOpsRepo.png)
 
 2. V príkazovom riadku prejdite do priečinka `${WAC_ROOT}/ambulance-gitops` a inicializujte lokálny git repozitár príkazom:
 
@@ -48,4 +48,4 @@ vytvorili adresár _webcloud-gitops_, ktorý obsahuje popis nasadenia nášho pr
 
    V prehliadači skontrolujte, že sú vaše súbory uložené vo vzdialenom repozitári.
 
-    ![Vzdialený repozitár gitops](./img/007-02-RepoContent.png)
+    ![Vzdialený repozitár gitops](./img/070-02-RepoContent.png)

@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-002
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-020
 ```
 
 ---
@@ -14,13 +14,13 @@ nie je to ale podmienkou.
 
 1. Na stránke [GitHub] sa prihláste do svojho účtu a v hornom panely rozbaľte tlačidlo označené
    "+" a zvoľte _New Repository_.
-  ![Vytvorenie nového repozitára](./img/002-01-NewRepo.png)
+  ![Vytvorenie nového repozitára](./img/020-01-NewRepo.png)
 
 2. V zobrazenom okne zvoľte meno repozitára `ambulance-ufe`, a ostatné voľby ponechajte v pôvodonom stave.  
    Skontrolujte, že všetky možnosti v sekcii _Initialize this repository with:_ sú prázdne. Následne stlačte 
    na tlačidlo _Create repository_.
 
-   ![Vytvorenie nového repozitára](./img/002-02-CreateRepo.png)
+   ![Vytvorenie nového repozitára](./img/020-02-CreateRepo.png)
 
    Na nasledujúcej stránke máte uvedené pokyny na vytvorenie lokálneho repozitára a jeho synchronizáciu s vzdialeným repozitárom.
    V našom prípade budeme používať príkazy zobrazené v sekcii _…or push an existing repository from the command line_.
@@ -78,7 +78,7 @@ nie je to ale podmienkou.
 
     V prehliadači skontrolujte, že sú vaše súbory uložené vo vzdialenom repozitári.
 
-    ![Synchronizovaný repozitár](./img/002-03-GitRepository.png)
+    ![Synchronizovaný repozitár](./img/020-03-GitRepository.png)
 
 Počas cvičení budeme používať zjednodušený vývojový proces a pracovať priamo na
 vetve `main` repozitára. Pri práci v tíme sa ale odporúča používať vývojový

@@ -23,6 +23,7 @@
 [docker-hub]:https://hub.docker.com/
 [docker hub]:https://hub.docker.com/
 [flux]:https://fluxcd.io/
+[flux cd]:https://fluxcd.io/
 [gin]:https://gin-gonic.com/docs/
 [git]:https://git-scm.com/
 [github]:[https://github.com/]

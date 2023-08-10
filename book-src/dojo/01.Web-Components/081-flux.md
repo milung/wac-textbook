@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-007
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-070
 ```
 
 ---
@@ -29,7 +29,7 @@ kontrolujú, ako sa zmeny v git repozitároch aplikujú do kubernetes klastra. D
 
 Na obrázku sú znázornené komponenty Flux.
 
-![Flux gitops](./img/dojo-flux-gitops-toolkit.png)
+![Flux gitops](./img/081-01-flux-gitops-toolkit.png)
 
 Ukážeme si inštaláciu a konfiguráciu Flux na lokálnom kubernetes klastri, ktorý poskytuje aplikácia Docker Desktop.
 
@@ -185,7 +185,7 @@ uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do k
 
    Prejdite na stránku [GitHub], prihláste sa a následne prejdite na stránku [Developer Settings](https://github.com/settings/apps). _Z hlavnej stránky sa tu môžete dostať stlačením ikony Vášho avatara, menu "Settings" a potom "Developer settings"._ Na ľavej strane vyberte _Personal access tokens->Tokens (classic)_ a stlačte tlačidlo _Generate new token_. Prihláste sa, zadajte meno tokenu, napr. _WAC-FluxCD token_, a _Expiration_ nastavte  na _Custom defined_ (dátum aspoň do konca semestra). V časti _Scopes_ označte položku _repo_. Stlačte tlačidlo _Generate token_ a __NEZABUDNITE SI ULOŽIŤ DO SCHRÁNKY__ vygenerovaný PAT.
 
-   ![Vytvorenie Personal Access Token-u](./img/008a-01-GitHubPAT.png)
+   ![Vytvorenie Personal Access Token-u](./img/081-01-GitHubPAT.png)
 
    Následne musíme toto heslo uložiť do kubernetes klastra. V kontexte GitOps máme teraz niekoľko možností ako postupovať. Tu si ukážeme zatiaľ jednoduchší postup, a to, že heslá a iné dôverné informácie nebudú súčasťou nášho repozitára, ale ich budeme mať k dispozícii len lokálne. Tento postup sa ale skomplikuje v momente, kedy budeme musieť pracovať s viac ako len s jedným heslom alebo klastrom. V takom prípade je oveľa vhodnejšie použiť tzv. [_SOPS - Service Operations_](https://fluxcd.io/flux/guides/mozilla-sops/), kedy sú šifrované heslá a verejný kľúč uložené priamo v repozitári a súkromý kľúč, potrebný na odšifrovanie dôverných informácií je prístupný len v samotnom klastri, kde ho ručne nasadzuje jeho administrátor. Druhý spôsob si preto ukážeme až v inej kapitole.
 
@@ -359,7 +359,7 @@ Aby sme mohli začať využívať služby [Flux], musíme ich prvotne nasadiť d
     Zadajte do prehliadača adresu [http://localhost:30331/](http://localhost:30331/).
     Mali by ste vidieť stránku s aplikačnou obálkou s integrovanou mikro aplikáciou. Po stlačení na odkaz _Zoznam čakajúcich_ by ste mali vidieť nasledujúci výstup:
 
-    ![Integrovaný zoznam čakajúcich](./img/dojo-appshell-list.png)
+    ![Integrovaný zoznam čakajúcich](./img/060-02-appshell-list.png)
 
 ## Overenie funkcionality priebežného nasadenia
 

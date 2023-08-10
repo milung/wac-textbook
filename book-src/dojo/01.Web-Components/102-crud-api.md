@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-010a
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-101
 ```
 
 ---
@@ -100,7 +100,7 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
                description: Ambulance or Entry with such ID does not exists
       delete:
          tags:
-            - ambulanceWaitingList
+            - ambulanceWaitingList @_important_@
          summary: Deletes specific entry
          operationId: deleteWaitingListEntry
          description: Use this method to delete the specific entry from the   waiting   list.
@@ -118,7 +118,7 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
             schema:
                type: string
          responses:
-            "204":
+            "204": @_important_@
                description: Item deleted
             "404":
                description: Ambulance or Entry with such ID does not exists 
@@ -159,7 +159,9 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
             return undefined   @_add_@
          }   @_add_@
          try {   @_add_@
-            const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase).getWaitingListEntry(this.ambulanceId, this.entryId)   @_add_@
+            const response  @_add_@
+                = await AmbulanceWaitingListApiFactory(undefined, this.apiBase)  @_add_@
+                  .getWaitingListEntry(this.ambulanceId, this.entryId)   @_add_@
              @_add_@
             if (response.status < 299) {   @_add_@
                this.entry = response.data;   @_add_@
@@ -201,13 +203,17 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
             <form ref={el => this.formElement = el}> @_add_@
              <md-filled-text-field label="Meno a Priezvisko" 
                required value={this.entry?.name} @_add_@
-               oninput={ (ev: InputEvent) => { if(this.entry) {this.entry.name = this.handleInputEvent(ev)} } }>  @_add_@
+               oninput={ (ev: InputEvent) => {  @_add_@
+                  if(this.entry) {this.entry.name = this.handleInputEvent(ev)}  @_add_@
+               } }>  @_add_@
                <md-icon slot="leadingicon">person</md-icon>
              </md-filled-text-field>
 
              <md-filled-text-field label="Registračné číslo pacienta" 
                required value={this.entry?.patientId} @_add_@
-               oninput={ (ev: InputEvent) => { if(this.entry) {this.entry.patientId = this.handleInputEvent(ev)} } }>  @_add_@
+               oninput={ (ev: InputEvent) => { @_add_@
+                  if(this.entry) {this.entry.patientId = this.handleInputEvent(ev)}  @_add_@
+               } }>  @_add_@
                <md-icon slot="leadingicon">fingerprint</md-icon>
              </md-filled-text-field>
 
@@ -218,7 +224,9 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
              <md-filled-select label="Dôvod návštevy" 
                value={this.entry?.condition?.code}> @_add_@
-               oninput = { (ev: InputEvent) => { if(this.entry) {this.entry.condition.code = this.handleInputEvent(ev)} } }>  @_add_@
+               oninput = { (ev: InputEvent) => { @_add_@
+                  if(this.entry) {this.entry.condition.code = this.handleInputEvent(ev)} @_add_@
+               } }>  @_add_@
                <md-icon slot="leadingicon">sick</md-icon>
                <md-select-option value="folowup" headline="Kontrola"></md-select-option>
                <md-select-option value="nausea" headline="Nevoľnosť"></md-select-option>
@@ -234,9 +242,11 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
              <md-slider
                min="2" max="45" value={this.entry?.estimatedDurationMinutes || 15} ticks labeled @_add_@
                oninput={ (ev:InputEvent) => { @_add_@
-                 if(this.entry) {this.entry.estimatedDurationMinutes = Number.parseInt(this.handleInputEvent(ev))};
-                 this.handleSliderInput(ev)
-               } }></md-slider>
+                 if(this.entry) { @_add_@
+                  this.entry.estimatedDurationMinutes  @_add_@
+                     = Number.parseInt(this.handleInputEvent(ev))}; @_add_@
+                 this.handleSliderInput(ev) @_add_@
+               } }></md-slider> @_add_@
            </div>
 
            <md-divider inset></md-divider>
@@ -288,7 +298,8 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
    private async updateEntry() {      @_add_@
       try {  @_add_@
-          const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase).updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry)  @_add_@
+          const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase) @_add_@
+            .updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry)  @_add_@
           if (response.status < 299) {  @_add_@
             this.editorClosed.emit("store")  @_add_@
           } else {  @_add_@
@@ -301,7 +312,8 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
    private async deleteEntry() { @_add_@
       try { @_add_@
-         const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase).deleteWaitingListEntry(this.ambulanceId, this.entryId) @_add_@
+         const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase) @_add_@
+            .deleteWaitingListEntry(this.ambulanceId, this.entryId) @_add_@
          if (response.status < 299) { @_add_@
          this.editorClosed.emit("delete") @_add_@
          } else { @_add_@
@@ -554,7 +566,8 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
       private async updateEntry() {
          try {
-            const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase).updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry)  @_remove_@
+            const response = await AmbulanceWaitingListApiFactory(undefined, this.apiBase) @_remove_@
+               .updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry)  @_remove_@
             // store or update
             const api = AmbulanceWaitingListApiFactory(undefined, this.apiBase);  @_add_@
             const response   @_add
@@ -609,20 +622,20 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
      ...
    }
 
-   .add-button {
-      position: absolute;
-      right: 1rem;
-      bottom: 0;
-      --md-filled-icon-button-container-size: 4rem;
-      --md-filled-icon-button-icon-size: 3rem;
-   }
+   .add-button {  @_add_@
+      position: absolute;  @_add_@
+      right: 1rem;  @_add_@
+      bottom: 0;  @_add_@
+      --md-filled-icon-button-container-size: 4rem;  @_add_@
+      --md-filled-icon-button-icon-size: 3rem;  @_add_@
+   }  @_add_@
    ```
 
    Tlačidlo _+_ je umiestnené na spodu vpravo nášho elementu. Pretože používame pozíciu `absolute`, musíme nastaviť aj `position` na `relative` pre element `<pfx>-ambulance-wl-list`, ináč by sa pozícia tlačidla upravovala vzhľadom k pozícii a veľkosti stránky, alebo vzhľadom k pozícii najbližšieho iného predka, ktorého pozícia by bola relatívna.
 
    Funkcionalitu môžete overiť, mali by ste vidieť zoznam s tlačidlom _+_ a po kliknutí na tlačidlo by sa mal zobraziť editor pre vytvorenie nového záznamu.
 
-   ![Zoznam s tlačidlom pridania nového záznamu](./img/010b-01-AddEntry.png)
+   ![Zoznam s tlačidlom pridania nového záznamu](./img/102-01-AddEntry.png)
 
 10. Zoznam príčin návštevy je zatiaľ statický, pričom chceme dosiahnuť aby sme mali špecifický zoznam pre každú ambulanciu: `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` a upravte ho:
 
@@ -674,7 +687,7 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
                ... @_remove_@
           </md-filled-select> @_remove_@
           <!-- pre prehľadnosť použijeme pomocnú metódu -->
-          {this.renderConditions()} @_add:@
+          {this.renderConditions()} @_add_@
         </form>
        ...
       );
@@ -734,7 +747,7 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
     a otvorte v prehliadači stránku [http://localhost:3333](http://localhost:3333). Majte na pamäti, že stále používame len simuláciu WEB API.
 
-12. Rozšírime testy editora o jednoduchý test správnosti poľa _Meno a Priezvisko_. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/test/<pfx>-ambulance-wl-editor.spec.tsx` a upúravte ho: 
+12. Rozšírime testy editora o jednoduchý test správnosti poľa _Meno a Priezvisko_. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/test/<pfx>-ambulance-wl-editor.spec.tsx` a upravte ho:
 
     ```tsx
     import { newSpecPage } from '@stencil/core/testing';
@@ -804,7 +817,7 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
          @_add_@
          const page = await newSpecPage({  @_add_@
             components: [PfxAmbulanceWlEditor], // @_pfx_@  @_add_@
-            html: `<pfx-ambulance-wl-editor entry-id="test-entry" ambulance-id="test-ambulance" api-base="http://sample.test/api"></pfx-ambulance-wl-editor>`, // @_pfx_@  @_add_@
+            html: `<<pfx>-ambulance-wl-editor entry-id="test-entry" ambulance-id="test-ambulance" api-base="http://sample.test/api"></<pfx>-ambulance-wl-editor>`,  @_add_@
          });  @_add_@
          let items: any = await page.root.shadowRoot.querySelectorAll("md-filled-text-field");  @_add_@
          @_add_@

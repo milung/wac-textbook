@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-004b
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-042
 ```
 
 ---
@@ -25,7 +25,7 @@ nasadenia aplikácie.
   voči nej žiadne poplatky, pokiaľ sa tak explicitne nerozhodnete. Pri cvičeniach
   budeme používať len služby, ktoré sú zdarma.
 
-   ![Voľné služby Azure](./img/01-SPA-20-AzureFree.png)
+   ![Voľné služby Azure](./img/042-01-AzureFree.png)
 
    Po aktivácii budete presmerovaný na stránku [Azure Portal][azure-portal],
    na ktorej môžete spravovať svoje prostriedky vo verejnom dátovom centre
@@ -51,11 +51,11 @@ nasadenia aplikácie.
 
 6. V sekcii _Pricing plan_ zvoľte nový _Linux plan_ (_Create new_). Pomenujte ho `WebInCloud-DojoServicePlan` a zmeňte štandardné nastavenie v poli _Pricing Plan_ na hodnotu _Free F1_.
 
-   ![Vytvorenie prostriedku typu Web App](./img/004b-01-CreateWebApp.png)
+   ![Vytvorenie prostriedku typu Web App](./img/042-01-CreateWebApp.png)
 
 7. Stlačte na tlačidlo _Next : Docker_ a upravte voľbu _Image Source_ na hodnotu `Docker Hub` a do políčka _Image and tag_ vložte hodnotu `<your-account>/ambulance-ufe:latest`
 
-    ![Nastavenie docker obrazu pre Azure We Applikáciu](./img/004b-02-CreateWebAppDocker.png)
+    ![Nastavenie docker obrazu pre Azure We Applikáciu](./img/042-02-CreateWebAppDocker.png)
 
 8. Teraz stlačte na tlačidlo _Review + create_, skontrolujte nastavenia webovej aplikácie a potvrďte voľbou _Create_.
 
@@ -64,7 +64,7 @@ nasadenia aplikácie.
     _Go to Resource_. V prehľade webovej aplikácie (_Overview_) vidíte odkaz -
     _URL_- na novú aplikáciu. Otvorte tento odkaz v novom okne.
 
-    ![Prehľad o prostriedku Web App](./img/004b-03-WebAppOverview.png)
+    ![Prehľad o prostriedku Web App](./img/042-03-WebAppOverview.png)
 
     V prehliadači by ste mali vidieť známy zoznam čakajúcich pacientov, tentoraz obslúžený z  dátového centra Microsoft Azure.
 

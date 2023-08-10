@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-004b
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-042
 ```
 
 ---
@@ -16,13 +16,13 @@ aktualizovala, keď sa zmení jej docker obraz na Docker Hube.
    v záložke _Deployment Center_ prepnite voľbu _Continuous deployment_ na `On` a
    skopírujte hodnotu z políčka _Webhook URL_. Uložte nastavenie stlačením tlačidla _Save_:
 
-    ![Deplyment Center Web Aplikácie Azure](./img/dojo-azurewebapp-cd.png)
+    ![Deplyment Center Web Aplikácie Azure](./img/050-01-azurewebapp-cd.png)
 
     Prejdite na stránku [Docker Hub][docker-hub], otvorte detaily vášho obrazu
     `ambulance-ufe` a prejdite do záložky _Webhooks_. Vytvorte nový webhook, pomenujte ho
     _Azure WebApp_ a ako URL nastavte hodnotu skopírovanú z Azure portálu.
 
-    ![Vytvorenie web-hook záznamu na DockerHub](./img/dojo-dockerhub-webhook.png)
+    ![Vytvorenie web-hook záznamu na DockerHub](./img/050-02-dockerhub-webhook.png)
 
     Týmto nastavením sme zabezpečili, že kedykoľvek sa do registra Docker Hub zapíše nový
     obraz s označením `<your-account>/ambulance-ufe:latest`, webová služba vytvorená na
@@ -32,7 +32,7 @@ aktualizovala, keď sa zmení jej docker obraz na Docker Hube.
 2. Do _CI pipeline_ pridáme krok na zverejnenie novej verzie docker obrazu po úspešnom
    builde. Tentoraz budeme ručne upravovať predpis priebežnej integrácie.
 
-   V kapitole [Kontajnerizácie aplikácie](./004a-ufe-containerization.md) sme vytvorili obraz pomocou príkazu `docker build`. Tento príkaz vytvoril obraz pre aktuálnu platformu nášho prostredia - `linux/amd64` v prostredí Windows alebo linux na procesoroch Intel/AMD, alebo `linux/arm64/v8` na novších modeloch Apple Mac. Aby bol náš generovaný obraz použiteľný na rôznych platformách, musíme vytvoriť takzvanú [viac-platformovú zostavu](https://docs.docker.com/build/building/multi-platform/), ktorá vytvorí rôzne obrazy a zaregisturje ich v registry pod spoločným názvom (tzv. manifest s viacerími odkazmi). Lokálne by sme k tomu použili príkaz `docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t <pfx>/ambulance-ufe .`. Detaily o tomto postupe nájdete [tu](https://docs.docker.com/build/building/multi-platform/).  V priebežnej integrácii budeme výtvarať práve takéto viac-platformové obrazy.
+   V kapitole [Kontajnerizácie aplikácie](./041-ufe-containerization.md) sme vytvorili obraz pomocou príkazu `docker build`. Tento príkaz vytvoril obraz pre aktuálnu platformu nášho prostredia - `linux/amd64` v prostredí Windows alebo linux na procesoroch Intel/AMD, alebo `linux/arm64/v8` na novších modeloch Apple Mac. Aby bol náš generovaný obraz použiteľný na rôznych platformách, musíme vytvoriť takzvanú [viac-platformovú zostavu](https://docs.docker.com/build/building/multi-platform/), ktorá vytvorí rôzne obrazy a zaregisturje ich v registry pod spoločným názvom (tzv. manifest s viacerími odkazmi). Lokálne by sme k tomu použili príkaz `docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t <pfx>/ambulance-ufe .`. Detaily o tomto postupe nájdete [tu](https://docs.docker.com/build/building/multi-platform/).  V priebežnej integrácii budeme výtvarať práve takéto viac-platformové obrazy.
 
    Otvorte súbor `${WAC_ROOT}/ambulance-ufe/.github/workflows/ci.yml` a na jeho konci pridajte nové kroky predpisu:
 
@@ -100,14 +100,14 @@ aktualizovala, keď sa zmení jej docker obraz na Docker Hube.
 
 3. Pre úspešny beh priebežnej integrácie je nutné ešte nastaviť premenné `secrets.DOCKERHUB_USERNAME` a `secrets.DOCKERHUB_TOKEN`. Prejdite na stránku [Docker Hub], Rozbaľte menu označené názvom Vášho účtu a zvoľte _Account Settings_. V záložke _Security_ nájdete tlačidlo _New Access Token_.
 
-   ![Vytvorenie nového tokena pre Docker Hub](./img/005-01-AccountSecurity.png)
+   ![Vytvorenie nového tokena pre Docker Hub](./img/050-01-AccountSecurity.png)
 
    Vytvorte nový token s názvom `ambulance-ufe CI` a priradte mu práva `Read, Write, Delete` a stlačte tlačidlo _Generate_. Vygenerovaný token si skopírujte do schránky.
 
    Teraz prejdite do Vášho repozitára `<pfx>/ambulance-ufe` na stránke [GitHub]. V hornej lište zvoľte záložku _Settings_ a následne na bočnom panely zvoľte položku _Secrets and Variables_ -> _Actions_.
    Na tejto stánke stlačte na tlačidlo _New repository secret_ a vytvorte novú premennú s názvom `DOCKERHUB_TOKEN` a ako hodnotu vložte zo schránky skopírovaný token. Opäť stlačte na tlačidlo _New repository secret_ a vytvorte premmenú s názvom `DOCKERHUB_USERNAME` a ako hodnotu vložte svoje používateľské meno na Docker Hub.
 
-   ![Premmenné a kľúče pre beh priebežnej integrácie](./img/005-02-GithubSecrets.png)
+   ![Premmenné a kľúče pre beh priebežnej integrácie](./img/050-02-GithubSecrets.png)
 
    Vytvorené premenné sú k dispozícii pre ďaľší beh našej priebežnej integrácie.
 

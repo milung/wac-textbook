@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-008a
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-081
 ```
 
 ---
@@ -188,7 +188,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
 
     Týmto spôsobom sme naši zmeny zároveň aplikovali do klastra. Po chvíli sa v klastri automaticky zmeni verzia kontajnera na verziu `main-YYYYMMDD.HHMM` a v repozitári môžete vidiť nový komit, ktorého autorom je `fluxcd_bot`.
 
-   ![Zmena verzie kontajnera](./img/008b-01-FluxBotCommit.png)
+   ![Zmena verzie kontajnera](./img/082-01-FluxBotCommit.png)
 
    Overíme celý CI/CD cyklus explicitne. V priečinku `${WAC_ROOT}/ambulance-ufe` zmeňte kód komponentu `ambulance-ufe`, napr. zmeňte meno pacienta v zozname, komitnite a synchronizujte zmeny. Po chvíli, keď prebehne CI a vytvorí sa nový obraz na DockerHub-e, skontrolujte históriu na stránke [GitHub] v repozitári _ambulance-gitops_ (stlačte na nápis _N commits_ na vrchu zoznamu súborov), a potom zadajte v prehliadači adresu [http://localhost:30331/](http://localhost:30331/) a pozrite si zoznam pacientov.
 
@@ -208,4 +208,4 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
 
 Pre lepšie pochopenie sú na nasledujúcom obrázku znázornené komponenty spomínané v tejto kapitole a ich vzájomné prepojenie.
 
-![Komponenty Flux a ich spolupráca](./img/008b-02-FluxCD.svg)
+![Komponenty Flux a ich spolupráca](./img/082-02-FluxCD.svg)
