@@ -44,10 +44,9 @@ Technické ohraničenia:
 
 * Aplikácia je vytvorená v jazyku [Go]
   s použitím [Gin Web Framework][gin]
-* Aplikačné rozhranie je popísané vo formáte [OpenAPI],
-  s použitím nástroja [Swagger]
+* Aplikačné rozhranie je popísané vo formáte [OpenAPI]
 * Stav čakajúcich a informácie o pacientoch sú uložené v  No-SQL databáze
-  vytvorenej pomocou knižnice [MongoDB]
+  ku ktorej budeme pristupovať pomocou knižnice [MongoDB]
 
 ## <a name="priprava"></a>Príprava na cvičenie
 
@@ -55,6 +54,5 @@ Technické ohraničenia:
   [_Web aplikácia pomocou knižnice Stencil JS_](../01.Web-Components/dojo/000-README.md)
 * Nainštalovaný programovací jazyk [Go](https://go.dev/doc/install)
 * Nainštalovanú aplikáciu [Postman]
-* Vytvorený účet na stránke [Swagger Hub]
 * Zoznámenie sa s jazykom Go, napr. [GOLANGBOT.COM](https://golangbot.com/learn-golang-series/)
 * Zoznámenie sa s jazykom [YAML](https://yaml.org/)

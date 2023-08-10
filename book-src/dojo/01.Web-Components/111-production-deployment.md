@@ -1,5 +1,13 @@
 # Nasadenie aplikácie na produkčný kubernetes klaster
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-111
+```
+
+---
+
 Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster privátny, zmeny v ňom môže robiť iba gitops team. Má podobnú štruktúru ako náš `ambulance-gitops` repozitár. Na rozdiel od lokálneho klastra, zabezpečuje prítomnosť infraštruktúry  vtomto klastri externý Gitops team (cvičiaci). Študenti majú k dispozícii konfiguráciu ku klastru, pomocou ktorej môžu ku klastru pristúpiť a nasadiť svoje aplikácie do namespace `wac-hospital`. V tomto kroku si pripravíme konfiguráciu pre nasadenie do klastra. Predpokladáme, že repozitár Vašej konfigurácia, ako aj obrazy softvérových kontajnerov sú verejne prístupné a nie je nutné použiť autentifikáciu. Pokiaľ tomu tak nie je musíte do konfigurácie doplniť aj príslušné autentifikačné údaje vo forme kubernetes objektov _Secret_.
 
 1. V tejto konfigurácii predpokladáme, že chcete explicitne kontrolovať, ktoré verzie softvérových kontajnerov budú do spoločného klastra nasadzované - predpokladajme, že to je _produkčý_ klaster. Ďalej predpokladajme, že naša aplikácia je v stave pripravenom na produkčné nasadenie. Ako prvý krok preto vytvoríme nové vydanie - _release_ - našej aplikácie. Na stránke [GitHub] prejdite do repozitára `ambulance-ufe` a v sekcii _Code_ stlačte na odkaz `0 tags` a následne na tlačidlo _Create a new releases_. V rozbaľovacom zozname _Choose a tag_ zadajte  text `v1.0.0`. Do poľa _Release title_ zadajte text `v1.0.0` a v poli _Describe this release_ zadajte text `Initial release of the waiting list application with CRUD operations`. Stlačte tlačidlo _Publish release_.

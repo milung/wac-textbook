@@ -1,5 +1,13 @@
 # Ladenie aplikácie
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-120
+```
+
+---
+
 V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
 
 1. Ladenie aplikácie si odskúšame v rámci pridávania nového pacienta. V súbore
