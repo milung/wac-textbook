@@ -18,6 +18,7 @@
 [custom-elements]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements
 [devcontainers cli]:https://github.com/devcontainers/cli
 [Development Containers]:https://containers.dev/
+[Docker Compose]:https://docs.docker.com/compose/
 [docker-containers]:https://www.docker.com/resources/what-container
 [docker-desktop]:https://www.docker.com/products/docker-desktop
 [docker-hub]:https://hub.docker.com/
@@ -58,6 +59,7 @@
 [openapi generator online]:http://api.openapi-generator.tech/index.html
 [openapi-generator]:https://openapi-generator.tech/
 [openapi]:https://www.openapis.org/about
+[openapi-spec]:https://spec.openapis.org/oas/latest.html
 [openlens]:https://github.com/MuhammedKalkan/OpenLens
 [paas]:https://azure.microsoft.com/en-in/resources/cloud-computing-dictionary/what-is-paas/
 [Postman]:https://www.getpostman.com/
@@ -71,7 +73,7 @@
 [shadow-dom]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
 [shsdc]: https://www.siemens-healthineers.com/sk/development-center
 [single-spa]:https://single-spa.js.org/
-[sops]:
+[sops]:https://github.com/getsops/sops
 [stencil]:https://stenciljs.com/
 [swagger hub]:https://app.swaggerhub.com/home
 [swagger]:https://swagger.io/docs/specification/about/
