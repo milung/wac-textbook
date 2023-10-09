@@ -1,4 +1,4 @@
-# Vygenerovanie kostry obslužného kódu API
+# Generovanie kostry obslužného kódu Web API
 
 ---
 

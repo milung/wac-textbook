@@ -252,11 +252,11 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
            <md-divider inset></md-divider>
 
            <div class="actions">
-             <md-tonal-button id="delete" disabled={ !this.entry }  @_important_@
+             <md-filled-tonal-button id="delete" disabled={ !this.entry }  @_important_@
                onClick={() => this.deleteEntry()} >  @_important_@
                <md-icon slot="icon">delete</md-icon>
                Zmazať
-             </md-tonal-button>
+             </md-filled-tonal-button>
              <span class="stretch-fill"></span>
              <md-outlined-button id="cancel"
                onClick={() => this.editorClosed.emit("cancel")}>
@@ -560,7 +560,7 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
       render() {
          ...
-          <md-tonal-button id="delete" disabled={!this.entry || this.entry?.id === "@new" } @_important_@
+          <md-filled-tonal-button id="delete" disabled={!this.entry || this.entry?.id === "@new" } @_important_@
          ...
       }
 

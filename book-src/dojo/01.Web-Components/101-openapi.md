@@ -324,7 +324,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
       @Prop() ambulanceId: string; @_add_@
       @State() errorMessage: string; @_add_@
 
-      waitingPatients: WaitingListEntry[];
+      waitingPatients: WaitingListEntry[]; @_important_@
 
       private async getWaitingPatientsAsync(): Promise<WaitingListEntry[]> {   @_important_@
         ... odstránte pôvodný kód ... @_remove_@
@@ -474,7 +474,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    ```tsx
    import { newSpecPage } from '@stencil/core/testing';
-   import { PfxAmbulanceWlList } from '../<pfx>-ambulance-wl-list';
+   import { <Pfx>AmbulanceWlList } from '../<pfx>-ambulance-wl-list';
    import axios from "axios"; @_add_@
    import MockAdapter from "axios-mock-adapter"; @_add_@
    import { WaitingListEntry } from '../../../api/ambulance-wl'; @_add_@
@@ -510,7 +510,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
           components: [<Pfx>AmbulanceWlList],
           html: `<<pfx>-ambulance-wl-list ambulance-id="test-ambulance" api-base="http://test/api"></<pfx>-ambulance-wl-list>`, @_important_@
         });
-        const wlList = page.rootInstance as PfxAmbulanceWlList;
+        const wlList = page.rootInstance as <Pfx>AmbulanceWlList;
         const expectedPatients = wlList?.waitingPatients?.length;
 
         const items = page.root.shadowRoot.querySelectorAll("md-list-item");
@@ -536,11 +536,11 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
       it('renders error message on network issues', async () => {  @_add_@
         mock.onGet().networkError();  @_add_@
         const page = await newSpecPage({  @_add_@
-          components: [PfxAmbulanceWlList],  // @_pfx_@  @_add_@
-          html: `<pfx-ambulance-wl-list ambulance-id="test-ambulance" api-base="http://test/api"></pfx-ambulance-wl-list>`,  // @_pfx_@  @_add_@
+          components: [<Pfx>AmbulanceWlList],  // @_add_@
+          html: `<pfx-ambulance-wl-list ambulance-id="test-ambulance" api-base="http://test/api"></pfx-ambulance-wl-list>`,  // @_add_@
         });  @_add_@
           @_add_@
-        const wlList = page.rootInstance as PfxAmbulanceWlList; // @_pfx_@  @_add_@
+        const wlList = page.rootInstance as <Pfx>AmbulanceWlList; // @_add_@
         const expectedPatients = wlList?.waitingPatients?.length  @_add_@
         @_add_@
         const errorMessage =  page.root.shadowRoot.querySelectorAll(".error");  @_add_@

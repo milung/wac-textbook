@@ -1,4 +1,4 @@
-# Implementácia perzistencie údajov vo WEB API
+# Implementácia WEB API a perzistencie údajov
 
 ---
 
@@ -857,8 +857,14 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     )
 
     func (this *Ambulance) reconcileWaitingList() {
-        slices.SortFunc(this.WaitingList, func(i, j int) bool {
-            return this.WaitingList[i].WaitingSince.Before(this.WaitingList[j].WaitingSince)
+        slices.SortFunc(this.WaitingList, func(left, right WaitingListEntry) int {
+            if left.WaitingSince.Before(right.WaitingSince) {
+                return -1
+            } else if left.WaitingSince.After(right.WaitingSince) {
+                return 1
+            } else {
+                return 0
+            }
         })
 
         // we assume the first entry EstimatedStart is the correct one (computed before previous entry was deleted)

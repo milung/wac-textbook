@@ -1,9 +1,12 @@
 
 [sports-score> Cieľ cvičenia](./000-README.md#ciel)
-[home-work> Príprava na cvičenie](./000-README.md#priprava)
-[$golang> Kostra web služby v jazyku Go](./002-webapi.md)
+[$golang> Kostra web API služby](./010-kostra.md)
+[api> Generovanie kostry obslužného kódu Web API](./020-webapi.md)
+[database> Inštalácia a nastavenie MongoDB databázy](./030-mongodb.md)
+[database> Implementácia WEB API a perzistencie údajov](./040-api-perstistence.md)
+[biotech> Testovanie v jazyku Go](./050-test-in-go.md)
+
 [$git-alt> Archivácia kódu](./003-webapi-git.md)
-[biotech> Testovanie v jazyku Go](./004-test-in-go.md)
 [$docker> Kontajnerizovanie aplikácie - webového api](./005-dockerization.md)
 [@arrows-spin> Automatická priebežná integrácia - docker](./006-cont-integration-docker.md)
 [$cubes> Nasadenie do klastra Kubernetes](./007-webapi-kubernetes.md)

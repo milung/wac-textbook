@@ -1,4 +1,4 @@
-# Kostra serverovej aplikácie
+# Kostra Web API služby
 
 ---
 

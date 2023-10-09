@@ -47,6 +47,19 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
 
    components: 
     - ../../../components/version-release @_important_@
+   ```
+
+   Náš spoločný klaster sme tu nazvali `wac-aks`, čo referuje na nasadenie do klastra služby [Azure Kubernetes Services](https://azure.microsoft.com/en-us/products/kubernetes-service). Obsah je obdobný s obsahom z klastra `localhost`, avšak zmenili sme komponent v sekcii `components`. Navyše sme použili [_Replacement Transformer_](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/replacements/) pomocou ktorého skopírujeme verziu docker obrazu z nášho deploymentu do definície webkomponentu za účelom vyprázdnenia vyrovnávacej pamäte, tzv. [_Cache busting_](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#cache_busting).Vždy keď zmeníme tag verzie docker obrazu, zmení sa aj hash v definícii webkomponentu a hash výsledného javaskript súboru ponúkaného službou `ufe-controller`. Následkom je, že pri ďalšom načítaní stránky sa používateľovi v prehliadači obnoví verzia nášho komponentu.
+
+3. Vytvorte súbor `${WAC_ROOT}\ambulance-gitops/components/version-release/kustomization.yaml` s obsahom:
+
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1alpha1
+   kind: Component
+   images:
+   - name: <pfx>/ambulance-ufe
+   newName: <pfx>/ambulance-ufe 
+   newTag: 1.0.0  #aktuálna verzia docker obrazu, ktorú chcete aby používatelia - cvičiaci - videli nasadenú
 
    replacements: 
     - targets:
@@ -66,19 +79,6 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
         options: 
             delimiter: ':'
             index: 1
-   ```
-
-   Náš spoločný klaster sme tu nazvali `wac-aks`, čo referuje na nasadenie do klastra služby [Azure Kubernetes Services](https://azure.microsoft.com/en-us/products/kubernetes-service). Obsah je obdobný s obsahom z klastra `localhost`, avšak zmenili sme komponent v sekcii `components`. Navyše sme použili [_Replacement Transformer_](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/replacements/) pomocou ktorého skopírujeme verziu docker obrazu z nášho deploymentu do definície webkomponentu za účelom vyprázdnenia vyrovnávacej pamäte, tzv. [_Cache busting_](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#cache_busting).Vždy keď zmeníme tag verzie docker obrazu, zmení sa aj hash v definícii webkomponentu a hash výsledného javaskript súboru ponúkaného službou `ufe-controller`. Následkom je, že pri ďalšom načítaní stránky sa používateľovi v prehliadači obnoví verzia nášho komponentu.
-
-3. Vytvorte súbor `${WAC_ROOT}\ambulance-gitops/components/version-release/kustomization.yaml` s obsahom:
-
-   ```yaml
-   apiVersion: kustomize.config.k8s.io/v1alpha1
-   kind: Component
-   images:
-   - name: <pfx>/ambulance-ufe
-   newName: <pfx>/ambulance-ufe 
-   newTag: 1.0.0  #aktuálna verzia docker obrazu, ktorú chcete aby používatelia - cvičiaci - videli nasadenú
    ```
 
    V tomto klastri nebude používať [_Image Update Automation_](https://fluxcd.io/flux/guides/image-update/) [Flux CD] operátora, ale chceme mať explicitnú kontrolu nad verziou docker obrazov, ktoré budú nasadzované. Preto sme vytvorili nový komponent `version-release`, ktorý obsahuje konfiguráciu špecifickú pre oficiálne vydanie nášho softvéru.

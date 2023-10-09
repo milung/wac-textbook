@@ -59,11 +59,11 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
   
           <md-divider></md-divider>
           <div class="actions">
-            <md-tonal-button id="delete"
+            <md-filled-tonal-button id="delete"
               onClick={() => this.editorClosed.emit("delete")}>
               <md-icon slot="icon">delete</md-icon>
               Zmazať
-            </md-tonal-button>
+            </md-filled-tonal-button>
             <span class="stretch-fill"></span>
             <md-outlined-button id="cancel"
               onClick={() => this.editorClosed.emit("cancel")}>
@@ -112,7 +112,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
    import '@material/web/select/select-option'  @_add_@
    import '@material/web/slider/slider'  @_add_@
    import '@material/web/button/filled-button'  @_add_@
-   import '@material/web/button/tonal-button'  @_add_@
+   import '@material/web/button/filled-tonal-button'  @_add_@
    import '@material/web/button/outlined-button'  @_add_@
    import '@material/web/divider/divider'  @_add_@
    ...
@@ -509,7 +509,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
         items = await page.root.shadowRoot.querySelectorAll("md-outlined-button");
         expect(items.length).toEqual(1);
 
-        items = await page.root.shadowRoot.querySelectorAll("md-tonal-button");
+        items = await page.root.shadowRoot.querySelectorAll("md-filled-tonal-button");
         expect(items.length).toEqual(1);
       });
     });
