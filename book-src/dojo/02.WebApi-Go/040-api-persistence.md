@@ -1018,9 +1018,10 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context) {
         ctx.AbortWithStatus(http.StatusNotImplemented) @_remove_@
         // update ambulance document
-        updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {  @_remove_@
-            return ambulance, ambulance.WaitingList, http.StatusOK  @_remove_@
-        })  @_remove_@
+        updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {  @_add_@
+            // return nil ambulance - no need to update it in db   @_add_@
+		    return nil, ambulance.WaitingList, http.StatusOK  @_add_@
+        })   @_add_@
     }
 
     // GetWaitingListEntry - Provides details about waiting list entry
@@ -1048,7 +1049,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 }, http.StatusNotFound   @_add_@
             }   @_add_@
             @_add_@
-            return ambulance, ambulance.WaitingList[entryIndx], http.StatusOK   @_add_@
+            // return nil ambulance - no need to update it in db   @_add_@
+            return nil, ambulance.WaitingList[entryIndx], http.StatusOK   @_add_@
         })   @_add_@
     }
     ```

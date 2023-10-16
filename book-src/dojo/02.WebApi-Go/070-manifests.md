@@ -58,7 +58,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_MONGODB_COLLECTION
                   value: ambulances
                 - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
-                  value: 5
+                  value: "5"
               resources:
                 requests:
                   memory: "64Mi"
@@ -69,7 +69,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
 
     ```
 
-   Štruktúru manifestu už poznáme z predchádzajúceho manifestu pre front-end aplikáciu. V tomto prípade sme ale pridali aj definíciu environmentálnych premenných, ktoré budú použité pri spustení kontajnera. Vymenovanie všetkých prememných uľahčí prácu používateľom, ktorý nepoznajú implementáciu našej služby.
+   Štruktúru manifestu už poznáme z predchádzajúceho manifestu pre front-end aplikáciu. V tomto prípade sme ale pridali aj definíciu environmentálnych premenných, ktoré budú použité pri spustení kontajnera. Vymenovanie všetkých prememných uľahčí prácu používateľom, ktorý nepoznajú implementáciu našej služby. Všetky hodnoty v sekcii `env` musia byť typu string, preto je nutné uviesť aj číselné hodnoty v úvodzovkách.
 
 2. Súčasťou požiadaviek na našu službu je aj možnosť získať prehľad o funkcionalite WEB API služby a možnosť si vyskúšať prácu s ňou. K tomu využijeme obraz kontajnerizovanej aplikácie [swaggerapi/swagger-ui](https://hub.docker.com/r/swaggerapi/swagger-ui). Môžeme ju nasadiť samostatne ako voliteľný komponent, alebo ju môžeme nasadiť ako [_sidecar_](https://learn.microsoft.com/en-us/azure/architecture/patterns/sidecar) k našej službe. Zvolíme si druhú možnosť a do zoznamu kontajnerov nášho podu pridáme ďalší kontajner.
 
@@ -88,7 +88,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
             imagePullPolicy: Always   @_add_@
             ports:   @_add_@
             - name: api-ui   @_add_@
-                containerPort: 8080   @_add_@
+                containerPort: "8080"   @_add_@
             env:           @_add_@
               - name: PORT   @_add_@
                 value: "8081"   @_add_@
@@ -170,7 +170,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
    const mongoHost = process.env.AMBULANCE_API_MONGODB_HOST
    const mongoPort = process.env.AMBULANCE_API_MONGODB_PORT
    
-   const mongoUser = process.env.AMBULANCE_API_MONGODB_USER
+   const mongoUser = process.env.AMBULANCE_API_MONGODB_USERNAME
    const mongoPassword = process.env.AMBULANCE_API_MONGODB_PASSWORD
    
    const database = process.env.AMBULANCE_API_MONGODB_DATABASE
@@ -182,7 +182,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
    let connection;
    while(true) {
        try {
-           connection = Mongo(`mongodb://${mongoUse}:${mongoPassword}@${mongoHost}:${mongoPort}`);
+           connection = Mongo(`mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}`);
            break;
        } catch (exception) {
            print(`Cannot connect to mongoDB: ${exception}`);
@@ -289,7 +289,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                claimName: mongodb-pvc @_important_@
            containers:
            - name: *PODNAME
-             image: mongodb:latest
+             image: mongo:latest
              imagePullPolicy: Always
              ports:
              - name: mongodb-port
@@ -300,12 +300,14 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
              env:
               - name: MONGO_INITDB_ROOT_USERNAME
                 valueFrom:
-                   secretKeyRef: mongodb-auth
-                   key: username
+                   secretKeyRef: 
+                    name: mongodb-auth
+                    key: username
               - name: MONGO_INITDB_ROOT_PASSWORD
                 valueFrom:
-                   secretKeyRef: mongodb-auth
-                   key: password
+                   secretKeyRef: 
+                    name: mongodb-auth
+                    key: password
              resources:
                requests:
                  memory: "1GB"
@@ -375,91 +377,97 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
         - username=admin
         - password=admin
 
-    patches:
-    - path: patches/webapi.deployment.yaml
+    - path: patches/webapi.deployment.patch.yaml
+      target:
+        group: apps
+        version: v1
+        kind: Deployment
+        name: ${templateOption:pfx}-ambulance-webapi
     ```
 
-   Okrem referencie na zdrojové manifesty konfigurácie obsahuje tento súbor aj deklaráciu [konfiguračnej mapy - _ConfigMap_](https://kubernetes.io/docs/concepts/configuration/configmap/) a zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Ďalej obsahuje referenciu na úpravu manifestu pre nasadenie nášho webapi. Táto úprava je potrebná preto, aby sme mohli použiť hodnoty z konfiguračnej mapy a zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) v rámci konfigurácie našej služby.
+   Okrem referencie na zdrojové manifesty konfigurácie obsahuje tento súbor aj deklaráciu [konfiguračnej mapy - _ConfigMap_](https://kubernetes.io/docs/concepts/configuration/configmap/) a zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Ďalej obsahuje referenciu na úpravu manifestu pre nasadenie nášho webapi - `patches/webapi.deployment.patch.yaml`. Táto úprava je potrebná preto, aby sme mohli použiť hodnoty z konfiguračnej mapy a zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) v rámci konfigurácie našej služby. V tomto prípade realizujem úpravu pomocou manifestu typu [JSONPatch]. Dôvodom je najmä fakt, že potrebujeme zmazať pôvodné vlastnosti `value` v definíciach premenných prostredia.
 
-   Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/components/mongodb/patches/webapi.deployment.yaml` s nasledujúcim obsahom:
+   >info:> Alternatívou by bolo vytvoriť dve záplaty typu [_strategic merge_](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/patchesstrategicmerge/), pričom prvá by zmazala pôvodné záznamy v sekcii `env` pomocou `$patch: delete` directívy, a druhá záplata by ich pridala s použitím záznamov s vlatnosťou `valueFrom`. Z dôvodu ukážky použitia [JSONPatch]  sme tento spôsob nezvolili, hoci z hľadiska dlhodobého vývoja by bol asi primeranejší.
 
-    ```yaml
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: <pfx>-ambulance-webapi 
-    spec:
-      template:
-        spec:
-          initContainers:
-            - name: init-mongodb
-              env:
-                - name: AMBULANCE_API_MONGODB_HOST
-                  valueFrom:
-                    configMapKeyRef:
-                      name: mongodb-connection
-                      key: host
-                - name: AMBULANCE_API_MONGODB_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      name: mongodb-connection
-                      key: port
-                - name: AMBULANCE_API_MONGODB_USERNAME
-                  valueFrom:
-                    secretKeyRef: mongodb-auth
-                    key: username
-                - name: AMBULANCE_API_MONGODB_PASSWORD
-                  valueFrom:
-                    secretKeyRef: mongodb-auth
-                    key: password
-                - name: AMBULANCE_API_MONGODB_DATABASE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: <pfx>-ambulance-webapi-config 
-                      key: database
-                - name: AMBULANCE_API_MONGODB_COLLECTION
-                  valueFrom:
-                    configMapKeyRef:
-                      name: <pfx>-ambulance-webapi-config 
-                    key: collection
-                - name: RETRY_CONNECTION_SECONDS
-                  value: "5"
-          containers:
-            - name: <pfx>-ambulance-wl-webapi-container 
-              env:
-                - name: AMBULANCE_API_MONGODB_HOST
-                  valueFrom:
-                    configMapKeyRef:
-                      name: mongodb-connection
-                      key: host
-                - name: AMBULANCE_API_MONGODB_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      name: mongodb-connection
-                      key: port
-                - name: AMBULANCE_API_MONGODB_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: mongodb-auth
-                      key: username
-                - name: AMBULANCE_API_MONGODB_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: mongodb-auth
-                      key: password
-                - name: AMBULANCE_API_MONGODB_DATABASE
-                  valueFrom:
-                    configMapKeyRef:
-                      name: <pfx>-ambulance-webapi-config 
-                      key: database
-                - name: AMBULANCE_API_MONGODB_COLLECTION
-                  valueFrom:
-                    configMapKeyRef:
-                      name: <pfx>-ambulance-webapi-config 
-                      key: collection
-    ```
+   Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/components/mongodb/patches/webapi.deployment.patch.yaml` s nasledujúcim obsahom:
 
-   V podstate sa jedná o skrátený zápis našho pôvodného zdroja `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/deployment.yaml` s upravenými hodnotami príslušných premenných prostredia, ktoré sa načítavajú z konfiguračnej mapy a zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Keďže sa jedna o konfiguráciu typu [_Component_](https://kubectl.docs.kubernetes.io/guides/config_management/components/), tak pôvodný zdroj nemusí byť súčasťou konfigurácie, ale môže byť definovaný ako súčasť konfigurácie, ktorá používa daný komponent.
+   ```yaml
+    - op: replace
+      path: /spec/template/spec/initContainers/0/env
+      value: 
+        - name: AMBULANCE_API_MONGODB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-connection
+              key: host
+        - name: AMBULANCE_API_MONGODB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-connection
+              key: port
+        - name: AMBULANCE_API_MONGODB_USERNAME
+          valueFrom:
+            secretKeyRef: 
+              name: mongodb-auth
+              key: username
+        - name: AMBULANCE_API_MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef: 
+              name: mongodb-auth
+              key: password
+        - name: AMBULANCE_API_MONGODB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: milung-ambulance-webapi-config
+              key: database
+        - name: AMBULANCE_API_MONGODB_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: milung-ambulance-webapi-config 
+              key: collection
+    - op: replace
+      path: /spec/template/spec/containers/0/env
+      value:
+        - name: AMBULANCE_API_ENVIRONMENT
+          value: production
+        - name: AMBULANCE_API_PORT
+          value: "8080"
+        - name: AMBULANCE_API_MONGODB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-connection
+              key: host
+        - name: AMBULANCE_API_MONGODB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-connection
+              key: port
+        - name: AMBULANCE_API_MONGODB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-auth
+              key: username
+        - name: AMBULANCE_API_MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-auth
+              key: password
+        - name: AMBULANCE_API_MONGODB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: milung-ambulance-webapi-config 
+              key: database
+        - name: AMBULANCE_API_MONGODB_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: milung-ambulance-webapi-config 
+              key: collection
+        - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
+          value: "5"
+
+   ```
+
+   V podstate sa jedná o zápis príkazov na prepísanie hodnôt `env` v inicialzačnom kontajnery a v prvom z kontajnerovo v našom pôvodnom zdroji `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/deployment.yaml` s upravenými hodnotami príslušných premenných prostredia, ktoré sa načítavajú z konfiguračnej mapy a zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Keďže sa jedna o konfiguráciu typu [_Component_](https://kubectl.docs.kubernetes.io/guides/config_management/components/), tak pôvodný zdroj nemusí byť súčasťou konfigurácie tohto komponentu, tzn. nemusí byť deklarovaný v niektorom z pôvodných zdrojov načítaných prostredníctvom záznamov pod sekciou `resources`, ale môže byť definovaný ako súčasť inej konfigurácie, ktorá použije náš komponent. 
 
    Nakoniec vytvoríme novú konfiguráciu, ktorá tento komponent použije. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/with-mongo/kustomization.yaml` s týmto obsahom:
 
@@ -494,3 +502,5 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
    V prehliadači prejdite do svojho repozitára na stránke [GitHub]. V repozitári prejdite do záložky _Code_, stlačte na odkaz _1 tags_, a následne na tlačidlo _Create new release_. Zadajte do poľa _Choose tag_ hodnotu `v1.0.1`, do poľa _Release Title_ zadajte text `v1.0.1` a do poľa _Describe this release_ zadajte text `Manifests for webapi deployment`. Stlačte na tlačidlo _Publish release_.
 
    >info:> Pokiaľ ste už vytvorili tag s väčšou sémantickou verziou, tak použite tag ktorý pokračuje v číslovaní.
+
+>warning:> V reálnom prostredí musí byť správnosť manifestov overená aj ich nasadením do testovacieho klastra v rámci automatizovaných integračných testov.

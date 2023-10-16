@@ -19,8 +19,8 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
 1. Vytvorte súbor  `${WAC_ROOT}/ambulance-webapi/build/docker/DockerFile` a vložte do neho nasledujúci obsah:
 
    ```dockerfile
-   # use specific versions of images if you want - only prerelease available when writing this text
-   FROM openapitools/openapi-generator-cli:v7.0.0-beta as api
+   # use specific versions of images
+   FROM openapitools/openapi-generator-cli:v7.0.1 as api
    
    WORKDIR /local
 
@@ -42,7 +42,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
 
    ```dockerfile
    # use specific versions of images if you want
-   FROM openapitools/openapi-generator-cli:v7.0.0-beta as api
+   FROM openapitools/openapi-generator-cli:v7.0.1 as api
    ...
    ############################################
    FROM golang:latest AS build    @_add_@
@@ -139,7 +139,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
       ...
    ```
 
-   Upravte text `<your-docker-id>` tak aby obsahoval Vaše user id na strínke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
+   Upravte text `<your-docker-id>` tak aby obsahoval Vaše user id na stránke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 
    ```powershell
    .\scripts\run.ps1 docker

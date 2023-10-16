@@ -10,36 +10,34 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
 Ďalším krokom je nasadenie pripravených manifestov do lokálneho klastra. Tentokrát využijeme manifesty ktoré sme pripravili v predchádzajúcom cvičení.
 
->info:> Pamätajte, že [konfigurácia aplikácie má byť oddelená od zdrojového kódu aplikácie](https://12factor.net/build-release-run). Manifesty v repozitári `ambulance-webapi` sú preto len odporučeným predpisom, nie súčasťou konfigurácie Vášho systému. V typických prípadoch tento predpis môže byť vhodný, pri iných prípadoch je potrebné ho upraviť. Tento príklad slúži preto slúži len ako ukážka možností konfigurácie jednotlivých komponentov s využitím distribuovaných repozítarov.
+>info:> Pamätajte, že [konfigurácia aplikácie má byť oddelená od zdrojového kódu aplikácie](https://12factor.net/build-release-run). Manifesty v repozitári `ambulance-webapi` sú preto len odporučeným predpisom, nie súčasťou konfigurácie Vášho systému. V typických prípadoch tento predpis môže byť vhodný, pri iných prípadoch je potrebné ho upraviť. Tento príklad slúži i len ako ukážka možností konfigurácie jednotlivých komponentov s využitím distribuovaných repozítarov.
 
 1. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/kustomization.yaml` a vložte do neho nasledujúci obsah - upravte názov repozitára podľa toho, ako ste ho nazvali:
-
-   ```yaml
 
    ```yaml
    apiVersion: kustomize.config.k8s.io/v1beta1
    kind: Kustomization
 
    resources:
-   - 'https://github.com/<your-account>/ambulance-webapi//deploy/manifests/install' # ?ref=v1.0.1
+   - 'https://github.com/<your-account>/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
    ```
 
    >info:> Dva po sebe idúce znaky `//` oddeľujú URL repozitára od cesty k repozitáru. Pokiaľ by ste chceli získať konkrétnu verziu - git tag allebo commit - pridajte za na koniec URL  `?ref=<tag>`.
 
-2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/install/patches/ambulance-webapi.service.yaml` s nasledujúcim obsahom: 
+2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/install/patches/ambulance-webapi.service.yaml` s nasledujúcim obsahom:
 
    ```yaml
    kind: Service
-    apiVersion: v1
-    metadata:
-    name: pfx-ambulance-webapi
-    spec:  
-    ports:
-    - name: http
-        protocol: TCP
+   apiVersion: v1
+   metadata:
+   name: pfx-ambulance-webapi
+   spec:  
+   ports:
+   - name: http
+     protocol: TCP
 
-        type: NodePort
-        nodePort: 30081
+     type: NodePort
+     nodePort: 30081
    ```
 
    Tento súbor upraví definíciu služby tak, aby bola dostupná z lokálnej siete na porte `30081`.
@@ -57,7 +55,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
     components: 
     - ../../../components/version-developers
-    - https://github.com/<your-account>/ambulance-webapi//deploy/manifests/components/mongodb @_add_@
+    - https://github.com/<your-account>/ambulance-webapi//deployments/kustomize/components/mongodb @_add_@
 
     patches: @_add_@
     - path: patches/ambulance-webapi.service.yaml @_add_@
@@ -161,6 +159,6 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
 8. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 
----;
+<hr/>
 
 Týmto krokom máme front-end aj webapi nasadené v lokálnom klastri. Nevýhodou tohto nasadenia je, že tieto služby sú dostupné na rôznych portoch, čo z pohľadu prehliadača je považované za rôzne inštancie servera. Navyše by tento prístup bol problematický pri nasadení na verejne URL, pretože väčšina sietí implicitne blokuje HTTP prístup na porty mimo portov 80 a 443. V ďalšej časti si vysvetlíme ako tento problém vyriešiť a zostaviť z jednotlivých mikroslužieb takzvaný [Service Mesh], ktorý vo výsledku bude tvoriť jeden konzistentný celok aj z pohľadu používateľa.

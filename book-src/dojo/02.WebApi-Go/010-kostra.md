@@ -10,7 +10,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-010
 
 1. Prejdite na stránku [GitHub] a pod svojim účtom vytvorte nový repozitár nazvaný "ambulance-webapi". Ponechajte nastavenia prázdne.
 
-    ![Vytvorenie repozitára](images/001-01-CreateRepository.png)
+    ![Vytvorenie repozitára](img/001-01-CreateRepository.png)
 
     Po stlačení tlačidla _Create repository_ sa zobrazí stránka s návodom, ako si môžete vytvorený repozitár naklonovať na svoj počítač. Momentálne nás ale zaujíma cesta k Vašemu repozitáru, ktorá bude použitá ako idenitifikátor pre modul [Golang module](https://go.dev/doc/modules/developing) nášho projektu. V prehliadači skopírujte adresu k Vášmu repozitáru bez úvodnej schémy `https://`, to znamená reťazec v tvare `github.com/<pfx>/ambulance-webapi`.
 

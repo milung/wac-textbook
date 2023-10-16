@@ -37,6 +37,7 @@
 [jest]:https://jestjs.io/
 [jquery]:https://jquery.com/
 [jsonschema]:https://json-schema.org/
+[jsonpatch]:https://jsonpatch.com/
 [jsx]:https://reactjs.org/docs/introducing-jsx.html
 [k8s-api]:https://kubernetes.io/docs/concepts/overview/kubernetes-api/
 [k8s-controller]:https://kubernetes.io/docs/concepts/architecture/controller/
