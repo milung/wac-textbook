@@ -1,6 +1,37 @@
-# Cvičenie 1: Web aplikácia pomocou knižnice Stencil JS
+# Cvičenie: Web aplikácia pomocou knižnice Stencil JS
 
 ## <a name="ciel"></a>Cieľ cvičenia
+
+Pri cvičení sa naučíte vytvoriť jednoduchú aplikáciu založenú na technológii [WebComponents][webc].
+Naučíte sa ako túto aplikáciu zapúzdriť do samostatného softvérového kontajnera a ako túto aplikáciu
+nasadiť do existujúcej webovej stránky bežiacej na platforme Kubernetes. Tiež sa naučíte využívať
+knižnicu [Material Design Web Components][md-webc] na štylizovanie vizuálnej podoby aplikácie a vytvoriť
+API špecifikáciu a vygenerovať klienta pre túto špecifikáciu pomocou nástroja [OpenAPI][openapi].
+
+## Použíte technológie
+
+Aplikácia je implementovaná v jazyku [TypeScript][typescript] s využitím aplikačnej knižnice [Stencil JS][stencil] 
+vo forme [webových komponentov][webc]. Aplikácia je vytvorená technikou micro Front End a integrovaná do existujúceho 
+webového aplikačného rozhrania formou dynamicky načítavaných webových komponentov. Aplikácia je nasadená ako sada
+softvérových kontajnerov v systéme [Kubernetes][kubernetes]. Aplikácia využíva knižnicu webových komponentov
+[Material Design Web Components][md-webc] za účelom štylizovania vizuálnej podoby aplikácie.
+
+Pri voľbe technológií sme sa snažili o to, aby sme použili technológie, ktoré sú v súčasnosti využívané v praxi
+a zároveň spĺňaju ciele cvičenia. Pre väčšinu technológií existujú aj iné alternatívy a v prípade záujmu ich
+môžete použiť namiesto tých, ktoré sú v tomto cvičení použité. Podmienkou je aby výsledná aplikácia bola vytvorená
+ako [webový komponent][webc] a bola nasadená ako softvérový kontajner v systéme [Kubernetes][kubernetes]. Najme v prípade
+ak sa rozhodnete použiť inú technológiu ako [Stencil JS][stencil] na vytvorenie webového komponentu, je potrebné aby výsledná
+implementácia používala [Shadow DOM][shadow-dom] a [Custom Elements][custom-elements] špecifikáciu.
+
+V prípade zvolených technológií sa najčastejšie vyskytuje otázka, prečo sme zvolili [Stencil JS][stencil] namiesto
+iných alternatív ako napríklad [Angular][angular], [React][react] alebo [Vue][vue]. Dôvodom je, že [Stencil JS][stencil]
+je knižnica, ktorá je primárne zameraná na vytváranie webových komponentov a je založená na štandardoch [WebComponents][webc],
+zatiaľ čo v iných alternátívach je vývoj webových komponent len "pridaná možnosť".
+Hoci je teda možné použiť aj iné knižnice, v prípade [Stencil JS][stencil] je výhodou,
+že sa jedná o pomerne jednoduchú nadstavbu nad technológiou [WebComponents][webc], čo nám umožní viac sa zamerať na ostatné 
+aspekty full-stack vývoja a zaroveň si plne osvojiť technológiu [WebComponents][webc].
+
+## <a name="zadanie"></a>Zadanie cvičenia
 
 Vytvorenie web rozhrania pre správu čakárne ambulancie. Základná funkcionalita:
 
@@ -24,7 +55,7 @@ Aplikáciu používajú dvaja používatelia: Pacient a Ambulantná sestra
   * Ako sestra ambulancie, v prípade posúdenia vážneho stavu pacienta, chcem  
   mať možnosť zmeniť poradie čakajúcich.
 
-Technické ohraničenia:
+## Technické ohraničenia:
 
 * Aplikácia je implementovaná v programovacom jazyku TypeScript s využitím
   aplikačnej knižnice [Stencil JS][stencil] vo forme [webových komponentov][webc].
@@ -40,12 +71,21 @@ Technické ohraničenia:
   * Odporúčame pozrieť nástroj **nvm** na správu verzií NodeJS (v praxi sa môžete stretnúť s projektami vyžadujúcimi rôzne verzie)
 * Inštalácia [Visual Studio Code][vscode]
 * Nainštalované rozšírenia vo Visual Studio Code:
-  * [TSLint (ms-vscode.vscode-typescript-tslint-plugin)](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin)
+  * [ESLint (dbaeumer.vscode-eslint)](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 * Inštalácia [Git][git]
-* Vytvorený účet a organizáciu s administrátorskými právami na stránke
-  [Microsoft Azure DevOps Services][azure-devops]
+* Vytvorený účet na [GitHub]
 * Vytvorený účet na [Microsoft Azure Cloud](https://azure.microsoft.com/en-us/free/students/)
 * Predbežné zoznámenie sa s jazykom [TypeScript][typescript]
   a s knižnicou [Stencil JS][stencil]
 * Nainštalovaný systém [Docker Desktop][docker-desktop] s aktivovaným subsystémom [kubernetes][kubernetes], prípadne funkčná inštalácia balíčka docker a minikube na systéme Linux.
 * Vytvorený účet na stránke [Docker Hub][docker-hub]
+
+## Pracovné prostredie
+
+V cvičeniach prepokladáme, že všetky aktivity budete realizovať pod jedným adresárom, ktorý je v text značený ako `${WAC_ROOT}`. V tomto adresári budú vytvorené všetky repozitáre, ktoré budú vytvorené počas cvičenia a budú do neho umiestňované aj pomocné súbory. Odporúčame mať v tomto priečinku aj uložený workspace pre Visual Studio Code.
+
+Príkazy, ktoré používame na príkazovom riadku predpokladajú použitie [PowerShell] prostredia, ktorý je štandardne dostupný na platforme Windows. Hoci väčšina príkazov je funkčná bez zmeny aj v prostredí [Bash], odporúčame používať mať k dispozícii [PowerShell] prostredie aj na platforme Linux a MacOS. Postup inštalácie je popísaný na stránke [Install PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell).
+
+## Development Containers
+
+Na začiatku jednotlivých kapitol sú uvedené príkazy na aplikáciu šáblon predvytvorených kontajnerov typu [Development Containers]. Tieto slúžia na inicializáciu projektu na začiatku kapitoly do predpokladaného stavu. Uvedený príkaz nie je za bežných okolností potrebný, slúži najmä na synchronizáciu stavu projektu medzi jednotlivými cvičeniami v prípade technických problémov. Podrobný postup je uvedený v kapitole [Riešenie Problémov](../99.Problems-Resolutions/01.development-containers.md).

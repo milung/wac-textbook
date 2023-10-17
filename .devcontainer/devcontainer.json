@@ -1,0 +1,40 @@
+{
+	"name": "wac-devcontainer",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": { },
+		"context": ".."
+	},
+	"initializeCommand": "docker pull milung/book-builder:latest",
+	"overrideCommand": false,	
+
+	"features": {
+		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {},
+		"ghcr.io/devcontainers/features/powershell:latest": {
+			"version": "latest"
+		}
+	},
+
+	"forwardPorts": [
+		3380
+	],
+
+	"mounts": [
+		"source=${localWorkspaceFolder}/book-src,target=/usr/src/app/book-src,type=bind,consistency=cached"
+	],
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"DavidAnson.vscode-markdownlint",
+				"GitHub.copilot",
+				"GitHub.copilot-chat"
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "pwsh"
+			}
+		}
+	}
+}

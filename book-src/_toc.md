@@ -22,10 +22,17 @@
 
 [#include dojo/03.ServiceMesh/_toc.md]
 
-<hr />
+## [build-circle> Riešenie problémov](dojo/99.Problems-Resolutions/000-README.md)
 
-[library-books> Register](./_glossary.md)
+[#include dojo/99.Problems-Resolutions/_toc.md]
+
+<hr />
 
 ## [history-edu> Archív](./archive/000-README.md)
 
 [#include archive/_toc.md]
+
+<hr />
+
+## [library-books> Register](./_glossary.md)
+
