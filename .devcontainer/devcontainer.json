@@ -19,9 +19,9 @@
 		3380
 	],
 
-	"mounts": [
-		"source=${localWorkspaceFolder}/book-src,target=/usr/src/app/book-src,type=bind,consistency=cached"
-	],
+	// "mounts": [
+	// 	"source=${localWorkspaceFolder}/book-src,target=/usr/src/app/book-src,type=bind,consistency=cached"
+	// ],
 
 	// Configure tool-specific properties.
 	"customizations": {
