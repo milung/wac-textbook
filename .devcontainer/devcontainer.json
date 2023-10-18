@@ -6,6 +6,8 @@
 		"context": ".."
 	},
 	"initializeCommand": "docker pull milung/book-builder:latest",
+	"postCreateCommand": "ln -sf /workspaces/wac-textbook/book-src/* /usr/src/app/book-src/",
+	"postStartCommand": "cd /usr/src/app && npm run serve-spa",
 	"overrideCommand": true,	
 
 	"features": {
@@ -18,10 +20,6 @@
 	"forwardPorts": [
 		3380
 	],
-
-	// "mounts": [
-	// 	"source=${localWorkspaceFolder}/book-src,target=/usr/src/app/book-src,type=bind,consistency=cached"
-	// ],
 
 	// Configure tool-specific properties.
 	"customizations": {
