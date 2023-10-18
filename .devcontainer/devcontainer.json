@@ -9,7 +9,6 @@
 	"overrideCommand": false,	
 
 	"features": {
-		"ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {},
 		"ghcr.io/devcontainers/features/powershell:latest": {
 			"version": "latest"
 		}
