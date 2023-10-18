@@ -6,7 +6,7 @@
 		"context": ".."
 	},
 	"initializeCommand": "docker pull milung/book-builder:latest",
-	"overrideCommand": false,	
+	"overrideCommand": true,	
 
 	"features": {
 		"ghcr.io/devcontainers/features/powershell:latest": {
