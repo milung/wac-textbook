@@ -23,8 +23,10 @@
 [docker-desktop]:https://www.docker.com/products/docker-desktop
 [docker-hub]:https://hub.docker.com/
 [docker hub]:https://hub.docker.com/
+[Envoy Gateway]:https://gateway.envoyproxy.io/
 [flux]:https://fluxcd.io/
 [flux cd]:https://fluxcd.io/
+[gatewayapi]:https://gateway-api.sigs.k8s.io/
 [gin]:https://gin-gonic.com/docs/
 [git]:https://git-scm.com/
 [github]:[https://github.com/]
@@ -33,6 +35,7 @@
 [gitops]:https://www.gitops.tech/
 [Go]:https://go.dev/
 [helm]:https://helm.sh/
+[_Ingress_]:https://kubernetes.io/docs/concepts/services-networking/ingress/
 [Inversify]:https://github.com/inversify/InversifyJS
 [jest]:https://jestjs.io/
 [jquery]:https://jquery.com/
@@ -47,6 +50,7 @@
 [kubernetes]:https://kubernetes.io/
 [kustomize]:https://kustomize.io/
 [lens]:https://github.com/MuhammedKalkan/OpenLens
+[linkerd]:https://linkerd.io/
 [Lit]:https://lit.dev/
 [material design]:https://material.io/
 [md-webc]:https://github.com/material-components/material-web

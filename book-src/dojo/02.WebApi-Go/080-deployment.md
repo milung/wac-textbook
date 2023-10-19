@@ -50,8 +50,8 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
     ...
 
     resources:
-    - ../../../apps/milung-ambulance-ufe
-    - ../../../apps/milung-ambulance-webapi @_add_@
+    - ../../../apps/<pfx>-ambulance-ufe
+    - ../../../apps/<pfx>-ambulance-webapi @_add_@
 
     components: 
     - ../../../components/version-developers
@@ -63,7 +63,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
    Pretože v našom lokálnom klastri máme len jednu službu využívajúcu [MongoDB], aplikuje priamo manifesty uvedené v repozítary `ambulance-gitops`. Pri spoločnom klastri, alebo v prípade viacerých služieb využívajúcich [MongoDB] budeme postupovať odlišne, a manifesty v repozitári  `ambulance-webapi` nám poslúžia len ako príklad konfigurácie.
 
-4. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` a upravte atribút `api-base`:
+4. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a upravte atribút `api-base`:
 
    ```yaml
    ...
@@ -89,7 +89,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
      name: ambulance-webapi
      namespace: wac-hospital
    spec:
-     image: <github-account>/ambulance-webapi
+     image: <github-account>/ambulance-wl-webapi
      interval: 1m0s
    ```
 
@@ -128,10 +128,10 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
    ```yaml
    images:
-   - name: milung/ambulance-webapi @_add_@
-     newName: milung/ambulance-webapi # {"$imagepolicy":  "wac-hospital:ambulance-webapi:name"} @_add_@
+   - name: <docker-id>/ambulance-webapi @_add_@
+     newName: <docker-id>/ambulance-webapi # {"$imagepolicy":  "wac-hospital:ambulance-webapi:name"} @_add_@
      newTag: main # {"$imagepolicy": "wac-hospital:ambulance-webapi:tag"} @_add_@
-   - name: milung/ambulance-webapi
+   - name: <docker-id>/ambulance-webapi
    ...
    ```
 

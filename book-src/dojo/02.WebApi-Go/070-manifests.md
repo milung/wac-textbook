@@ -418,12 +418,12 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
         - name: AMBULANCE_API_MONGODB_DATABASE
           valueFrom:
             configMapKeyRef:
-              name: milung-ambulance-webapi-config
+              name: <pfx>-ambulance-webapi-config
               key: database
         - name: AMBULANCE_API_MONGODB_COLLECTION
           valueFrom:
             configMapKeyRef:
-              name: milung-ambulance-webapi-config 
+              name: <pfx>-ambulance-webapi-config 
               key: collection
     - op: replace
       path: /spec/template/spec/containers/0/env
@@ -455,12 +455,12 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
         - name: AMBULANCE_API_MONGODB_DATABASE
           valueFrom:
             configMapKeyRef:
-              name: milung-ambulance-webapi-config 
+              name: <pfx>-ambulance-webapi-config 
               key: database
         - name: AMBULANCE_API_MONGODB_COLLECTION
           valueFrom:
             configMapKeyRef:
-              name: milung-ambulance-webapi-config 
+              name: <pfx>-ambulance-webapi-config 
               key: collection
         - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
           value: "5"
