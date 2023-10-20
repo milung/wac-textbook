@@ -54,8 +54,8 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
 
    ![Kostra aplikácie](./img/010-01-kostra.png)
 
-   >build_circle:> Pokiaľ sa Vám pri vykonávaní príkazu objavý chyba odkadzujúca  na `Puppeteer` postupujte podľa pokynov v kapitole [Riešenie problémov](../99.Problems-Resolutions/02.puppeteer.md). Dočasne môžete tento problém  opraviťnastavením premennej prostredia `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` na  hodnotu`true`: 
-   > 
+   >build_circle:> Pokiaľ sa Vám pri vykonávaní príkazu objavý chyba odkadzujúca  na `Puppeteer` postupujte podľa pokynov v kapitole [Riešenie problémov](../99.Problems-Resolutions/02.puppeteer.md). Dočasne môžete tento problém  opraviťnastavením premennej prostredia `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` na  hodnotu `true`:
+   >
    > ```ps
    > $env:PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
    > ```
@@ -185,12 +185,11 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
           <slot></slot> @_remove_@
 
            <md-list>   @_add_@
-              {this.waitingPatients.map(entry =>   @_add_@
-                <md-list-item   @_add_@
-                  headline={entry.name}   @_add_@
-                  supportingText={"Predpokladaný vstup: " + this.isoDateToLocale(entry.estimatedStart)}   @_add_@
-                >   @_add_@
-                  <md-icon slot="start">person</md-icon>   @_add_@
+              {this.waitingPatients.map(patient =>    @_add_@
+                <md-list-item>   @_add_@
+                  <div slot="headline">{patient.name}</div>   @_add_@
+                  <div slot="supporting-text">{"Predpokladaný vstup: " + this.isoDateToLocale(patient.estimatedStart)}</div>   @_add_@
+                    <md-icon slot="start">person</md-icon>   @_add_@
                 </md-list-item>   @_add_@
               )}   @_add_@
             </md-list>   @_add_@
