@@ -75,6 +75,7 @@
 [Redux]:https://redux.js.org/
 [REST API]:https://en.wikipedia.org/wiki/Representational_state_transfer
 [REST Client]:https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+[semver]:https://semver.org/lang/sk/
 [service mesh]:https://en.wikipedia.org/wiki/Service_mesh
 [shadow-dom]:https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
 [shsdc]: https://www.siemens-healthineers.com/sk/development-center
