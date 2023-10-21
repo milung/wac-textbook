@@ -133,29 +133,29 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
          mongo up
       }
       "docker" {    @_add_@
-          docker build -t <your-docker-id>/ambulance-wl-webapi:local-build -f ${ProjectRoot}/build/docker/Dockerfile .    @_add_@
+          docker build -t <docker-id>/ambulance-wl-webapi:local-build -f ${ProjectRoot}/build/docker/Dockerfile .    @_add_@
       }    @_add_@
       default {
       ...
    ```
 
-   Upravte text `<your-docker-id>` tak aby obsahoval Vaše user id na stránke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
+   Upravte text `<docker-id>` tak aby obsahoval Vaše user id na stránke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 
    ```powershell
    .\scripts\run.ps1 docker
    ```
 
-   Po úspešnom dokončení príkazu budete mať k dispozícii nový obraz softvérového kontainera s názvom `<your-docker-id>/ambulance-wl-webapi:local-build`. Skontrolujte to pomocou príkazu:
+   Po úspešnom dokončení príkazu budete mať k dispozícii nový obraz softvérového kontainera s názvom `<docker-id>/ambulance-wl-webapi:local-build`. Skontrolujte to pomocou príkazu:
 
    ```powershell
-   docker inspect <your-docker-id>/ambulance-wl-webapi:local-build
+   docker inspect <docker-id>/ambulance-wl-webapi:local-build
    ```
 
    Obraz môžete zverejniť na stránke [Docker Hub] pomocou príkazu:
 
    ```powershell
    docker login
-   docker push <your-docker-id>/ambulance-wl-webapi:local-build
+   docker push <docker-id>/ambulance-wl-webapi:local-build
    ```
 
 6. Archivujte zmeny príkazmy v priečinku `${WAC_ROOT}/ambulance-webapi`
@@ -247,7 +247,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
          id: meta    @_add_@
          uses: docker/metadata-action@v4.6.0    @_add_@
          with:    @_add_@
-           images: <your-docker-id>/ambulance-wl-webapi     @_add_@
+           images: <docker-id>/ambulance-wl-webapi     @_add_@
            tags: |      @_add_@
                type=schedule     @_add_@
                type=ref,event=branch      @_add_@
@@ -285,7 +285,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
 
    Vytvorte nový token s názvom `ambulance-webapi CI` a priradte mu práva `Read, Write, Delete` a stlačte tlačidlo _Generate_. Vygenerovaný token si skopírujte do schránky.
 
-   Teraz prejdite do Vášho repozitára `<your-github-id>/ambulance-ufe` na stránke [GitHub]. V hornej lište zvoľte záložku _Settings_ a následne na bočnom panely zvoľte položku _Secrets and Variables_ -> _Actions_.
+   Teraz prejdite do Vášho repozitára `<github-id>/ambulance-ufe` na stránke [GitHub]. V hornej lište zvoľte záložku _Settings_ a následne na bočnom panely zvoľte položku _Secrets and Variables_ -> _Actions_.
    Na tejto stánke stlačte na tlačidlo _New repository secret_ a vytvorte novú premennú s názvom `DOCKERHUB_TOKEN` a ako hodnotu vložte zo schránky skopírovaný token. Opäť stlačte na tlačidlo _New repository secret_ a vytvorte premmenú s názvom `DOCKERHUB_USERNAME` a ako hodnotu vložte svoje používateľské meno na Docker Hub.
 
    ![Premmenné a kľúče pre beh priebežnej integrácie](./img/060-04-GithubSecrets.png)
@@ -296,7 +296,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
 
    ![GitHub Actions](./img/060-02-NewRelease.png)
 
-   V repozitári prejdite do záložky _Actions_ a skontrolujte, že sa spustil predpis _Test and Publish WebAPi Container Image_ pre novo vytvorený tag. Po jeho ukončení môžete overiť na stránke [Docker Hub], že sa v repozitári vytvoril nový obraz softvérového kontajnera s názvom `<your-docker-id>/ambulance-wl-webapi:v1.0.0`.
+   V repozitári prejdite do záložky _Actions_ a skontrolujte, že sa spustil predpis _Test and Publish WebAPi Container Image_ pre novo vytvorený tag. Po jeho ukončení môžete overiť na stránke [Docker Hub], že sa v repozitári vytvoril nový obraz softvérového kontajnera s názvom `<docker-id>/ambulance-wl-webapi:v1.0.0`.
 
 8. Prevezmite si zmeny zo svojho [GitHub] repozitára. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 

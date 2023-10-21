@@ -25,11 +25,11 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
       name: ambulance-ufe
       namespace: wac-hospital
     spec:
-      image: <vase-docker-id>/ambulance-ufe @_important_@
+      image: <docker-id>/ambulance-ufe @_important_@
       interval: 1m0s
     ```
 
-    >warning:> Zameňte vase-docker-id !
+    >warning:> Zameňte <docker-id> !
 
     Vytvote tiež súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ufe-controller.image-repository.yaml` s obsahom:
 
@@ -88,8 +88,8 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
    kind: Component 
    
    images:
-   - name: <your-docker-id>/ambulance-ufe  @_important_@
-     newName: <your-docker-id>/ambulance-ufe # {"$imagepolicy":  "wac-hospital:ambulance-ufe:name"} @_important_@
+   - name: <docker-id>/ambulance-ufe  @_important_@
+     newName: <docker-id>/ambulance-ufe # {"$imagepolicy":  "wac-hospital:ambulance-ufe:name"} @_important_@
      newTag: main # {"$imagepolicy": "wac-hospital::ambulance-ufe:tag"} @_important_@
    
    - name: milung/ufe-controller

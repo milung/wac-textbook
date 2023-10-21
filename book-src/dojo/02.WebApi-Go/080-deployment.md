@@ -89,7 +89,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
      name: ambulance-webapi
      namespace: wac-hospital
    spec:
-     image: <github-account>/ambulance-wl-webapi
+     image: <github-id>/ambulance-wl-webapi
      interval: 1m0s
    ```
 

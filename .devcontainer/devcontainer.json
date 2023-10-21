@@ -6,9 +6,12 @@
 		"context": ".."
 	},
 	"initializeCommand": "docker pull milung/book-builder:latest",
-	"postCreateCommand": "ln -sf /workspaces/wac-textbook/book-src/* /usr/src/app/book-src/",
 	"postStartCommand": "cd /usr/src/app && npm run serve-spa",
 	"overrideCommand": true,	
+
+	"remoteEnv": {
+		"BOOK_SRC": "${containerWorkspaceFolder}/book-src"
+	},
 
 	"features": {
 		"ghcr.io/devcontainers/features/powershell:latest": {
