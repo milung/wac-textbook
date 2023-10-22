@@ -93,7 +93,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
               - name: PORT   @_add_@
                 value: "8081"   @_add_@
               - name:   URL   @_add_@
-                value: http://localhost:8080/.openapi/   @_add_@
+                value: /openapi   @_add_@
               - name: BASE_URL   @_add_@
                 value: /openapi-ui   @_add_@
               - name: FILTER   @_add_@

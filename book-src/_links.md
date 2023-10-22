@@ -84,6 +84,7 @@
 [stencil]:https://stenciljs.com/
 [swagger hub]:https://app.swaggerhub.com/home
 [swagger]:https://swagger.io/docs/specification/about/
+[swagger ui]:https://swagger.io/tools/swagger-ui/
 [tdd]:https://en.wikipedia.org/wiki/Test-driven_development
 [troubleshooting]:/dojo/99.Problems-Resolutions/000-README.md
 [twelves]: https://12factor.net/ 

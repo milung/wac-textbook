@@ -194,7 +194,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
     )
     
     func AddRoutes(engine *gin.Engine) {
-      group := engine.Group("/{{{basePathWithoutHost}}}")
+      group := engine.Group("{{{basePathWithoutHost}}}")
       {{#apiInfo}}{{#apis}}
       {
         api := new{{classname}}()

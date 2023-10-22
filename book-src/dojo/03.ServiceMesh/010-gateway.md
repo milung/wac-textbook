@@ -200,54 +200,131 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
    parentRefs:
        - name: wac-hospital-gateway
    rules:
+   - matches:
+      - path:
+          type: PathPrefix
+          value: /<pfx>-api
+    filters: 
+    - type: URLRewrite    @_important_@
+      urlRewrite:    @_important_@
+        path:    @_important_@
+          type: ReplacePrefixMatch    @_important_@
+          replacePrefixMatch: /api    @_important_@
+    backendRefs:
+      - group: ""
+        kind: Service
+        name: <pfx>-ambulance-webapi
+        port: 80
+    ```
+
+   Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta zdroja začína segmentom `/<pfx>-api` budú presmerované na službu `<pfx>-ambulance-webapi`.
+   Všimnite si časť `filters` - tu špecifikujeme, že sa ma cesta `/<pfx>-api` zameniť za `/api` pred tým, ako sa požiadavka odovzdá službe `<pfx>-ambulance-webapi`. Toto je potrebné, pretože služba `<pfx>-ambulance-webapi` očakáva, že API požiadavky budú zasielané na cestu `/api`.
+
+   Ďalej do toho istého súboru doplňte nové pravidlo:
+
+   ```yaml
+   ...
+   spec:
+     rules:
        - matches:
            - path:
                type: PathPrefix
                value: /<pfx>-api
-       backendRefs:
-           - group: ""
-           kind: Service
-           name: <pfx>-ambulance-webapi
-           port: 80
+         ...
+       - matches:    @_add_@
+           - path:    @_add_@
+               type: PathPrefix    @_add_@
+               value: /<pfx>-openapi-ui    @_add_@
+         backendRefs:    @_add_@
+           - group: ""    @_add_@
+             kind: Service    @_add_@
+             name: <pfx>-openapi-ui    @_add_@
+             port: 80    @_add_@
+   ```
+
+   Požiadavky na cestu `/<pfx>-openapi-ui` budú presmerované na službu `<pfx>-openapi-ui`, ktorú ešte musíme nakonfigurovať - jedná sa o službu, ktorá sprístupní [Swagger UI] kontajner, nakonfigurovaný v našich manifestoch webapi služby. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/<pfx>-ambulance-webapi/openapi-ui.service.yaml`:
+
+   ```yaml
+   kind: Service
+   apiVersion: v1
+   metadata:
+     name: <pfx>-openapi-ui
+   spec:  
+     selector:
+       pod: <pfx>-ambulance-webapi-label
+     ports:
+     - name: http
+       protocol: TCP
+       port: 80  
+       targetPort: 8081
+   ```
+
+   Ešte raz upravte súbor súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/http-route.yaml`, tentoraz pridáme obsluhu na cestu `/<pfx>-openapi`, z ktorej bude swagger ui načítavať OpenAPI špecifikáciu:
+
+   ```yaml
+   ...
+   spec:
+     rules:
        - matches:
            - path:
                type: PathPrefix
-               value: /<pfx>-openapi
-       backendRefs:
-           - group: ""
-           kind: Service
-           name: <pfx>-openapi
-           port: 80
-    ```
+               value: /<pfx>-api
+         ...
+       - matches:
+           - path:
+               type: PathPrefix
+               value: /<pfx>-openapi-ui
+         ...
+       - matches:   @_add_@
+           - path:   @_add_@
+               type: Exact   @_add_@
+               value: /<pfx>-openapi   @_add_@
+         filters:    @_add_@
+         - type: URLRewrite   @_add_@
+           urlRewrite:   @_add_@
+             path:   @_add_@
+               type: ReplaceFullPath   @_add_@
+               replaceFullPath: /openapi   @_add_@
+         backendRefs:   @_add_@
+           - group: ""   @_add_@
+             kind: Service   @_add_@
+             name: <pfx>-ambulance-webapi   @_add_@
+             port: 80   @_add_@
+   ```
 
-    Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta zdroja začína segmentom `/api` budú presmerované na službu `ambulance-webapi`. Požiadavky na cestu `/openapi` budú presmerované na službu `<pfx>-openapi`, ktorú ešte musíme nakonfigurovať. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/<pfx>-ambulance-webapi/openapi-service.yaml`:
+   Pretože sme oproti manifestom v repozitári `ambulance-webapi` upravili cestu z ktorej bude [Swagger UI] načítavať OpenAPI špecifikáciu a na ktorej bude obsluhovaný, musíme upraviť aj konfiguráciu [Swagger UI] kontajnera. Tieto úpravy sú potrebné, aby sme vedeli nasadiť naše služby do spoločného klastra bez konfliktov so službami ostatných študentov. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/patches/ambulance-webapi.deployment.yaml`:
 
-    ```yaml
-    kind: Service
-    apiVersion: v1
-    metadata:
-      name: <pfx>-openapi
-    spec:  
-      selector:
-        pod: <pfx>-ambulance-webapi-label
-      ports:
-      - name: http
-        protocol: TCP
-        port: 80  
-        targetPort: 8081
-    ```
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: <pfx>-ambulance-webapi 
+   spec:
+     template:
+       spec:
+         containers:
+           - name: openapi-ui
+             env:
+               - name: URL
+                 value: /<pfx>-openapi
+               - name: BASE_URL
+                 value: /<pfx>-openapi-ui
+   ```
 
-    Nakoniec upravte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/kustomization.yaml`:
+   Nakoniec upravte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/kustomization.yaml`:
 
-    ```yaml
-    ...
-    resources:
-    - 'https://github.com/milung/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
-    - openapi.service.yaml @_add_@
-    - http-route.yaml @_add_@
-    ```
+   ```yaml
+   ...
+   resources:
+   - 'https://github.com/milung/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
+   - openapi-ui.service.yaml @_add_@
+   - http-route.yaml @_add_@
+    @_add_@
+   patches: @_add_@
+   - path: patches/ambulance-webapi.deployment.yaml @_add_@
+   ```
 
-    >homework:> Upravte manifesty v repozitári `ambulance-webapi` tak, aby obsahovali tu pridané konfigurácie pre objekt  _Service_ `<pfx>-openapi` a pre objekt _HTTPRoute_ `<pfx>-ambulance-webapi`, pričom _HttpRoute_ objekt bude voliteľný konfiguračný komponent `with-gateway-api`. Následne upravte konfiguráciu v repozitári `ambulance-gitops` tak, aby sa tieto konfigurácie aplikovali.
+   >homework:> Upravte manifesty v repozitári `ambulance-webapi` tak, aby obsahovali tu pridané konfigurácie pre objekt  _Service_ `<pfx>-openapi` a pre objekt _HTTPRoute_ `<pfx>-ambulance-webapi`, pričom _HttpRoute_ objekt bude voliteľný konfiguračný komponent `with-gateway-api`. Následne upravte konfiguráciu v repozitári `ambulance-gitops` tak, aby sa tieto konfigurácie aplikovali.
 
 3. Nakoniec upravíme deklaráciu našej mikro front-end aplikácie, tak aby jej atribút `api-base` ukazoval na cestu webapi na to istom hostiteľskom počítači. :
 
@@ -272,7 +349,7 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
     kubectl kustomize ambulance-gitops/clusters/localhost
     ```
 
-4. Archivujte zmeny do vzdialeného repozitára
+5. Archivujte zmeny do vzdialeného repozitára
 
    ```ps
    git add .
