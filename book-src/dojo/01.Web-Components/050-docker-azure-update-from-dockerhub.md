@@ -68,8 +68,7 @@ aktualizovala, keď sa zmení jej docker obraz na Docker Hube.
       uses: docker/metadata-action@v3
       with:
         images: |
-          <pfx>/ufe-controller @_important_@
-
+          <dockerhub-registry>/ambulance-ufe @_important_@
         tags: |
           type=schedule
           type=ref,event=branch
@@ -81,7 +80,7 @@ aktualizovala, keď sa zmení jej docker obraz na Docker Hube.
           type=raw,value=latest,enable={{is_default_branch}} # `latest` pre každý komit do main vetvy @_important_@
    ```
 
-   >info:> V tomto cvičení vždy vytvárame obraz s tagom `<pfx>/ambulance-ufe:latest` pre zjednodušenie ďalšieho postupu. V reálnym projektoch sa `latest` tag vytvorí len pri oficiálnych otestovaných vydaniach novej verzie - napríklad pri pridaní tagu vo formáte `v1.0.1`.
+   >info:> V tomto cvičení vždy vytvárame obraz s tagom `<dockerhub-registry>/ambulance-ufe:latest` pre zjednodušenie ďalšieho postupu. V reálnym projektoch sa `latest` tag vytvorí len pri oficiálnych otestovaných vydaniach novej verzie - napríklad pri pridaní tagu vo formáte `v1.0.1`.
 
    Ďalej pridáme krok na vytvorenie viac-platformového obrazu:
 
