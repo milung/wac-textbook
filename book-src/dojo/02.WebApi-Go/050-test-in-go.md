@@ -125,29 +125,34 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
         suite.Run(t, new(AmbulanceWlSuite))
     }
 
-    type DbServiceMock struct {   @_add_@
-        mock.Mock   @_add_@
-    }   @_add_@
-        @_add_@
-    func (this *DbServiceMock) CreateDocument(ctx context.Context, id string, document interface{}) error {   @_add_@
-        args := this.Called(ctx, id, document)    @_add_@
-        return args.Error(0)    @_add_@
-    }   @_add_@
-    @_add_@
-    func (this *DbServiceMock) FindDocument(ctx context.Context, id string) (interface{}, error) {    @_add_@
-        args := this.Called(ctx, id)    @_add_@
-        return args.Get(0), args.Error(1)   @_add_@
-    }   @_add_@
-    @_add_@
-    func (this *DbServiceMock) UpdateDocument(ctx context.Context, id string, document interface{}) error {   @_add_@
-        args := this.Called(ctx, id, document)    @_add_@
-        return args.Error(0)    @_add_@
-    }   @_add_@
-    @_add_@
-    func (this *DbServiceMock) DeleteDocument(ctx context.Context, id string) error {   @_add_@
-        args := this.Called(ctx, id)    @_add_@
-        return args.Error(0)    @_add_@
-    }   @_add_@
+    type DbServiceMock[DocType interface{}] struct {    @_add_@           @_add_@
+        mock.Mock              @_add_@
+    }              @_add_@
+               @_add_@
+    func (this *DbServiceMock[DocType]) CreateDocument(ctx context.Context, id string, document *DocType) error {              @_add_@
+        args := this.Called(ctx, id, document)             @_add_@
+        return args.Error(0)               @_add_@
+    }              @_add_@
+               @_add_@
+    func (this *DbServiceMock[DocType]) FindDocument(ctx context.Context, id string) (*DocType, error) {               @_add_@
+        args := this.Called(ctx, id)               @_add_@
+        return args.Get(0).(*DocType), args.Error(1)               @_add_@
+    }              @_add_@
+               @_add_@
+    func (this *DbServiceMock[DocType]) UpdateDocument(ctx context.Context, id string, document *DocType) error {              @_add_@
+        args := this.Called(ctx, id, document)             @_add_@
+        return args.Error(0)               @_add_@
+    }              @_add_@
+               @_add_@
+    func (this *DbServiceMock[DocType]) DeleteDocument(ctx context.Context, id string) error {             @_add_@
+        args := this.Called(ctx, id)               @_add_@
+        return args.Error(0)               @_add_@
+    }              @_add_@
+               @_add_@
+    func (this *DbServiceMock[DocType]) Disconnect(ctx context.Context) error {            @_add_@
+        args := this.Called(ctx)               @_add_@
+        return args.Error(0)               @_add_@
+    }              @_add_@
 
     func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
     ...
@@ -159,30 +164,33 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
 
     ```go
     ...
-    func (this *DbServiceMock) DeleteDocument(ctx context.Context, id string) error {
+    func (this *DbServiceMock) Disconnect(ctx context.Context) error {
         ...
     }
 
-    func (suite *AmbulanceWlSuite) SetupTest() {    @_add_@
-        suite.dbServiceMock = &DbServiceMock{}    @_add_@
-    @_add_@
-        suite.dbServiceMock.    @_add_@
-          On("FindDocument", mock.Anything, mock.Anything).     @_add_@
-          Return(     @_add_@
-              &Ambulance{     @_add_@
-                  Id: "test-ambulance",     @_add_@
-                  WaitingList: []WaitingListEntry{    @_add_@
-                      {     @_add_@
-                          Id:                       "test-entry",     @_add_@
-                          PatientId:                "test-patient",     @_add_@
-                          WaitingSince:             time.Now(),     @_add_@
-                          EstimatedDurationMinutes: 101,    @_add_@
-                      },    @_add_@
-                  },    @_add_@
-              },    @_add_@
-              nil,    @_add_@
-          )     @_add_@
-    }   @_add_@
+    func (suite *AmbulanceWlSuite) SetupTest() {    @_add_@             @_add_@
+        suite.dbServiceMock = &DbServiceMock[Ambulance]{}                @_add_@
+                 @_add_@
+        // Compile time Assert that the mock is of type db_service.DbService[Ambulance]              @_add_@
+        var _ db_service.DbService[Ambulance] = suite.dbServiceMock              @_add_@
+                 @_add_@
+        suite.dbServiceMock.                 @_add_@
+            On("FindDocument", mock.Anything, mock.Anything).                @_add_@
+            Return(              @_add_@
+                &Ambulance{              @_add_@
+                    Id: "test-ambulance",                @_add_@
+                    WaitingList: []WaitingListEntry{                 @_add_@
+                        {                @_add_@
+                            Id:                       "test-entry",              @_add_@
+                            PatientId:                "test-patient",                @_add_@
+                            WaitingSince:             time.Now(),                @_add_@
+                            EstimatedDurationMinutes: 101,               @_add_@
+                        },               @_add_@
+                    },               @_add_@
+                },               @_add_@
+                nil,                 @_add_@
+            )                @_add_@
+    }                @_add_@
     
     func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
     ...
@@ -244,9 +252,9 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
 
    >info:> Pokiaľ máte vo Visual Studio Code nainštalované rozšírenie [golang.go](https://marketplace.visualstudio.com/items?itemName=golang.Go), tak môžete testy vykonávať alebo ladiť priamo z prostredia VS Code.
 
-   Pokiaľ by sme postupovali striktne metódou [TDD], tak by v tomto kroku ešte nebola naša metóda `UpdateWaitingListEntry` implementovaná - vracala by chybový kód `501 - Not Implemented`. Funkcionalitu by sme postupne pridávali len na základe nových požiadaviek, k čomu by sme vytvárali potrebné testy a prípadne by sme refaktorovali zdrojový kód pri súčasnom zachovaní pôvodnej požadovanej funkcionality - overenej už existujúcimi testami. Testy by zároveň odrážali, aká funkcionalita je požadavaná a implementovaná.Častým nedostatkom testovacích sád je totiž, že sa len snažia opísať a verifikovať ako je kód implementovaný, ale nezohľadňujú, či je implementovaný kód vôbec požadovaný a z akej požadovanej funkcionality daná implementácia vychádza.
+   Pokiaľ by sme postupovali striktne metódou [TDD], tak by v tomto kroku ešte nebola naša metóda `UpdateWaitingListEntry` implementovaná - vracala by chybový kód `501 - Not Implemented`. Funkcionalitu by sme postupne pridávali len na základe nových požiadaviek, k čomu by sme vytvárali potrebné testy a prípadne by sme refaktorovali zdrojový kód pri súčasnom zachovaní pôvodnej požadovanej funkcionality - overenej už existujúcimi testami. Testy by zároveň odrážali, aká funkcionalita je požadavaná a implementovaná. Častým nedostatkom nekvalitných testovacích sád je, že sa len snažia opísať a verifikovať ako je kód implementovaný, ale nezohľadňujú, či je implementovaný kód vôbec požadovaný a z akej požadovanej funkcionality daná implementácia vychádza.
 
-9. Upravte súbor `${WAC_ROOT}/ambulance-webapi/scripts/run.ps1` - doplňte príkaz na vykonávanie testov: 
+9. Upravte súbor `${WAC_ROOT}/ambulance-webapi/scripts/run.ps1` - doplňte príkaz na vykonávanie testov:
 
    ```ps
    ...
@@ -261,3 +269,5 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
        "mongo" {
        ...
    ```
+
+>homework:> Samostatne doplňte aspoň jeden test pre službu `ambulance-webapi`

@@ -213,7 +213,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
    Táto implementácia je dočasná, pred jej dokončením pripravíme pomocnú triedu, ktorá bude zodpovedná za prístup k databáze.
 
-3. Za účelom prístupu k dokumentom a práce s nimi vytvoríme nové triedy v samostatnom  _package_ `db_service`. Pretože programovací jazyk [Go] nedovoľuje vytvárať cyklické závislosti medzi jednotlivými balíčkami, bude táto implementácia abstraktná, to znamená, že nebude používať žiadne typy z balíčka `ambulance_wl`. K serializácii objektov pritom bude využívať anotácie vygenerované openapi generátorom kódu. Napríklad typ `Condition` v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/model_condition.go` je definovaný takto
+3. Za účelom prístupu k dokumentom a práce s nimi vytvoríme nové triedy v samostatnom  _package_ `db_service`. Pretože programovací jazyk [Go] nedovoľuje vytvárať cyklické závislosti medzi jednotlivými balíčkami, bude táto implementácia používať šablóny typov - [_generics_], to znamená, že nebude používať žiadne typy z balíčka `ambulance_wl`. K serializácii objektov pritom bude využívať anotácie vygenerované openapi generátorom kódu. Napríklad typ `Condition` v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/model_condition.go` je definovaný takto
 
    ```go
    type Condition struct {
@@ -229,7 +229,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
    ```
 
-   Napríklad anotácia `json:"value"` určuje, že vlastnosť `Value` sa bude do JSON objektu serializovať pod kľúčom `value`. Knižnica mongo podporuje `json` aj `bson` (binary JSON) anotácie. Vďaka tomu bude možné použiť túto triedu priamo na serializáciu a deserializáciu objektov z databázy.
+   Anotácia `json:"value"` určuje, že vlastnosť `Value` sa bude do JSON objektu serializovať pod kľúčom `value`. Knižnica mongo podporuje `json` aj `bson` (binary JSON) anotácie. Vďaka tomu bude možné použiť túto triedu priamo na serializáciu a deserializáciu objektov z databázy.
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` s obsahom:
 
@@ -242,6 +242,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         "log"
         "os"
         "strconv"
+        "sync"
+        "sync/atomic"
         "time"
 
         "go.mongodb.org/mongo-driver/bson"
@@ -249,15 +251,16 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         "go.mongodb.org/mongo-driver/mongo/options"
     )
 
-    type DbService interface {
-        CreateDocument(ctx context.Context, id string, document interface{}) error
-        FindDocument(ctx context.Context, id string) (interface{}, error)
-        UpdateDocument(ctx context.Context, id string, document interface{}) error
+    type DbService[DocType interface{}] interface {
+        CreateDocument(ctx context.Context, id string, document *DocType) error
+        FindDocument(ctx context.Context, id string) (*DocType, error)
+        UpdateDocument(ctx context.Context, id string, document *DocType) error
         DeleteDocument(ctx context.Context, id string) error
+        Disconnect(ctx context.Context) error
     }
 
-    var NotFoundError = fmt.Errorf("Document not found!")
-    var ConflictError = fmt.Errorf("Conflict: Document already exists!")
+    var ErrNotFound = fmt.Errorf("document not found")
+    var ErrConflict = fmt.Errorf("conflict: document already exists")
 
     type MongoServiceConfig struct {
         ServerHost string
@@ -269,23 +272,23 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         Timeout    time.Duration
     }
 
-    type mongoSvc struct {
+    type mongoSvc[DocType interface{}] struct {
         MongoServiceConfig
         client     atomic.Pointer[mongo.Client]
         clientLock sync.Mutex
     }
     ```
 
-   Rozhranie DbService je generickým rozhraním, vo zvyšku našej implementácie budeme predpokladať, že pracujeme s [dokumentovou databázou](https://en.wikipedia.org/wiki/Document-oriented_database) ale nebude zavádzať explicitné závislosti na konkrétnej implementácii. V našom prípade bude konkrétnou implementáciou trieda `mongoSvc`, ktorá bude využívať knižnicu [mongo-go-driver](https://github.com/mongodb/mongo-go-driver). Všimnite si, že tento typ nie je mimo package `db_service` viditeľný (začína malým písmenom), čo znamená, že ho budeme môcť použiť iba v rámci tohto balíčka.
+   Rozhranie DbService je generickým rozhraním, konkrétny typ inštancie bude určený pri jej vytváraní naviazaním na typ `DocType`. Vo zvyšku našej implementácie budeme predpokladať, že pracujeme s [dokumentovou databázou](https://en.wikipedia.org/wiki/Document-oriented_database) ale nebude zavádzať explicitné závislosti na konkrétnej implementácii. V našom prípade bude konkrétnou implementáciou trieda `mongoSvc`, ktorá bude využívať knižnicu [mongo-go-driver](https://github.com/mongodb/mongo-go-driver). Všimnite si, že tento typ nie je mimo package `db_service` viditeľný (začína malým písmenom), čo znamená, že ho budeme môcť použiť iba v rámci tohto balíčka.
 
 4. Typ `mongoSvc` bude zdieľaný medzi jednotlivými požiadavkami prichádzajúcimi na náš server. Preto bude obsahovať aj synchronizačný mechanizmus, ktorý zabezpečí, že v jednom okamihu bude existovať iba jedna inštancia triedy `mongo.Client`. Kód triedy `mongo.Client` je reentrantný, prístup k metódam tejto triedy preto nie je potrebné synchronizovať.
 
    Pri vytváraní novej inštancie použijeme buď explicitne dodané parametre v type `MongoServiceConfig` alebo, ak nie sú poskytnuté, pokúsime sa ich načítať z premenných prostredia alebo použijeme predvolené hodnoty. Doplňte na koniec súboru `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` nasledujúci kód:
 
    ```go
-   func NewMongoService(
+   func NewMongoService[DocType interface{}](
         config MongoServiceConfig,
-    ) DbService {
+    ) DbService[DocType] {
         enviro := func(name string, defaultValue string) string {
             if value, ok := os.LookupEnv(name); ok {
                 return value
@@ -293,7 +296,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             return defaultValue
         }
 
-        svc := &mongoSvc{}
+        svc := &mongoSvc[DocType]{}
         svc.MongoServiceConfig = config
 
         if svc.ServerHost == "" {
@@ -319,7 +322,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         }
 
         if svc.DbName == "" {
-            svc.DbName = enviro("AMBULANCE_API_MONGODB_DBNAME", "<pfx>-ambulance-wl")
+            svc.DbName = enviro("AMBULANCE_API_MONGODB_DATABASE", "milung-ambulance-wl")
         }
 
         if svc.Collection == "" {
@@ -335,25 +338,33 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 svc.Timeout = 10 * time.Second
             }
         }
+
+        log.Printf(
+            "MongoDB config: //%v@%v:%v/%v/%v",
+            svc.UserName,
+            svc.ServerHost,
+            svc.ServerPort,
+            svc.DbName,
+            svc.Collection,
+        )
         return svc
     }
    ```
 
    >info:> Odporúčame Vám zoznámiť sa s knižnicou [viper], ktorá poskytuje flexibilnejšie spôsoby konfigurácie aplikácie v cieľovom prostredí
 
-5. Ďalej do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplňte pomocné funkcie na pripojenie sa a odpojenie sa od databázy. Všimnite si akým spôsobom zabezpečuje synchronizáciu prístupu k inštancii triedy `mongo.Client`. Hoci by sme mohli univerzálne používať mutex `clientLock`, prístup k nemu by vyvolával prerušenie daného vlákna výpočtu, čo by z hľadiska celkového výkonu bolo neefektívne. Preto používame [atomic pointer](https://pkg.go.dev/sync/atomic#Pointer) ktorý umožňuje atomické načítanie a zápis hodnoty, a len v prípade kedy musíme vytvoriť novú inštanciu klienta, alebo ju odstrániť, vstúpime do kritickej sekcie riadenej mutexom. PRetože priebeh vypočtu môže byť ukončený náhlou výnimkou, používame konštrukt `defer`, ktorý zabezpečí, že sa uvedený výraz vykoná vždy keď opustíme danú funkciu.
+5. Ďalej do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplňte pomocné funkcie na pripojenie sa a odpojenie sa od databázy. Všimnite si akým spôsobom zabezpečuje synchronizáciu prístupu k inštancii triedy `mongo.Client`. Hoci by sme mohli univerzálne používať mutex `clientLock`, prístup k nemu by mohol vyvolať prerušenie daného vlákna výpočtu, čo by z hľadiska celkového výkonu bolo neefektívne. Preto používame [atomic pointer](https://pkg.go.dev/sync/atomic#Pointer) ktorý umožňuje atomické načítanie a zápis hodnoty, a len v prípade kedy musíme vytvoriť novú inštanciu klienta, alebo ju odstrániť, vstúpime do kritickej sekcie riadenej mutexom. Pretože priebeh vypočtu môže byť ukončený náhlou výnimkou, používame konštrukt `defer`, ktorý zabezpečí, že sa uvedený výraz vykoná vždy keď opustíme danú funkciu.
 
     ```go
-    ....
-    func (this *mongoSvc) connect(ctx context.Context) (*mongo.Client, error) {
+    func (this *mongoSvc[DocType]) connect(ctx context.Context) (*mongo.Client, error) {
         // optimistic check
-        client := this.client.Load() @_important_@
+        client := this.client.Load()
         if client != nil {
             return client, nil
         }
 
-        this.clientLock.Lock() @_important_@
-        defer this.clientLock.Unlock() @_important_@
+        this.clientLock.Lock()
+        defer this.clientLock.Unlock()
         // pesimistic check
         client = this.client.Load()
         if client != nil {
@@ -378,7 +389,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         }
     }
 
-    func (this *mongoSvc) disconnect(ctx context.Context) error {
+    func (this *mongoSvc[DocType]) Disconnect(ctx context.Context) error {
         client := this.client.Load()
 
         if client != nil {
@@ -397,23 +408,26 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
-6. Následne do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplníme implementáciu rozhrania `DbService` nad typom `mongoSvc`. Vo všetkých metódach sa pokúsime načítať dokument (ambulanciu) s príslušným id a pokiaľ sa v databáze nenachádza vrátime preddefinovanú inštanciu `NotFoundError`typu `error`, respektíve v prípade vytvárania dokumentu vrátime chybu `ConflictError` ak taký dokument už existuje.
+6. Následne do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplníme implementáciu rozhrania `DbService` nad typom `mongoSvc`. Vo všetkých metódach sa pokúsime načítať dokument (ambulanciu) s príslušným id a pokiaľ sa v databáze nenachádza vrátime preddefinovanú inštanciu typu `error` `ErrNotFoundE`, respektíve v prípade vytvárania dokumentu vrátime chybu `ErrConflict` ak taký dokument už existuje.
 
-   Všimnite si používanie typu `context.Context`. Tento typ je štandarnde použitý ako prvý parameter funkcií, ktoré využívajú asynchrónne spracovanie údajov alebo implementujú dlhotrvajúci výpočet. `Context` umožňuje propagovať žiadosť o predčasné ukončenie výpočtu do svojich podriadených kontextov, vytvorených jeho metódami `With....`. Tiež umožňuje predávať medzi vláknami údaje, ktoré sú spoločné pre celý výpočet. V našom prípade používame `Context` na to aby sme časovo ohraničili dobu počas ktorej sa má klient pokúšať získať odpoveď z pripojenej databázy.
+   Všimnite si používanie typu [`context.Context`](https://pkg.go.dev/context). Tento typ je štandarnde použitý ako prvý parameter funkcií, ktoré využívajú asynchrónne spracovanie údajov alebo implementujú dlhotrvajúci výpočet. `Context` umožňuje propagovať žiadosť o predčasné ukončenie výpočtu do svojich podriadených kontextov, vytvorených jeho metódami `With....`. Tiež umožňuje predávať medzi vláknami údaje, ktoré sú spoločné pre celý výpočet. V našom prípade používame `Context` na to aby sme časovo ohraničili dobu počas ktorej sa má klient pokúšať získať odpoveď z pripojenej databázy.
 
-   Volanie `context.Cancel()` nastaví _context_ do stavu `Done`, čo môžeme použiť, ak by sme čakali na dokončenie výpočtu asynchrónnym spôsobom alebo ak by sme chceli _context_ - teda výpočet riadený týmto _context_-om - predčasne ukončiť z iného vlákna. Túto možnosť tu ale nevyužívame.
+   Volanie `context.Cancel()` nastaví _context_ do stavu `Done`, čo môžeme použiť, ak by sme čakali na dokončenie výpočtu asynchrónnym spôsobom alebo ak by sme chceli _context_ - teda výpočet riadený týmto _context_-om - predčasne ukončiť z iného vlákna. Túto možnosť tu ale nevyužívame. Nezabudnitne, že novovytvorene inštancie typu `context.Context` sú vždy v stave `Done` a preto je potrebné ich vytvárať pomocou metód `context.With...`, a na konci ich životného cyklu je potrebné zavolať funkciu `context.Cancel()`. V našom prípade to robíme pomocou konštruktu `defer` a volaním poskytnutej funkcie `contextCancel()`, ktorá interne prevolá spomenutú metódu `context.Cancel()`.
 
     ```go
-    func (this *mongoSvc) CreateDocument(ctx context.Context, id string, document interface{}) error {
-        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)  @_important_@
+    func (this *mongoSvc[DocType]) CreateDocument(ctx context.Context, id string, document *DocType) error {
+        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
         defer contextCancel()
         client, err := this.connect(ctx)
+        if err != nil {
+            return err
+        }
         db := client.Database(this.DbName)
         collection := db.Collection(this.Collection)
         result := collection.FindOne(ctx, bson.D{{Key: "id", Value: id}})
         switch result.Err() {
         case nil: // no error means there is conflicting document
-            return ConflictError @_important_@
+            return ErrConflict
         case mongo.ErrNoDocuments:
             // do nothing, this is expected
         default: // other errors - return them
@@ -424,8 +438,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         return err
     }
 
-    func (this *mongoSvc) FindDocument(ctx context.Context, id string) (interface{}, error) {
-        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)  @_important_@
+    func (this *mongoSvc[DocType]) FindDocument(ctx context.Context, id string) (*DocType, error) {
+        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
         defer contextCancel()
         client, err := this.connect(ctx)
         if err != nil {
@@ -437,19 +451,19 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         switch result.Err() {
         case nil:
         case mongo.ErrNoDocuments:
-            return nil, NotFoundError  @_important_@
+            return nil, ErrNotFound
         default: // other errors - return them
             return nil, result.Err()
         }
-        var document interface{}
+        var document *DocType
         if err := result.Decode(&document); err != nil {
             return nil, err
         }
         return document, nil
     }
 
-    func (this *mongoSvc) UpdateDocument(ctx context.Context, id string, document interface{}) error {
-        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)  @_important_@
+    func (this *mongoSvc[DocType]) UpdateDocument(ctx context.Context, id string, document *DocType) error {
+        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
         defer contextCancel()
         client, err := this.connect(ctx)
         if err != nil {
@@ -461,7 +475,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         switch result.Err() {
         case nil:
         case mongo.ErrNoDocuments:
-            return NotFoundError  @_important_@
+            return ErrNotFound
         default: // other errors - return them
             return result.Err()
         }
@@ -469,8 +483,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         return err
     }
 
-    func (this *mongoSvc) DeleteDocument(ctx context.Context, id string) error {
-        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)  @_important_@
+    func (this *mongoSvc[DocType]) DeleteDocument(ctx context.Context, id string) error {
+        ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
         defer contextCancel()
         client, err := this.connect(ctx)
         if err != nil {
@@ -482,7 +496,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         switch result.Err() {
         case nil:
         case mongo.ErrNoDocuments:
-            return NotFoundError  @_important_@
+            return ErrNotFound
         default: // other errors - return them
             return result.Err()
         }
@@ -510,13 +524,13 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         engine := gin.New()
         engine.Use(gin.Recovery())
     
-        // setup context update  middleware
-        dbService := db_service.NewMongoService(db_service.MongoServiceConfig{}) @_add_@
-        defer dbService.Disconnect(context.Background()) @_add_@ 
-        engine.Use(func(ctx *gin.Context) {   @_add_@
-            ctx.Set("db_service", dbService)   @_add_@
-            ctx.Next()   @_add_@
-        })   @_add_@
+        // setup context update  middleware     @_add_@
+        dbService := db_service.NewMongoService[ambulance_wl.Ambulance](db_service.MongoServiceConfig{})     @_add_@
+        defer dbService.Disconnect(context.Background())     @_add_@
+        engine.Use(func(ctx *gin.Context) {     @_add_@
+            ctx.Set("db_service", dbService)     @_add_@
+            ctx.Next()     @_add_@
+        })     @_add_@
         // request routings
         ambulance_wl.AddRoutes(engine)
         ...
@@ -552,7 +566,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             return   @_add_@
         }   @_add_@
     @_add_@
-        db, ok := value.(db_service.DbService)   @_add_@
+        db, ok := value.(db_service.DbService[Ambulance])   @_add_@
         if !ok {   @_add_@
             ctx.JSON(   @_add_@
                 http.StatusInternalServerError,   @_add_@
@@ -581,7 +595,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             ambulance.Id = uuid.New().String()   @_add_@
         }   @_add_@
     @_add_@
-        err = db.CreateDocument(ctx, ambulance.Id, ambulance)   @_add_@
+        err = db.CreateDocument(ctx, ambulance.Id, &ambulance)   @_add_@
     @_add_@
         switch err {   @_add_@
         case nil:   @_add_@
@@ -589,7 +603,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 http.StatusCreated,   @_add_@
                 ambulance,   @_add_@
             )   @_add_@
-        case db_service.ConflictError:   @_add_@
+        case db_service.ErrConflict:   @_add_@
             ctx.JSON(   @_add_@
                 http.StatusConflict,   @_add_@
                 gin.H{   @_add_@
@@ -634,7 +648,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             return    @_add_@
         }    @_add_@
         @_add_@
-        db, ok := value.(db_service.DbService)    @_add_@
+        db, ok := value.(db_service.DbService[Ambulance])    @_add_@
         if !ok {    @_add_@
             ctx.JSON(    @_add_@
                 http.StatusInternalServerError,    @_add_@
@@ -652,7 +666,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         switch err {    @_add_@
         case nil:    @_add_@
             ctx.AbortWithStatus(http.StatusNoContent)    @_add_@
-        case db_service.NotFoundError:    @_add_@
+        case db_service.ErrNotFound:    @_add_@
             ctx.JSON(    @_add_@
                 http.StatusNotFound,    @_add_@
                 gin.H{    @_add_@
@@ -710,7 +724,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
    Týmto sme overili funkčnosť doteraz implmentovného kódu a zároveň sme vytvorili novú ambulanciu. V prehliadači otvorte stánku `http://localhost:8081/db/<pfx>-ambulance-wl/ambulance` a v zozname dokumento stlačte na prvý záznam.
 
-10. V prípade zostávajúcich obslužných metód bude ich funkcionalita v mnohm podobná, Najprv musíme získať dokument pre danú ambulanciu, upraviť ho, a následne ho pozmenený uložiť do databázy. Popritom musíme ošetriť možné chybové stavy. Aby sme zredukovali duplicitu kódu, pomôžeme si pomocnou funkciou. Vytvorte súbor `${WAC_ROOT}//ambulance-webapi/internal/ambulance_wl/utils_ambulance_updater.go` s nasledujúcim obsahom:
+10. V prípade zostávajúcich obslužných metód bude ich funkcionalita v mnohom podobná. Najprv musíme získať dokument pre danú ambulanciu, upraviť ho, a následne ho pozmenený uložiť do databázy. Popritom musíme ošetriť možné chybové stavy. Aby sme zredukovali duplicitu kódu, pomôžeme si pomocnou funkciou. Vytvorte súbor `${WAC_ROOT}//ambulance-webapi/internal/ambulance_wl/utils_ambulance_updater.go` s nasledujúcim obsahom:
 
     ```go
     package ambulance_wl
@@ -727,7 +741,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         ambulance *Ambulance,  @_important_@
     ) (updatedAmbulance *Ambulance, responseContent interface{}, status int)  @_important_@
 
-    func updateAmbulanceFunc(ctx *gin.Context, ambulanceId string, updater ambulanceUpdater) {
+    func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
         value, exists := ctx.Get("db_service")
         if !exists {
             ctx.JSON(
@@ -740,7 +754,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             return
         }
 
-        db, ok := value.(db_service.DbService)
+        db, ok := value.(db_service.DbService[Ambulance])
         if !ok {
             ctx.JSON(
                 http.StatusInternalServerError,
@@ -753,12 +767,13 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         }
 
         ambulanceId := ctx.Param("ambulanceId")
-        value, err := db.FindDocument(ctx, ambulanceId)
+
+        ambulance, err := db.FindDocument(ctx, ambulanceId)
 
         switch err {
         case nil:
             // continue
-        case db_service.NotFoundError:
+        case db_service.ErrNotFound:
             ctx.JSON(
                 http.StatusNotFound,
                 gin.H{
@@ -767,6 +782,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                     "error":   err.Error(),
                 },
             )
+            return
         default:
             ctx.JSON(
                 http.StatusBadGateway,
@@ -775,9 +791,9 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                     "message": "Failed to load ambulance from database",
                     "error":   err.Error(),
                 })
+            return
         }
 
-        ambulance, ok := value.(*Ambulance)
         if !ok {
             ctx.JSON(
                 http.StatusInternalServerError,
@@ -789,7 +805,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             return
         }
 
-        updatedAmbulance, responseObject, status := updater(ctx, ambulance)  @_important_@
+        updatedAmbulance, responseObject, status := updater(ctx, ambulance)
 
         if updatedAmbulance != nil {
             err = db.UpdateDocument(ctx, ambulanceId, updatedAmbulance)
@@ -804,7 +820,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             } else {
                 ctx.AbortWithStatus(status)
             }
-        case db_service.NotFoundError:
+        case db_service.ErrNotFound:
             ctx.JSON(
                 http.StatusNotFound,
                 gin.H{
@@ -826,6 +842,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
+    Všimnite si, že funkcia `updateAmbulanceFunc` akceptuje ako vstupný argument inú funkciu, declarovanú ako `ambulanceUpdater`. Funkcie sú v jazyku [go] plnohodnotnými typmi a preto ich je možné používať ako typy.
+
 11. Teraz otvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_conditions.go` a upravte ho:
 
     ```go
@@ -839,11 +857,16 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             ctx *gin.Context,    @_add_@
             ambulance *Ambulance,    @_add_@
         ) (updatedAmbulance *Ambulance, responseContent interface{}, status int) {    @_add_@
-            return nil, ambulance.PredefinedConditions, http.StatusOK    @_add_@
+            result := ambulance.PredefinedConditions   @_add_@
+            if result == nil {   @_add_@
+                result = []Condition{}   @_add_@
+            }   @_add_@
+            return nil, result, http.StatusOK   @_add_@
         })    @_add_@
-
     }
     ```
+
+    V tejto metóde sme použili funkciu `updateAmbulanceFunc` a ako jej argument sme poskytli anonymnú funkciu, ktorá vracia zoznam podmienok, ktoré sú priradené k ambulancii. Všimnite si, že v prípade, že ambulancia nemá priradené žiadne podmienky, vraciame prázdny zoznam.
 
 12. Trieda `implAmbulanceWaitingListAPI` upravuje zoznam čakajúcich v zvolenej ambulancii. Súčasťou aplikačnej logiky je zabezpečenie konzistentného zoznamu, to znamená, že po každej úprave potrebujeme upraviť dobu predpokladaného vstupu do ambulancie, ktorá nesmie byť skôr ako je daný okamžik, a ani sa nesmie prekrývať medzi dvoma pacientami. Toto zabezpečíme pomocou metódy `reconcileWaitingList` o ktorú rozšírime triedu `Ambulance`. Metódu vložíme do nového súboru, aby sme si neprepísali ručne vytvorený kód pri ďalšom použití nástroja [openapi-generator]. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/ext_model_ambulance.go` a vložte do neho nasledujúci kód:
 
@@ -903,6 +926,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     ```ps
     go mod tidy
     ```
+
+    >info:> V nových vydania jazyka go, je balík `slices` súčasťou štandardnej distribúcie. V prípade, že používate novšiu verziu jazyka go, môžete balík `golang.org/x/exp/slices` odstrániť z `go.mod` súboru a v sekcii `import` uviesť balík `slices`.
 
 13. Teraz otvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_waiting_list.go` a upravte metódu `CreateWaitingList`:
 
@@ -1019,8 +1044,12 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         ctx.AbortWithStatus(http.StatusNotImplemented) @_remove_@
         // update ambulance document
         updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {  @_add_@
+            result := ambulance.WaitingList     @_add_@
+            if result == nil {     @_add_@
+                result = []WaitingListEntry{}     @_add_@
+            }     @_add_@
             // return nil ambulance - no need to update it in db   @_add_@
-		    return nil, ambulance.WaitingList, http.StatusOK  @_add_@
+            return nil, result, http.StatusOK     @_add_@
         })   @_add_@
     }
 

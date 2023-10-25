@@ -51,7 +51,7 @@ Blokovú citáciu s ikonou môžete umiestniť pomocou nasledujúcej syntaxe: `>
 
 Používajte tieto ikony:
 
-- `>info:>` pre doplňujúce informácie 
+- `>info:>` pre doplňujúce informácie
 - `>warning:>` pre dôležité informácie
 - `>build_circle:>` pre riešenie možných problémov
 - `>$apple:>` pre Mac Os špecifické informácie

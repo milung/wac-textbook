@@ -113,6 +113,7 @@ uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do k
      namespace: wac-hospital
    spec:
      wait: true
+     force: true 
      dependsOn:  @_important_@
      - name: prepare @_important_@
      interval: 42s

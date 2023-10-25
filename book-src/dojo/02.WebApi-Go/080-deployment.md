@@ -128,14 +128,33 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
    ```yaml
    images:
-   - name: <docker-id>/ambulance-webapi @_add_@
-     newName: <docker-id>/ambulance-webapi # {"$imagepolicy":  "wac-hospital:ambulance-webapi:name"} @_add_@
+   - name: <docker-id>/ambulance-wl-webapi @_add_@
+     newName: <docker-id>/ambulance-wl-webapi # {"$imagepolicy":  "wac-hospital:ambulance-webapi:name"} @_add_@
      newTag: main # {"$imagepolicy": "wac-hospital:ambulance-webapi:tag"} @_add_@
-   - name: <docker-id>/ambulance-webapi
+  
    ...
    ```
 
-6. Otvorte okno príkazového riadku v adresári ``${WAC_ROOT}/ambulance-gitops` a overte správnosť konfigurácie príkazom:
+6. Ďalej upravte atribúty web componentu aby sa pokúsil pripojiť k nasadenému webapi. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a upravte ho:
+
+    ```yaml
+    ...
+    spec:   
+      ...
+      navigation:
+        - element: pfx-ambulance-wl-app    
+        ...
+          attributes:  @_add_@
+            - name: api-base  @_add_@
+              value: http://localhost:30081/api @_add_@
+            - name: ambulance-id 
+              value: bobulova 
+            ...
+    ```
+  
+    Týmto sme nášmu mikro frontendu povedali, že má komunikovať s webapi na porte `30081`.
+
+7. Otvorte okno príkazového riadku v adresári ``${WAC_ROOT}/ambulance-gitops` a overte správnosť konfigurácie príkazom:
 
    ```ps
    kustomize build clusters/localhost/install
@@ -143,7 +162,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
    Výstupom by mali byť manifesty pre nasadenie aplikácie bez chybovej správy.
 
-7. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
+8. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
 
    ```ps
    git add .
@@ -157,7 +176,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
     kubectl get pods  -n wac
     ```
 
-8. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
+9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 
 <hr/>
 

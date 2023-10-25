@@ -29,8 +29,8 @@ Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu 
             volumes:
             - db_data:/data/db @_important_@
             environment:
-                MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT}
-                MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD} 
+                MONGO_INITDB_ROOT_USERNAME: ${AMBULANCE_API_MONGODB_USERNAME}
+                MONGO_INITDB_ROOT_PASSWORD: ${AMBULANCE_API_MONGODB_PASSWORD} 
         mongo_express:
             image: mongo-express
             container_name: mongo_express
@@ -38,9 +38,13 @@ Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu 
             ports:
             - 8081:8081
             environment:
-            ME_CONFIG_MONGODB_ADMINUSERNAME:  ${MONGO_ROOT}
-            ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-            ME_CONFIG_MONGODB_SERVER: mongo_db
+                ME_CONFIG_MONGODB_ADMINUSERNAME:  ${AMBULANCE_API_MONGODB_USERNAME}
+                ME_CONFIG_MONGODB_ADMINPASSWORD: ${AMBULANCE_API_MONGODB_PASSWORD}
+                ME_CONFIG_MONGODB_SERVER: mongo_db
+                ME_CONFIG_BASICAUTH_USERNAME: mexpress
+                ME_CONFIG_BASICAUTH_PASSWORD: mexpress
+            links:
+            - mongo_db
     volumes:
         db_data: {} @_important_@
     ```

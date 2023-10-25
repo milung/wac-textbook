@@ -68,7 +68,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-010
 
    Funkcia `main` v _package_ `main` slúži ako vstupný bod programu v jazyku [Go]. V našom prípade vytvorí inštanciu HTTP servera s využitím knožnice [gin-go][gin], ktorý bude počúvať na porte, ktorý je definovaný v premennej prostredia `AMBULANCE_API_PORT`. Smerovanie požiadaviek na jednotlivé funkcie sú zabezpečené pomocou funkcie `engine.GET` . V našom prípade sme zaregistrovali funkciu `api.HandleOpenApi`, ktorá bude spracovávať požiadavky na získanie špecifikácie API. Všimnite si tiež, že referencujeme balíček `github.com/<pfx>/ambulance-webapi/api` čo je vlastne odkaz na nami vytvorený priečinok `${WAC_ROOT}/ambulance-webapi/api`.
 
-   >info:> Odporúčame mať v  prostredí Visual Studio COde nainštalované rozšírenie [golang.go](https://marketplace.visualstudio.com/items?itemName=golang.Go). Chyby v zozname importovaných balíčkov vyriešime v nasledujúcom kroku.
+   >info:> Odporúčame mať v  prostredí Visual Studio Code nainštalované rozšírenie [golang.go](https://marketplace.visualstudio.com/items?itemName=golang.Go). Chyby v zozname importovaných balíčkov vyriešime v nasledujúcom kroku.
 
 5. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/api/openapi.go` s nasledujúcim obsahom:
 
@@ -90,7 +90,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-010
     }
     ```
 
-    V tomto súbore sme pridali funkcionalitu pre náš balíček - _package_ - `github.com/<pfx>/ambulance-webapi/api`. Využili sme funkcionalitu knožnice [_embed_](https://pkg.go.dev/embed), ktorá zabezpečí, že súbor `ambulance-wl.openapi.yaml` bude pribalény k binárnemu súboru nášho programu.
+    V tomto súbore sme pridali funkcionalitu pre náš balíček - _package_ - `github.com/<github-id>/ambulance-webapi/api`. Využili sme funkcionalitu knožnice [_embed_](https://pkg.go.dev/embed), ktorá zabezpečí, že súbor `ambulance-wl.openapi.yaml` bude pribalény k binárnemu súboru nášho programu.
 
 6. V predchádzajúcich súboroch sme ponechali chybové hlásenia informujúce, že daný _package_ nie je dostupný. Všetky závislosti nášho modulu musia byť uvedené v súbore `${WAC_ROOT}/ambulance-webapi/go.mod` a načítane v lokálnej vyrovnávacej pamäti.  ABy sme nemuseli jednotlivé závislosti pridávať ručne, využijeme príkaz `go mod tidy`, ktorý ich pridá automaticky. Uložte zmeny a v príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte nasledujúci príkaz:
 
