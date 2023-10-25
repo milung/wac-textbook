@@ -1,4 +1,3 @@
-<hr />
 
 ## [language> Používateľské rozhranie s WebComponents](./01.Web-Components/000-README.md)
 
@@ -11,5 +10,3 @@
 ## [stack> Service Mesh](./03.ServiceMesh/000-README.md)
 
 [#include 03.ServiceMesh/_toc.md]
-
-<hr />

@@ -1,6 +1,4 @@
 
-<hr />
-
 [$angular> UI s Angular 10](./01.SPA/000-README.md)
 
 [#include 01.SPA/_toc.md]

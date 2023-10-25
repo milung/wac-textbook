@@ -3,7 +3,7 @@
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-020
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-030
 ```
 
 ---

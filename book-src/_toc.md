@@ -22,6 +22,8 @@
 
 [#include dojo/03.ServiceMesh/_toc.md]
 
+<hr />
+
 ## [build-circle> Riešenie problémov](dojo/99.Problems-Resolutions/000-README.md)
 
 [#include dojo/99.Problems-Resolutions/_toc.md]
