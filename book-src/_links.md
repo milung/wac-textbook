@@ -10,6 +10,7 @@
 [babel]:https://babeljs.io/
 [bit]:https://bit.dev/
 [bitbucket]:[https://bitbucket.org/]
+[cert-manager]:https://cert-manager.io/
 [chocolatey]:https://chocolatey.org/
 [common-cluster]:https://wac-2023.westeurope.cloudapp.azure.com/ui/
 [containers]:https://www.ibm.com/cloud/learn/containerization
@@ -35,6 +36,7 @@
 [gitops]:https://www.gitops.tech/
 [Go]:https://go.dev/
 [helm]:https://helm.sh/
+[http]:https://developer.mozilla.org/en-US/docs/Web/HTTP
 [_Ingress_]:https://kubernetes.io/docs/concepts/services-networking/ingress/
 [Inversify]:https://github.com/inversify/InversifyJS
 [jest]:https://jestjs.io/

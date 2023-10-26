@@ -3,5 +3,6 @@
 [$route> Smerovanie požiadaviek s Gateway API](./010-gateway.md)
 [$database> Nasadenie Mongo Express](./020-mongo-express.md)
 [$cubes> Nasadenie na produkčný kubernetes klaster](./030-webapi-prod-cluster.md)
+[shield> Bezpečné pripojenie protokolom HTTPS](./040-secure-connection.md)
 <!-- [$openid> Authentifikácia používateľov s OpenID Connect](./002-oidc-auth.md)
 [badge> Autorizácia používateľov s Open Policy Agent](./003-opa-autz.md) -->
