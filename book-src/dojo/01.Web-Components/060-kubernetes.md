@@ -44,7 +44,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
 
     Priečinok `apps` obsahuje komponenty systému, ktoré projektový tím zabezpečuje pre všetky  cieľové prostredia - klastre - a má ich plne pod kontrolou.
 
-    Priečinok `components` umožňuje zdieľať konfiguráciu medzi jednotlivými variantami nasadenie, napríklad pokiaľ by náš systém mal možnosť použiť rôzne systémy DBMS, mohli by sme príslušné konfigurácie a úpravy existujúcich komponentov umiestniť do tohto priečinka. V našom prípade budeme tento priečinok primárne používať na definíciu jednotlivých verzií nášho systému.
+    Priečinok `components` umožňuje zdieľať konfiguráciu medzi jednotlivými variantami nasadenia, napríklad pokiaľ by náš systém mal možnosť použiť rôzne systémy DBMS, mohli by sme príslušné konfigurácie a úpravy existujúcich komponentov umiestniť do tohto priečinka. V našom prípade budeme tento priečinok primárne používať na definíciu jednotlivých verzií nášho systému.
 
     >info:> V týchto cvičeniach používame takzvanú [_MonoRepo_](https://fluxcd.io/flux/guides/repository-structure/#monorepo) štruktúru repozitára pre priebežné nasadenie. Nie je to ale jediná možnosť, viac možností je opísaných vo [flux dokumentácii](https://fluxcd.io/flux/guides/repository-structure/).
 
@@ -220,7 +220,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
    - webcomponent.yaml
    
    commonLabels:               # značky priradené všetkým zdrojom tejt aplikácie
-     app.kubernetes.io/component: scida-etl <pfx>-ambulance-ufe
+     app.kubernetes.io/component: <pfx>-ambulance-ufe
    ```
 
    V tejto chvíli ešte nebudeme našu aplikáciu nasadzovať, potrebujeme najprv pripraviť manifesty pre infraštruktúru klastra. Pokiaľ ale chceme vidieť výsledok "kustomizacie" našej aplikácie, môžeme ho získať vykonaním príkazu
