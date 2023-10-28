@@ -182,7 +182,7 @@ uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do k
 
    Táto konfigurácia sa odkazuje na priečinok `gitops`, ktorý sme vytvorili v predchádzajúcom kroku. Znamená to, že konfigurácia klastra je riadená zdrojmi Flux CD, ktorý zabezpečuje priebežné nasadenie podľa konfigurácie v git repozitári na príslušných cestách.
 
-8. Pokiaľ je náš repozitár verejný, mohol by FluxCD získať informácie bez potreby konfigurovania prístupových práv. Keďže v praxi je bežnejšie, že konfigurácie špecifických ňovať, predpokladáme, že je tento repozitár privátny. Musíme preto nakonfigurovať pre Flux CD prístupové údaje - viď manifest v kroku 2.
+8. Ak je náš repozitár verejný, FluxCD môže získať informácie bez potreby konfigurovania prístupových práv. Avšak v praxi je bežnejšie, že konfigurácie sú špecifické a súkromné. Preto predpokladáme, že tento repozitár je súkromný a musíme nakonfigurovať prístupové údaje pre FluxCD.
 
    Prejdite na stránku [GitHub], prihláste sa a následne prejdite na stránku [Developer Settings](https://github.com/settings/apps). _Z hlavnej stránky sa tu môžete dostať stlačením ikony Vášho avatara, menu "Settings" a potom "Developer settings"._ Na ľavej strane vyberte _Personal access tokens->Tokens (classic)_ a stlačte tlačidlo _Generate new token_. Prihláste sa, zadajte meno tokenu, napr. _WAC-FluxCD token_, a _Expiration_ nastavte  na _Custom defined_ (dátum aspoň do konca semestra). V časti _Scopes_ označte položku _repo_. Stlačte tlačidlo _Generate token_ a __NEZABUDNITE SI ULOŽIŤ DO SCHRÁNKY__ vygenerovaný PAT.
 
@@ -251,9 +251,9 @@ uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do k
 
 ## Bootstraping Flux
 
-Aby sme mohli začať využívať služby [Flux], musíme ich prvotne nasadiť do klastra manuálne. Po prvom nasadení, dôjde k synchronizácii stavu medzi klastrom a našim repozitár, a pri ďalšej práci nam preto bude postačovať, keď smeny konfigurácie uložíme do repozitára. Jednou z výhod tohto prístupu je aj to, že môžeme riadiť kto z vývojového tímu potrebuje mať prístup ku jednotlivým nasadeniam/klastrom - v prípade vývoja formou DevOps predpokladáme, že to je väčšina vývojarov, a zároveň môžeme riadiť aké oprávnenia sú jednotlivým členom poskytnuté.
+Aby sme mohli začať využívať služby [Flux], musíme ich prvotne nasadiť do klastra manuálne. Po prvom nasadení, dôjde k synchronizácii stavu medzi klastrom a našim repozitár, a pri ďalšej práci nam preto bude postačovať, keď zmeny konfigurácie uložíme do repozitára. Jednou z výhod tohto prístupu je aj to, že môžeme riadiť kto z vývojového tímu potrebuje mať prístup ku jednotlivým nasadeniam/klastrom - v prípade vývoja formou DevOps predpokladáme, že to je väčšina vývojarov, a zároveň môžeme riadiť aké oprávnenia sú jednotlivým členom poskytnuté.
 
->info:> V tomto cvičení nasadzuje [Flux] formou referencie na zverejnené manifesty v repozitári [fluxcd/flux2](https://github.com/fluxcd/flux2). Alernatívne spôsob inštalácia je opísaný v [dokumentácii Fluxu](https://fluxcd.io/flux/installation/).
+>info:> V tomto cvičení nasadzuje [Flux] formou referencie na zverejnené manifesty v repozitári [fluxcd/flux2](https://github.com/fluxcd/flux2). Alernatívne spôsoby inštalácie sú opísané v [dokumentácii Fluxu](https://fluxcd.io/flux/installation/).
 
 1. Nasadíme Flux operátor do nášho klastra. Uistite sa, že máte vybraný správny kontext - `kubectl config get-contexts`, predite do priečinku `${WAC_ROOT}/ambulance-gitops/` a vykonajte príkaz
 
