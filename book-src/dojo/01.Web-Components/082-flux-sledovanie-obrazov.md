@@ -90,7 +90,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
    images:
    - name: <docker-id>/ambulance-ufe  @_important_@
      newName: <docker-id>/ambulance-ufe # {"$imagepolicy":  "wac-hospital:ambulance-ufe:name"} @_important_@
-     newTag: main # {"$imagepolicy": "wac-hospital::ambulance-ufe:tag"} @_important_@
+     newTag: main # {"$imagepolicy": "wac-hospital:ambulance-ufe:tag"} @_important_@
    
    - name: milung/ufe-controller
      newName: milung/ufe-controller # {"$imagepolicy":  "wac-hospital:ufe-controller:name"} @_important_@
