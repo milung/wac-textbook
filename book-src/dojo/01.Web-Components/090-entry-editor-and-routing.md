@@ -80,7 +80,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     }
    ```
 
-   a dolňte následujúci kód do triedy `<Pfx>AmbulanceWlEditor`:
+   a doplňte následujúci kód do triedy `<Pfx>AmbulanceWlEditor`:
 
    ```tsx
     import { Component, Host, Prop, State, h, EventEmitter, Event } from '@stencil/core'; @_add_@
@@ -135,7 +135,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     npm run start
     ```
 
-   V prehliadači otvorte stránku [http://localhost:3333/](http://localhost:3333/). Vidíte oba naše komponenty, pričom komponent `<pfx>-ambulance-wl-list` zatiaľ pôsobí neusporiadane.
+   V prehliadači otvorte stránku [http://localhost:3333/](http://localhost:3333/). Vidíte oba naše komponenty, pričom komponent `<pfx>-ambulance-wl-editor` zatiaľ pôsobí neusporiadane.
 
 5. Upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.css`:
 
@@ -183,7 +183,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
 
 ## Navigácia medzi komponentami
 
-Momentálne zobrazujeme ako zoznam čakájúcich pacientav, tak aj editor pre jednotlivé záznamy na jednej stránke. Našim cieľom je dosiahnuť, aby sa zoznam zobrazoval na adrese [http://localhost:3333/list](http://localhost:3333/list) a editor na adrese [http://localhost:3333/entry/<id-položky>](http://localhost:3333/ambulance-wl/entry/0), a by mal používateľ možnosť navigácie medzi tímito prvkami, a zároveň aby bola zachovaná funkcia navigačných tlačidiel. Zároveň chceme aby bolo možné našu aplikáciu obslúžiť aj keď je umiestnená na inej ako koreňovej adrese servere, ako napríklad na adrese `http://wac-hospital.wac/<pfx>-ambulance/`. K tomu budeme potrebovať nový komponent, ktorého úlohou bude zobraziť jeden z našich komponentov v závislosti od aktuálnej adresy stránky a zároveň reagovať na zmeny v navigácii.
+Momentálne zobrazujeme ako zoznam čakájúcich pacientav, tak aj editor pre jednotlivé záznamy na jednej stránke. Našim cieľom je dosiahnuť, aby sa zoznam zobrazoval na adrese [http://localhost:3333/list](http://localhost:3333/list) a editor na adrese [http://localhost:3333/entry/<id-položky>](http://localhost:3333/ambulance-wl/entry/0), aby mal používateľ možnosť navigácie medzi tímito prvkami, a zároveň aby bola zachovaná funkcia navigačných tlačidiel. Zároveň chceme aby bolo možné našu aplikáciu obslúžiť aj keď je umiestnená na inej ako koreňovej adrese servere, ako napríklad na adrese `http://wac-hospital.wac/<pfx>-ambulance/`. K tomu budeme potrebovať nový komponent, ktorého úlohou bude zobraziť jeden z našich komponentov v závislosti od aktuálnej adresy stránky a zároveň reagovať na zmeny v navigácii.
 
 Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je umožniť jednostránkovým aplikácia získať kontrolu nad požiadavkami k zmene stránky a podľa potreby zabrániť alebo povoliť načítanie novej stránky. Toto API ale momentálne _(august 2023)_ nie je k dispozícii pre všetky prehliadače. Pomôžeme si vytvorením zjednodušenej [polyfill](https://developer.mozilla.org/en-US/docs/Glossary/Polyfill) implementácie. Táto implementácia nie je síce plnohodnotná, pre naše potreby je ale dostatočná.
 
@@ -358,7 +358,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
       interface Window { navigation: any; } @_add_@
     }
     ...
-    export class PfxAmbulanceWlApp { 
+    export class <Pfx>AmbulanceWlApp { 
 
       @State() private relativePath = ""; @_add_@
       @_add_@
@@ -411,7 +411,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
       <<pfx>-ambulance-wl-list></<pfx>-ambulance-wl-list> @_remove_@
       <<pfx>-ambulance-wl-editor></<pfx>-ambulance-wl-editor> @_remove_@
       <!-- web application root component -->
-      <<pfx>-ambulance-wl-app base="/ambulance-wl/"></<pfx>-ambulance-wl-app> @_add_@
+      <<pfx>-ambulance-wl-app base-path="/ambulance-wl/"></<pfx>-ambulance-wl-app> @_add_@
      
     </body>
    ```
@@ -425,7 +425,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
    ...
    export class PfxAmbulanceWlList { 
 
-    @Event({ eventName: "entry-clicked"}) entryClicked: EventEmitter<string> @_add_@
+    @Event({ eventName: "entry-clicked"}) entryClicked: EventEmitter<string>; @_add_@
     ...
     render() {
     return (
