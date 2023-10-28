@@ -29,7 +29,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
       interval: 1m0s
     ```
 
-    >warning:> Zameňte <docker-id> !
+    >warning:> Zameňte \<docker-id\> !
 
     Vytvote tiež súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ufe-controller.image-repository.yaml` s obsahom:
 
@@ -81,7 +81,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
 
 3. Upravíme všetky súbory, kde chceme aby Flux aktualizoval verziu docker obrazu. To sa realizuje pridaním špeciálneho markeru `_# {"$imagepolicy": "POLICY_NAMESPACE:POLICY_NAME"}_` na riadok, ktorý sa má upravovať. V našom prípade by sme mohli upraviť súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml` a upraviť konfiguráciu v priečinku `${WAC_ROOT}/ambulance-gitops/infrastructure/ufe-controller`. Výhodnejšie je v tomto prípade ale mať všetky verzie kontajnerov na jednom mieste a zároveň mať možnosť riadiť verzie kontajnerov pre jednotlivé vydania nášho systému. K tomu využijeme takzvané [_Kustomize components_](https://kubectl.docs.kubernetes.io/guides/config_management/components/), ktoré umožňujú kombinovať jednotlivé varianty konfigurácie.
 
-   Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/components/version-developers` s obsahom:
+   Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/components/version-developers/kustomization.yaml` s obsahom:
 
    ```yaml
    apiVersion: kustomize.config.k8s.io/v1alpha1  
