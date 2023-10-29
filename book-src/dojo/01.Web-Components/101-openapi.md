@@ -12,7 +12,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
 >info:> Pre prácu s [openapi] súbormi odporúčame nainštalovať do prostredia Visual Studio Code rozšírenia [openapi-lint](https://marketplace.visualstudio.com/items?itemName=mermade.openapi-lint) a [openapi-designer](https://marketplace.visualstudio.com/items?itemName=philosowaffle.openapi-designer).
 
-1. Vytvorte súbor `${WAC_ROOT}/api/ambulance-wl.openapi.yaml`. Vložte do neho nasledujúci kód:
+1. Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml`. Vložte do neho nasledujúci kód:
 
    ```yaml
    openapi: 3.0.0
@@ -219,6 +219,8 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
       ...
    ```
 
+   >$apple:> Na niektorých Mac zariadeniach môže na porte 5000 bežať airplay server. V takomto prípade zmente port mock serveru na iný voľný port.
+
    Skript `convert-openapi` premení špecifikáciu vo formáte YAML na JSON - `open-api-mocker` vyžaduje špecifikáciu vo formáte JSON. Skript `mock-api` spustí mock server, ktorý bude poskytovať API podľa špecifikácie. Skript `start:mock` spustí obe predchádzajúce príkazy sekvenčne. Skript `start:app` obshuje príkaz, pôvodne použitý v skripte `start`, teda skompiluje našu aplikáciu a naštartuje vývojový server. Skript `start` sme upravili aby paralelne spustil náš mock API server a vývojový server našej aplikáciu. Tieto úpravy nám umožnie lokálny vývoj aplikácie bez nutnosti pripojenia na skutočný API server.
 
    Upravte súbor `${WAC_ROOT}/ambulance-ufe/.gitignore` a pridajte riadok `.openapi.json`.
@@ -237,7 +239,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
     Otvorte nový príkazový riadok a zadajte nasledujúci prikaz:
 
     ```ps
-    curl http://localhost:5000/api/waiting-list/bobulova
+    curl http://localhost:5000/api/waiting-list/bobulova/entries
     ```
 
     Na výstupe sa objeví výpis vo formáte JSON obsahujúci zoznam čakajúcich pacientov v ambulancii. Tento výpis je generovaný na základe príkladu v špecifikácii. Teraz máme k dispozícii službu, ktorá je schopná simulovať naše REST API. Zastavte spustené mock API (_CTRL+C_).
@@ -251,23 +253,24 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/openapitools.json` a vložte do neho nasledujúci obsah:
 
    ```json
-   "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
-    "generator-cli": {
-      "useDocker": true,
-      "version": "6.6.0",
-      "generators": {
-        "ambulance-wl": {
-          "generatorName": "typescript-axios", @_important_@
-          "glob": "api/ambulance-wl.openapi.yaml", @_important_@
-          "output": "#{cwd}/src/api/ambulance-wl", @_important_@
-          "additionalProperties": {
-            "supportsES6": "true",
-            "withInterfaces": true,
-            "enablePostProcessFile": true
+   {
+      "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+      "generator-cli": {
+          "useDocker": true,
+          "version": "6.6.0",
+          "generators": {
+              "ambulance-wl": {
+                  "generatorName": "typescript-axios", @_important_@
+                  "glob": "api/ambulance-wl.openapi.yaml", @_important_@
+                  "output": "#{cwd}/src/api/ambulance-wl", @_important_@
+                  "additionalProperties": {
+                      "supportsES6": "true",
+                      "withInterfaces": true,
+                      "enablePostProcessFile": true
+                  }
+              }
           }
-        }
       }
-    }
    }
    ```
 
@@ -394,7 +397,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    ```html
    <body style="font-family: 'Roboto'; ">
-      <<pfx>-ambulance-wl-app ambulance-id="bobulova" api-base="http://localhost:5000/api"></<pfx>-ambulance-wl-app> @_important_@
+      <<pfx>-ambulance-wl-app ambulance-id="bobulova" api-base="http://localhost:5000/api" base-path="/ambulance-wl/"></<pfx>-ambulance-wl-app> @_important_@
    </body>
    ```
 
@@ -429,7 +432,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    ```
 
    zobrazí sa Vám vo výpise chyba _SyntaxError: Cannot use import statement outside a module_ odkazujúca na kód z knižnice [axios]. Táto chyba je obdobná ako v prípade použitia
-   knižnice [@material/web][md-webc], spôsobená rôznými predpokladmi o používanej verzii jazyka ECMScript a podpore najnovších spôsobov načítavanie modulov medzi týmito knižnicami a testovacou knižnicou [Jest]. Knižnicu [Jest] môžme nakonfigurovať pomocou použitia tzv. [Transformerov kódu - _Code Transformers_](https://jestjs.io/docs/code-transformation).
+   knižnice [@material/web][md-webc], spôsobená rôznymi predpokladmi o používanej verzii jazyka ECMScript a podpore najnovších spôsobov načítavania modulov medzi týmito knižnicami a testovacou knižnicou [Jest]. Knižnicu [Jest] môžme nakonfigurovať pomocou použitia tzv. [Transformerov kódu - _Code Transformers_](https://jestjs.io/docs/code-transformation).
 
    Najpr si doinštalujeme potrebné balíčky. V adresári `${WAC_ROOT}/ambulance-ufe` vykonajte nasledujúci príkaz:
 
@@ -614,6 +617,8 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
         ...
         hash-suffix: v1alpha2 @_important_@
    ```
+
+   >$apple:> Nezabudnite nastaviť správny port.
 
    Následne v priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte komit a push:
 
