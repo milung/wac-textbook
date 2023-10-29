@@ -821,7 +821,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
          mock.onGet(/^.*\/condition$/).reply(200, sampleConditions);  @_add_@
          @_add_@
          const page = await newSpecPage({  @_add_@
-            components: [PfxAmbulanceWlEditor], // @_pfx_@  @_add_@
+            components: [PfxAmbulanceWlEditor],  @_add_@
             html: `<<pfx>-ambulance-wl-editor entry-id="test-entry" ambulance-id="test-ambulance" api-base="http://sample.test/api"></<pfx>-ambulance-wl-editor>`,  @_add_@
          });  @_add_@
          let items: any = await page.root.shadowRoot.querySelectorAll("md-filled-text-field");  @_add_@
