@@ -12,125 +12,125 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
 
 1. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml` a do sekcie `paths` doplňte ďalšie operácie:
 
-   ```yaml
-   ...
-   paths:
-     "/waiting-list/{ambulanceId}/entries":
-       ...
-     "/waiting-list/{ambulanceId}/entries/{entryId}": @_important_@
+  ```yaml
+  ...
+  paths:
+    "/waiting-list/{ambulanceId}/entries":
+    ...
+    "/waiting-list/{ambulanceId}/entries/{entryId}":
       get: 
-         tags:
-            - ambulanceWaitingList @_important_@
-         summary: Provides details about waiting list entry
-         operationId: getWaitingListEntry @_important_@
-         description: >-
-            By using ambulanceId and entryId you can details of particular entry
-            item ambulance.
-         parameters:
+        tags:
+          - ambulanceWaitingList
+        summary: Provides details about waiting list entry
+        operationId: getWaitingListEntry
+        description: >-
+          By using ambulanceId and entryId you can details of particular entry
+          item ambulance.
+        parameters:
           - in: path
             name: ambulanceId
             description: pass the id of the particular ambulance
             required: true
             schema:
-               type: string
-          - in: path
-            name: entryId @_important_@
-            description: pass the id of the particular entry in the waiting list
-            required: true
-            schema:
-               type: string
-         responses:
-            "200":
-               description: value of the waiting list entries
-               content:
-                  application/json:
-                  schema:
-                     $ref: "#/components/schemas/WaitingListEntry"
-                  examples:
-                     response:
-                        $ref: "#/components/examples/WaitingListEntryExample"
-            "404":
-               description: Ambulance or Entry with such ID does not exists
-      put:
-         tags:
-           - ambulanceWaitingList @_important_@
-         summary: Updates specific entry
-         operationId: updateWaitingListEntry
-         description: Use this method to update content of the waiting list entry.
-         parameters:
-          - in: path
-            name: ambulanceId
-            description: pass the id of the particular ambulance
-            required: true
-            schema:
-               type: string
-          - in: path
-            name: entryId @_important_@
-            description: pass the id of the particular entry in the waiting list
-            required: true
-            schema:
-               type: string
-         requestBody: @_important_@
-            content:
-               application/json:
-                  schema:
-                  $ref: "#/components/schemas/WaitingListEntry"
-                  examples:
-                    request:
-                     $ref: "#/components/examples/WaitingListEntryExample"
-            description: Waiting list entry to update
-            required: true
-         responses:
-            "200":
-               description: >-
-                  value of the waiting list entry with re-computed estimated time of
-                  ambulance entry
-               content:
-                  application/json:
-                  schema:
-                     $ref: "#/components/schemas/WaitingListEntry"
-                  examples:
-                    response:
-                       $ref: "#/components/examples/WaitingListEntryExample"
-            "403":
-               description: >-
-                  Value of the entryID and the data id is mismatching. Details are
-                  provided in the response body.
-            "404":
-               description: Ambulance or Entry with such ID does not exists
-      delete:
-         tags:
-            - ambulanceWaitingList @_important_@
-         summary: Deletes specific entry
-         operationId: deleteWaitingListEntry
-         description: Use this method to delete the specific entry from the   waiting   list.
-         parameters:
-          - in: path
-            name: ambulanceId
-            description: pass the id of the particular ambulance
-            required: true
-            schema:
-               type: string
+              type: string
           - in: path
             name: entryId
             description: pass the id of the particular entry in the waiting list
             required: true
             schema:
-               type: string
-         responses:
-            "204": @_important_@
-               description: Item deleted
-            "404":
-               description: Ambulance or Entry with such ID does not exists 
-   ```
+              type: string
+        responses:
+          "200":
+            description: value of the waiting list entries
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/WaitingListEntry"
+                examples:
+                  response:
+                    $ref: "#/components/examples/WaitingListEntryExample"
+          "404":
+            description: Ambulance or Entry with such ID does not exists
+      put:
+        tags:
+          - ambulanceWaitingList
+        summary: Updates specific entry
+        operationId: updateWaitingListEntry
+        description: Use this method to update content of the waiting list entry.
+        parameters:
+          - in: path
+            name: ambulanceId
+            description: pass the id of the particular ambulance
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: entryId
+            description: pass the id of the particular entry in the waiting list
+            required: true
+            schema:
+              type: string
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaitingListEntry"
+              examples:
+                request:
+                  $ref: "#/components/examples/WaitingListEntryExample"
+          description: Waiting list entry to update
+          required: true
+        responses:
+          "200":
+            description: >-
+              value of the waiting list entry with re-computed estimated time of
+              ambulance entry
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/WaitingListEntry"
+                examples:
+                  response:
+                    $ref: "#/components/examples/WaitingListEntryExample"
+          "403":
+            description: >-
+              Value of the entryID and the data id is mismatching. Details are
+              provided in the response body.
+          "404":
+            description: Ambulance or Entry with such ID does not exists
+      delete:
+        tags:
+          - ambulanceWaitingList
+        summary: Deletes specific entry
+        operationId: deleteWaitingListEntry
+        description: Use this method to delete the specific entry from the waiting list.
+        parameters:
+          - in: path
+            name: ambulanceId
+            description: pass the id of the particular ambulance
+            required: true
+            schema:
+              type: string
+          - in: path
+            name: entryId
+            description: pass the id of the particular entry in the waiting list
+            required: true
+            schema:
+              type: string
+        responses:
+          "204":
+            description: Item deleted
+          "404":
+            description: Ambulance or Entry with such ID does not exists
+  ```
 
-   Pridali sme nový _endpoint_ `/waiting-list/{ambulanceId}/entries/{entryId}` pre získanie detailu záznamu, jeho aktualizáciu a vymazanie a zodpovedajúco k tomu sme nazvali aj operácie a adaptovali odoszvy.  V prípade metódy `PUT` sme pridali aj `requestBody`, ktoré bude obsahovať aktualizovanú verziu záznamu, ktorý chceme aktualizovať.
+Pridali sme nový _endpoint_ `/waiting-list/{ambulanceId}/entries/{entryId}` pre získanie detailu záznamu, jeho aktualizáciu a vymazanie a zodpovedajúco k tomu sme nazvali aj operácie a adaptovali odozvy.  V prípade metódy `PUT` sme pridali aj `requestBody`, ktoré bude obsahovať aktualizovanú verziu záznamu, ktorý chceme aktualizovať.
 
-   Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie kódu pre prístup k API:
+Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie kódu pre prístup k API:
 
-   ```ps
-   npm run openapi
-   ```
+  ```ps
+    npm run openapi
+  ```
 
 2. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` a pridajte kód, ktorý načíta záznam z API servera a ošetrí správnosť údajov:
 
@@ -176,7 +176,6 @@ V tejto časti budeme pokračovať v definícii API špecifikácia a úprave kom
       }   @_add_@
 
       async componentWillLoad() {  @_and_@
-            componentWillLoad() {  @_and_@
          this.getWaitingEntryAsync();  @_and_@
       }  @_and_@
 

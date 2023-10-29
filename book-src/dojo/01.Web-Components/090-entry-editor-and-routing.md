@@ -527,7 +527,6 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
 
    ```yaml
     navigation:
-    navigation:
     - element: <pfx>-ambulance-wl-list @_remove_@
 
     # aplication context element
