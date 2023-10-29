@@ -29,23 +29,31 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
       return (
         <Host>
           <md-filled-text-field label="Meno a Priezvisko" >
-            <md-icon slot="leadingicon">person</md-icon>
+            <md-icon slot="leading-icon">person</md-icon>
           </md-filled-text-field>
   
           <md-filled-text-field label="Registračné číslo pacienta" >
-            <md-icon slot="leadingicon">fingerprint</md-icon>
+            <md-icon slot="leading-icon">fingerprint</md-icon>
           </md-filled-text-field>
   
           <md-filled-text-field label="Čakáte od" disabled>
-            <md-icon slot="leadingicon">watch_later</md-icon>
+            <md-icon slot="leading-icon">watch_later</md-icon>
           </md-filled-text-field>
   
           <md-filled-select label="Dôvod návštevy">
-            <md-icon slot="leadingicon">sick</md-icon>
-            <md-select-option value="folowup" headline="Kontrola"></md-select-option>
-            <md-select-option value="nausea" headline="Nevoľnosť"></md-select-option>
-            <md-select-option value="fever" headline="Horúčka"></md-select-option>
-            <md-select-option value="ache-in-throat" headline="Bolesti hrdla"></md-select-option>
+            <md-icon slot="leading-icon">sick</md-icon>
+            <md-select-option value="folowup">
+              <div slot="headline">Kontrola</div>
+            </md-select-option>
+            <md-select-option value="nausea">
+              <div slot="headline">Nevoľnosť</div>
+            </md-select-option>
+            <md-select-option value="fever">
+              <div slot="headline">Horúčka</div>
+            </md-select-option>
+            <md-select-option value="ache-in-throat">
+              <div slot="headline">Bolesti hrdla</div>
+            </md-select-option>
           </md-filled-select>
   
           <div class="duration-slider">
