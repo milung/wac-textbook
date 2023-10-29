@@ -431,12 +431,12 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
     return (
       <Host>
         <md-list>   
-          {this.waitingPatients.map((entry, index) =>   @_important_@
-            <md-list-item   
-              headline={entry.name}   
-              supportingText={"Predpokladaný vstup: " + this.isoDateToLocale(entry.estimatedStart)}   
-              onClick={ () => this.entryClicked.emit(index.toString())} @_add_@
-            > 
+          {this.waitingPatients.map((patient, index) =>   @_important_@
+            <md-list-item onClick={ () => this.entryClicked.emit(index.toStr ())}> @_add_@
+                <div slot="headline">{patient.name}</div>
+                <div slot="supporting-text">{"Predpokladaný vstup: " + this.isoDateToLocale(patient.estimatedStart)}</div>
+                <md-icon slot="start">person</md-icon>
+            </md-list-item>
         ...
    ```
 
