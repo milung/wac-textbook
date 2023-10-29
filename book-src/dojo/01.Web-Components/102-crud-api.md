@@ -830,7 +830,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
          await page.waitForChanges();  @_add_@
            @_add_@
          expect(items.length).toBeGreaterThanOrEqual(1);  @_add_@
-         expect(items[0]..getAttribute("value")).toEqual(sampleEntry.name);  @_add_@
+         expect(items[0].getAttribute("value")).toEqual(sampleEntry.name);  @_add_@
       });  @_add_@
 
     });
