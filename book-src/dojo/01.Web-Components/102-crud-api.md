@@ -184,7 +184,6 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
 
    Funkcionalita je obdobná ako v prípade metódy `getWaitingListAsync` v komponente `<pfx>-ambulance-wl-list`. V tomto prípade však načítame iba jeden záznam a to ten, ktorý chceme upraviť. Všimnite si, že metóda `componentWillLoad()` nepoužíva _async/await_. Dôsledkom je, že sa komponent najprv vyrenderuje - prázdny -  a polia sa vyplnia až po získaní údajov z API. Z toho dôvodu sme označili aj pole `entry` dekorátorom `@State()`. Správanie pri načítavaní zoznamu a editora tak bude mierne odlišné, v prvom prípade je UI blokované až kým sa nezískajú údaje, v druhom prípade sa UI vykreslí bez údajov a až neskôr sa doplnia údaje z API. Ani jedno riešenie nie je ideálne, náš kód by mal byť doplnený o stav `dataLoading` a počas tohto stavu by sme mali zobraziť zodpovedajúci indikátor napríklad text "Načítavam údaje...". Túto zmenu ponechamé na Vašu samostatnú prácu.
 
-
    Ďalej v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` upravíme funkciu `render()`:
 
    ```tsx
@@ -412,130 +411,130 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
 
 7. Zostáva nám ešte vyriešiť načítanie zoznamu možných problémov - `conditions` pre rozbaľovací zoznam a vytvorenie nového záznamu. Opäť začneme úpravou API špecifikácie v súbore `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml`. Do sekcie `tags` doplňte nasledujúci záznam:
 
-   ```yaml
-   ...
-   tags:
-      - name: ambulanceWaitingList
-        description: Ambulance waiting list
-      - name: ambulanceConditions @_add_@
-        description: Patient conditions and synptoms handled in the ambulance @_add_@
-   ...
-   ```
+  ```yaml
+  ...
+  tags:
+    - name: ambulanceWaitingList
+      description: Ambulance waiting list
+    - name: ambulanceConditions @_add_@
+      description: Patient conditions and synptoms handled in the ambulance @_add_@
+  ...
+  ```
 
-   a v sekcie `paths` doplňte nasledujúce operácie:
+  a v sekcie `paths` doplňte nasledujúce operácie:
 
-   ```yaml
-   ...
-   paths:
-     "/waiting-list/{ambulanceId}/entries":
-       get:
-         ...
-       post:  @_add_@
-         tags: @_add_@
-         - ambulanceWaitingList  @_add_@
-         summary: Saves new entry into waiting list @_add_@
-         operationId: createWaitingListEntry @_add_@
-         description: Use this method to store new entry into the waiting list. @_add_@
-         parameters: @_add_@
-         - in: path @_add_@
+  ```yaml
+  ...
+  paths:
+    "/waiting-list/{ambulanceId}/entries":
+      get:
+        ...
+      post:  @_add_@
+        tags: @_add_@
+          - ambulanceWaitingList  @_add_@
+        summary: Saves new entry into waiting list @_add_@
+        operationId: createWaitingListEntry @_add_@
+        description: Use this method to store new entry into the waiting list. @_add_@
+        parameters: @_add_@
+          - in: path @_add_@
             name: ambulanceId @_add_@
             description: pass the id of the particular ambulance @_add_@
             required: true @_add_@
             schema: @_add_@
-               type: string @_add_@
-         requestBody: @_add_@
-         content: @_add_@
+              type: string @_add_@
+        requestBody: @_add_@
+          content: @_add_@
             application/json: @_add_@
-               schema: @_add_@
-               $ref: "#/components/schemas/WaitingListEntry" @_add_@
-               examples: @_add_@
-                  request-sample:  @_add_@
-                     $ref: "#/components/examples/WaitingListEntryExample" @_add_@
-         description: Waiting list entry to store @_add_@
-         required: true @_add_@
-         responses: @_add_@
-         "200": @_add_@
+              schema: @_add_@
+                $ref: "#/components/schemas/WaitingListEntry" @_add_@
+              examples: @_add_@
+                request-sample:  @_add_@
+                  $ref: "#/components/examples/WaitingListEntryExample" @_add_@
+          description: Waiting list entry to store @_add_@
+          required: true @_add_@
+        responses: @_add_@
+          "200": @_add_@
             description: >- @_add_@
-               Value of the waiting list entry with re-computed estimated time of @_add_@
-               ambulance entry @_add_@
+              Value of the waiting list entry with re-computed estimated time of @_add_@
+              ambulance entry @_add_@
             content: @_add_@
-               application/json: @_add_@
-               schema: @_add_@
+              application/json: @_add_@
+                schema: @_add_@
                   $ref: "#/components/schemas/WaitingListEntry" @_add_@
-               examples: @_add_@
+                examples: @_add_@
                   updated-response:  @_add_@
-                     $ref: "#/components/examples/WaitingListEntryExample" @_add_@
-         "400": @_add_@
+                    $ref: "#/components/examples/WaitingListEntryExample" @_add_@
+          "400": @_add_@
             description: Missing mandatory properties of input object. @_add_@
-         "404": @_add_@
+          "404": @_add_@
             description: Ambulance with such ID does not exists @_add_@
-         "409": @_add_@
+          "409": @_add_@
             description: Entry with the specified id already exists @_add_@
     "/waiting-list/{ambulanceId}/entries/{entryId}":
       ...
     "/waiting-list/{ambulanceId}/condition": @_add_@
       get: @_add_@
-         tags: @_add_@
-         - ambulanceConditions @_add_@
-         summary: Provides the list of conditions associated with ambulance @_add_@
-         operationId: getConditions @_add_@
-         description: By using ambulanceId you get list of predefined conditions @_add_@
-         parameters: @_add_@
-         - in: path @_add_@
+        tags: @_add_@
+          - ambulanceConditions @_add_@
+        summary: Provides the list of conditions associated with ambulance @_add_@
+        operationId: getConditions @_add_@
+        description: By using ambulanceId you get list of predefined conditions @_add_@
+        parameters: @_add_@
+          - in: path @_add_@
             name: ambulanceId @_add_@
             description: pass the id of the particular ambulance @_add_@
             required: true @_add_@
             schema: @_add_@
-               type: string @_add_@
-         responses: @_add_@
-         "200": @_add_@
+              type: string @_add_@
+        responses: @_add_@
+          "200": @_add_@
             description: value of the predefined conditions @_add_@
             content: @_add_@
-               application/json: @_add_@
-               schema: @_add_@
+              application/json: @_add_@
+                schema: @_add_@
                   type: array @_add_@
                   items: @_add_@
-                     $ref: "#/components/schemas/Condition" @_add_@
-               examples: @_add_@
+                    $ref: "#/components/schemas/Condition" @_add_@
+                examples: @_add_@
                   response: @_add_@
-                     $ref: "#/components/examples/ConditionsListExample" @_add_@
-         "404": @_add_@
+                    $ref: "#/components/examples/ConditionsListExample" @_add_@
+          "404": @_add_@
             description: Ambulance with such ID does not exists   @_add_@
-   ...
-   ```
+  ...
+  ```
 
    V prípade operácie `GET` pre nový endpoint `/waiting-list/{ambulanceId}/condition`, ktorý vráti zoznam možných problémov, sme použili nový tag `ambulanceConditions`. To bude mať za následok vygenerovanie novej triedy a [_factory_ funkcie](https://en.wikipedia.org/wiki/Factory_method_pattern). Nakoniec doplníme nový príklad odozvy `ConditionsListExample`:
 
-   ```yaml
-   ...
-   components:
-     schemas:
-     ...
-     examples:
+  ```yaml
+  ...
+  components:
+    schemas:
+    ...
+    examples:
       ...
       ConditionsListExample:
-         summary: Sample of GP ambulance conditions
-         description: |
-         Example list of possible conditions, symptoms, and visit reasons
-         value:
-         - value: Teploty
+        summary: Sample of GP ambulance conditions
+        description: |
+          Example list of possible conditions, symptoms, and visit reasons
+        value:
+          - value: Teploty
             code: subfebrilia
             reference: "https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/"
             typicalDurationMinutes: 20
-         - value: Nevoľnosť
+          - value: Nevoľnosť
             code: nausea
             reference: "https://zdravoteka.sk/priznaky/nevolnost/"
             typicalDurationMinutes: 45
-         - value: Kontrola
+          - value: Kontrola
             code: followup
             typicalDurationMinutes: 15
-         - value: Administratívny úkon
+          - value: Administratívny úkon
             code: administration
             typicalDurationMinutes: 10
-         - value: Odber krvy
+          - value: Odber krvy
             code: blood-test
             typicalDurationMinutes: 10
-   ```
+  ```
 
 8. Uložte zmeny a v priečinku  `${WAC_ROOT}/ambulance-ufe` vykonajte príkaz:
 
@@ -553,13 +552,13 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
          if(this.entryId === "@new") {  @_add_@
             this.isValid = false;  @_add_@
             this.entry = {  @_add_@
-            id: "@new",  @_add_@
-            patientId: "",  @_add_@
-            waitingSince: null,  @_add_@
-            estimatedDurationMinutes: 15  @_add_@
+              id: "@new",  @_add_@
+              patientId: "",  @_add_@
+              waitingSince: null,  @_add_@
+              estimatedDurationMinutes: 15  @_add_@
             };  @_add_@
             return this.entry;  @_add_@
-         }  @_add_@
+          }  @_add_@
          ...
       }
 
@@ -575,10 +574,10 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
                .updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry)  @_remove_@
             // store or update
             const api = AmbulanceWaitingListApiFactory(undefined, this.apiBase);  @_add_@
-            const response   @_add
-               = this.entryId === "@new"   @_add
-               ? await api.createWaitingListEntry(this.ambulanceId, this.entry)  @_add
-               : await api.updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry);  @_add
+            const response   @_add_@
+               = this.entryId === "@new"   @_add_@
+               ? await api.createWaitingListEntry(this.ambulanceId, this.entry)  @_add_@
+               : await api.updateWaitingListEntry(this.ambulanceId, this.entryId, this.entry);  @_add_@
             ...
       }
       ...
@@ -614,27 +613,27 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
 
    Ešte upravíme štýl pre nový element v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.css`:
 
-   ```css
-   :host {
-      display: block;
-      width: 100%;
-      height: 100%;  
-      position: relative; @_add_@
-      padding-bottom: 2rem; @_add_@
-      }
+  ```css
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;  
+    position: relative; @_add_@
+    padding-bottom: 2rem; @_add_@
+  }
 
-   .error {
-     ...
-   }
+  .error {
+    ...
+  }
 
-   .add-button {  @_add_@
-      position: absolute;  @_add_@
-      right: 1rem;  @_add_@
-      bottom: 0;  @_add_@
-      --md-filled-icon-button-container-size: 4rem;  @_add_@
-      --md-filled-icon-button-icon-size: 3rem;  @_add_@
-   }  @_add_@
-   ```
+  .add-button {  @_add_@
+    position: absolute;  @_add_@
+    right: 1rem;  @_add_@
+    bottom: 0;  @_add_@
+    --md-filled-icon-button-container-size: 4rem;  @_add_@
+    --md-filled-icon-button-icon-size: 3rem;  @_add_@
+  }  @_add_@
+  ```
 
    Tlačidlo _+_ je umiestnené na spodu vpravo nášho elementu. Pretože používame pozíciu `absolute`, musíme nastaviť aj `position` na `relative` pre element `<pfx>-ambulance-wl-list`, ináč by sa pozícia tlačidla upravovala vzhľadom k pozícii a veľkosti stránky, alebo vzhľadom k pozícii najbližšieho iného predka, ktorého pozícia by bola relatívna.
 
@@ -702,34 +701,35 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
       let conditions = this.conditions || [];   @_add_@
       // we want to have this.entry`s condition in the selection list   @_add_@
       if (this.entry?.condition) {   @_add_@
-         const index = conditions.findIndex(condition => condition.code === this.entry.condition.code)   @_add_@
-         if (index < 0) {   @_add_@
-         conditions = [this.entry.condition, ...conditions]   @_add_@
-         }   @_add_@
+        const index = conditions.findIndex(condition => condition.code === this.entry.condition.code)   @_add_@
+        if (index < 0) {   @_add_@
+        conditions = [this.entry.condition, ...conditions]   @_add_@
+        }   @_add_@
       }   @_add_@
       return (   @_add_@
-         <md-filled-select label="Dôvod návštevy"   @_add_@
-         displayText={this.entry?.condition?.value}   @_add_@
-         oninput={(ev: InputEvent) => this.handleCondition(ev)} >   @_add_@
-         <md-icon slot="leadingicon">sick</md-icon>   @_add_@
-         {this.entry?.condition?.reference   @_add_@
-         ? <md-icon slot="trailingicon" class="link"   @_add_@
-               onclick={()=> window.open(this.entry.condition.reference, "_blank")}>   @_add_@
-               open_in_new   @_add_@
-               </md-icon>   @_add_@
-         : undefined   @_add_@
-         }   @_add_@
-         {conditions.map(condition => {   @_add_@
+        <md-filled-select label="Dôvod návštevy"   @_add_@
+          display-text={this.entry?.condition?.value}   @_add_@
+          oninput={(ev: InputEvent) => this.handleCondition(ev)} >   @_add_@
+        <md-icon slot="leading-icon">sick</md-icon>   @_add_@
+        {this.entry?.condition?.reference ? @_add_@
+          <md-icon slot="trailing-icon" class="link"   @_add_@
+            onclick={()=> window.open(this.entry.condition.reference, "_blank")}>   @_add_@
+              open_in_new   @_add_@
+          </md-icon>   @_add_@
+        : undefined   @_add_@
+        }   @_add_@
+        {conditions.map(condition => {   @_add_@
             return (   @_add_@
-               <md-select-option   @_add_@
-               value={condition.code} headline={condition.value}   @_add_@
-               selected={condition.code === this.entry?.condition?.code}>   @_add_@
-               </md-select-option>   @_add_@
+              <md-select-option   @_add_@
+              value={condition.code} @_add_@
+              selected={condition.code === this.entry?.condition?.code}> @_add_@
+                  <div slot="headline">{condition.value}</div> @_add_@
+              </md-select-option> @_add_@
             )   @_add_@
-         })}   @_add_@
-         </md-filled-select>   @_add_@
+        })}   @_add_@
+        </md-filled-select>   @_add_@
       );   @_add_@
-    }   @_add_@
+    } @_add_@
     
 
     private handleCondition(ev: InputEvent) {  @_add_@
@@ -836,7 +836,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
     });
     ```
 
-    V tomto prípade simulujeme odozvy z dvoch rôznych _endpoint_-ov, preto pri volaní metódy `onGet()` používame regulárny výraz aby sme jednotlivé požiadavky odlíšili. Taktiež v tomto prípade musíme predpokladať, že pri úvodnom vykreslení po zavolaní funkcie `newSpecPage` ešte nebolo ukončené asynchrónne načítanie údajov. Volaním `await delay(300)` unmožníme aby sa asynchr=onne volanie zrealizoval a spracovalo, následne volaním `await page.waitForChanges()` zabezpečíme, že sa vykonajú všetky potrebné aktualizácie elementov, a následne overíme výsledný stav. Obdobne ako v predchádzajúcich prípadoch uvádzae iba príklad testu, vypracovanie ďaľších testov ponecháme na Vašu samostatnú prácu.
+    V tomto prípade simulujeme odozvy z dvoch rôznych _endpoint_-ov, preto pri volaní metódy `onGet()` používame regulárny výraz aby sme jednotlivé požiadavky odlíšili. Taktiež v tomto prípade musíme predpokladať, že pri úvodnom vykreslení po zavolaní funkcie `newSpecPage` ešte nebolo ukončené asynchrónne načítanie údajov. Volaním `await delay(300)` unmožníme aby sa asynchrónne volanie zrealizovalo a spracovalo, následne volaním `await page.waitForChanges()` zabezpečíme, že sa vykonajú všetky potrebné aktualizácie elementov, a následne overíme výsledný stav. Obdobne ako v predchádzajúcich prípadoch uvádzae iba príklad testu, vypracovanie ďaľších testov ponecháme na Vašu samostatnú prácu.
 
     Overte funkčnosť testov vykonaním príkazu:
 
