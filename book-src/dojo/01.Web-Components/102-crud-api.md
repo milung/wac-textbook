@@ -182,7 +182,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
       ...
    ```
 
-   Funkcionalita je obdobná ako v prípade metódy `getWaitingListAsync` v komponente `<pfx>-ambulance-wl-list`. V tomto prípade však načítame iba jeden záznam a to ten, ktorý chceme upraviť. Všimnite si, že metóda `componentWillLoad()` nepoužíva _async/await_. Dôsledkom je, že sa komponent najprv vyrenderuje - prázdny -  a polia sa vyplnia až po získaní údajov z API. Z toho dôvodu sme označili aj pole `entry` dekorátor `@State()`. Správanie pri načítavaní zoznamu a editora tak bude mierne odlišné, v prvom prípade je UI blokované až kým sa nezískajú údaje, v druhom prípade sa UI vykreslí bez údajov a až neskôr sa doplnia údaje z API. Ani jedno riešenie nie je ideálne, náš kód by mal byť doplnený o stav `dataLoading` a počas tohto stavu by sme mali zobraziť zodpovedajúci indikátor napríklad text "Načítavam údaje...". Túto zmenu ponechamé na Vašu samostatnú prácu.
+   Funkcionalita je obdobná ako v prípade metódy `getWaitingListAsync` v komponente `<pfx>-ambulance-wl-list`. V tomto prípade však načítame iba jeden záznam a to ten, ktorý chceme upraviť. Všimnite si, že metóda `componentWillLoad()` nepoužíva _async/await_. Dôsledkom je, že sa komponent najprv vyrenderuje - prázdny -  a polia sa vyplnia až po získaní údajov z API. Z toho dôvodu sme označili aj pole `entry` dekorátorom `@State()`. Správanie pri načítavaní zoznamu a editora tak bude mierne odlišné, v prvom prípade je UI blokované až kým sa nezískajú údaje, v druhom prípade sa UI vykreslí bez údajov a až neskôr sa doplnia údaje z API. Ani jedno riešenie nie je ideálne, náš kód by mal byť doplnený o stav `dataLoading` a počas tohto stavu by sme mali zobraziť zodpovedajúci indikátor napríklad text "Načítavam údaje...". Túto zmenu ponechamé na Vašu samostatnú prácu.
 
 
    Ďalej v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` upravíme funkciu `render()`:
@@ -205,7 +205,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
                oninput={ (ev: InputEvent) => {  @_add_@
                   if(this.entry) {this.entry.name = this.handleInputEvent(ev)}  @_add_@
                } }>  @_add_@
-               <md-icon slot="leadingicon">person</md-icon>
+               <md-icon slot="leading-icon">person</md-icon>
              </md-filled-text-field>
 
              <md-filled-text-field label="Registračné číslo pacienta" 
@@ -213,24 +213,32 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
                oninput={ (ev: InputEvent) => { @_add_@
                   if(this.entry) {this.entry.patientId = this.handleInputEvent(ev)}  @_add_@
                } }>  @_add_@
-               <md-icon slot="leadingicon">fingerprint</md-icon>
+               <md-icon slot="leading-icon">fingerprint</md-icon>
              </md-filled-text-field>
 
              <md-filled-text-field label="Čakáte od" disabled 
                value={this.entry?.waitingSince}> @_add_@
-               <md-icon slot="leadingicon">watch_later</md-icon>
+               <md-icon slot="leading-icon">watch_later</md-icon>
              </md-filled-text-field>
 
              <md-filled-select label="Dôvod návštevy" 
-               value={this.entry?.condition?.code}> @_add_@
+               value={this.entry?.condition?.code} @_add_@
                oninput = { (ev: InputEvent) => { @_add_@
                   if(this.entry) {this.entry.condition.code = this.handleInputEvent(ev)} @_add_@
                } }>  @_add_@
-               <md-icon slot="leadingicon">sick</md-icon>
-               <md-select-option value="folowup" headline="Kontrola"></md-select-option>
-               <md-select-option value="nausea" headline="Nevoľnosť"></md-select-option>
-               <md-select-option value="fever" headline="Horúčka"></md-select-option>
-               <md-select-option value="ache-in-throat" headline="Bolesti hrdla"></md-select-option>
+               <md-icon slot="leading-icon">sick</md-icon>
+               <md-select-option value="folowup">
+                 <div slot="headline">Kontrola</div>
+               </md-select-option>
+               <md-select-option value="nausea">
+                 <div slot="headline">Nevoľnosť</div>
+               </md-select-option>
+               <md-select-option value="fever">
+                 <div slot="headline">Horúčka</div>
+               </md-select-option>
+               <md-select-option value="ache-in-throat">
+                 <div slot="headline">Bolesti hrdla</div>
+               </md-select-option>
              </md-filled-select>
            </form> @_add_@
 
@@ -385,16 +393,14 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
    ...
    render() {
       ...
-      {this.waitingPatients.map((entry) => @_important_@
-              <md-list-item
-                headline={entry.name}
-                supportingText={"Predpokladaný vstup: " + this.isoDateToLocale(entry.estimatedStart)}
-                onClick={() => this.entryClicked.emit(entry.id)} @_important_@
-              >
+      {this.waitingPatients.map((patient) => @_important_@
+        <md-list-item onClick={ () => this.entryClicked.emit(patient.id)}> @_important_@
+          <div slot="headline">{patient.name}</div>
+          <div slot="supporting-text">{"Predpokladaný vstup: " + this.isoDateToLocale(patient.estimatedStart)}</div>
+            <md-icon slot="start">person</md-icon>
+        </md-list-item>
       ...
    ```
-
-   Všimnite si, že sme pridali atribút `key` pre element `<md-list-item>`. Tento atribút je potrebný pre správne fungovanie komponentu `<md-list>`. V prípade, že by sme ho neuviedli, komponent by sa správal nekorektne, napríklad by sa pri zmene záznamov v zozname neaktualizoval.
 
 6. V priečinku `${WAC_ROOT}/ambulance-ufe` naštartujte vývojový server príkazom:
 
