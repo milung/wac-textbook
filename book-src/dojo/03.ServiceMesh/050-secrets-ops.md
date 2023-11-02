@@ -154,7 +154,7 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
                name: sops-age    @_add_@
    ```
 
-   Táto úprava pridá do všetkých objektov typu [_Kustomization_](https://fluxcd.io/flux/components/kustomize/kustomizations/), konfiguráciu pre dešifrovanie súborov pomocou nástroja [sops] s použitím nami vytvoreného zdroja [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) `sops-age`. Navyše sme pridali automatizáciu pre nasadenie citlivých údajov do klastra, čo sme doteraz museli vykonávať manuálne.
+   Táto úprava pridá do všetkých objektov typu [_Kustomization_](https://fluxcd.io/flux/components/kustomize/kustomizations/), konfiguráciu pre dešifrovanie súborov pomocou nástroja [sops] s použitím nami vytvoreného objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) `sops-age`. Navyše sme pridali automatizáciu pre nasadenie citlivých údajov do klastra, čo sme doteraz museli vykonávať manuálne.
 
 5. Zašifrujte súbory s citlivými údajmi. Otvorte okno príkazového riadku v adresári `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params` a vykonajte príkazy:
 
@@ -185,7 +185,7 @@ Odteraz možeme vykonať zmenu v súboroch s citlivými údajmi a po ich zašifr
 
 ## Automatizácia nasadenia do klastra pre vývojárov
 
-Pre informáciu tu uvádzam skript, ktorý môžete použiť pre automatizovanie nasadenia do prázdneho klastra pre vývojárov. Tento skript predpokladá, že členovia tímu zdieľajú privátny kľuč pre nasadenia do lokálneho klastra. Skript automatizuje nasadenie zdorja `sops-age` a `repository-pat`, následné nasadenie Flux CD a nasadenie zdrojov _kustomization_ pri vytvorení alebo obnove lokálneho klastra. Script môžete uložiť napríklad do súboru `${WAC_ROOT}/ambulance-gitops/scripts/developer-deploy.ps1`:
+Pre informáciu tu uvádzam skript, ktorý môžete použiť pre automatizovanie nasadenia do prázdneho klastra pre vývojárov. Tento skript predpokladá, že členovia tímu zdieľajú privátny kľuč pre nasadenia do lokálneho klastra. Skript automatizuje nasadenie zdorja `sops-age` a `repository-pat`, následné nasadenie Flux CD a nasadenie objektov _kustomization_ pri vytvorení alebo obnove lokálneho klastra. Script môžete uložiť napríklad do súboru `${WAC_ROOT}/ambulance-gitops/scripts/developer-deploy.ps1`:
 
 ```ps
 param (

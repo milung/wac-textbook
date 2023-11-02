@@ -14,7 +14,7 @@ Typickými reprezentantmi takýchto reverse proxy sú aplikácie [_nginx_](https
 
 Na základe skúseností z implementácie [Ingress API][ingress], sa začala pripravovať nová sada [Gateway API]. Hoci je [Ingress API][ingress] zatiaľ najviac rozšíreným spôsobom riadenia smerovania požiadaviek v systémoch kubernetes, my si ukážeme spôsob založený na [Gateway API].
 
-[Gateway API] poskytuje viacero zdrojov pre konfiguráciu systémov. V produkčnom nasadení sa predpokladá, že typ `Gateway Class` dodá poskytovateľ infraštruktúry - napríklad prevádzkovateľ verejného datového centra, typ `Gateway` poskytne správca klastru - napríklad informačné oddelenie zákazníka. Vývojari samotnej aplikácie budú typicky poskytovať zdroje typu `HTTPRoute`. Pre potreby lokálneho vývoja je ale potrebné nasadiť všetky typy zdrojov.
+[Gateway API] poskytuje viacero objektov pre konfiguráciu systémov. V produkčnom nasadení sa predpokladá, že typ `Gateway Class` dodá poskytovateľ infraštruktúry - napríklad prevádzkovateľ verejného datového centra, typ `Gateway` poskytne správca klastru - napríklad informačné oddelenie zákazníka. Vývojari samotnej aplikácie budú typicky poskytovať objekty typu `HTTPRoute`. Pre potreby lokálneho vývoja je ale potrebné nasadiť všetky typy objektov.
 
 ## Nasadenie Gateway API
 
@@ -47,7 +47,7 @@ Na základe skúseností z implementácie [Ingress API][ingress], sa začala pri
          port: 80
    ```
 
-   Táto konfigurácia vytvorí v rámci klastra bod pripojenia na ktorom bude implementácia [Gateway API] čakať na prichádzajúce požiadavky a spracovávať ich podľa pravidiel definovaných v zdrojoch typu [`HTTPRoute`](https://gateway-api.sigs.k8s.io/api-types/httproute/).
+   Táto konfigurácia vytvorí v rámci klastra bod pripojenia na ktorom bude implementácia [Gateway API] čakať na prichádzajúce požiadavky a spracovávať ich podľa pravidiel definovaných v objektoch typu [`HTTPRoute`](https://gateway-api.sigs.k8s.io/api-types/httproute/).
 
 3. Vytvorte súbor: `${WAC_ROOT}/ambulance_gitops/infrastructure/envoy-gateway/kustomization.yaml` s nasledujúcim obsahom:
 
@@ -61,7 +61,7 @@ Na základe skúseností z implementácie [Ingress API][ingress], sa začala pri
    - gateway.yaml
    ```
 
-   Tento manifest obsahuje zdroje potrebné pre nasadenie [Envoy Gateway] implementácia [Gateway API] a prípravu klastra pre potreby nasadenia jednotlivých mikroslužieb.
+   Tento manifest obsahuje objekty potrebné pre nasadenie [Envoy Gateway] implementácia [Gateway API] a prípravu klastra pre potreby nasadenia jednotlivých mikroslužieb.
 
 4. Upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`
 
@@ -96,7 +96,7 @@ Na základe skúseností z implementácie [Ingress API][ingress], sa začala pri
      ...
    ```
 
-   Dôvodom pre túto úpravu je, že [Flux CD] nevie správne vyhodnotiť stav nasadenia zdrojov typu [_Job_](https://kubernetes.io/docs/concepts/workloads/controllers/job/), ktoré sú z Kubernetes API zmazané po ich úspešnom vykonaní. Vlastnosť `wait: true` určovala, aby overil či sú všetky zdroje ktoré sú súčasťou konfigurácie v stave _Ready_. [Envoy Gateway]  implementácia obsahuje aj zdroje typu _Job_ ktoré sa vykonajú a ktoré Flux CD nevie následne overiť, či sú v stave _Ready_. Vyššie uvedenou úpravou sme túto vlastnosť vypli a namiesto nej sme pridali explicitný zoznam zdrojov, ktoré budú overované.
+   Dôvodom pre túto úpravu je, že [Flux CD] nevie správne vyhodnotiť stav nasadenia objektov typu [_Job_](https://kubernetes.io/docs/concepts/workloads/controllers/job/), ktoré sú z Kubernetes API zmazané po ich úspešnom vykonaní. Vlastnosť `wait: true` určovala, aby overil či sú všetky objekty, ktoré sú súčasťou konfigurácie v stave _Ready_. [Envoy Gateway]  implementácia obsahuje aj objekty typu _Job_ ktoré sa vykonajú a ktoré Flux CD nevie následne overiť, či sú v stave _Ready_. Vyššie uvedenou úpravou sme túto vlastnosť vypli a namiesto nej sme pridali explicitný zoznam objektov, ktoré budú overované.
 
 6. Uložte zmeny do vzidaleného repozitára:
 
@@ -106,7 +106,7 @@ Na základe skúseností z implementácie [Ingress API][ingress], sa začala pri
    git push
    ```
 
-   Potom čo [Flux CD] aplikuje zmeny, môžete skontrolovať, či boli zdroje úspešne nasadené:
+   Potom čo [Flux CD] aplikuje zmeny, môžete skontrolovať, či boli objekty úspešne nasadené:
 
    ```ps
    kubectl get gatewayclass
@@ -158,7 +158,7 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
                replaceFullPath: /ui
    ```
 
-   Vo všeobecnosti platí, že každá požiadavka musí byť spracovaná jedným alebo žiadny pravidlom uvedeným v zdrojoch `HTTRoute` pre daný `Gateway` objekt.  Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta zdroja začína segmentom `/ui` budú presmerované na službu `ufe-controller`. Požiadavky na root dokument `/` budú vrátene klientovi so stavom `303 -Redirect` a presmerovaním na cestu `/ui`.
+   Vo všeobecnosti platí, že každá požiadavka musí byť spracovaná jedným alebo žiadny pravidlom uvedeným v objektoch `HTTRoute` pre daný `Gateway` objekt.  Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta začína segmentom `/ui` budú presmerované na službu `ufe-controller`. Požiadavky na root dokument `/` budú vrátene klientovi so stavom `303 -Redirect` a presmerovaním na cestu `/ui`.
 
    Potrebuje upraviť [_base URL_] pre službu `ufe-controller`, ktorá bude teraz dostupná z koreňového adresáre '/' požiadaviek, ale z podadresára `/ui/`. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/ufe-controller/patches/ufe-controller.deployment.yaml` s nasledujúcim obsahom:
 
@@ -217,7 +217,7 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
         port: 80
     ```
 
-   Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta zdroja začína segmentom `/<pfx>-api` budú presmerované na službu `<pfx>-ambulance-webapi`.
+   Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta začína segmentom `/<pfx>-api` budú presmerované na službu `<pfx>-ambulance-webapi`.
    Všimnite si časť `filters` - tu špecifikujeme, že sa ma cesta `/<pfx>-api` zameniť za `/api` pred tým, ako sa požiadavka odovzdá službe `<pfx>-ambulance-webapi`. Toto je potrebné, pretože služba `<pfx>-ambulance-webapi` očakáva, že API požiadavky budú zasielané na cestu `/api`.
 
    Ďalej do toho istého súboru doplňte nové pravidlo:

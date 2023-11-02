@@ -105,7 +105,7 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
    #    name: <pfx>-repository-pat
    ```
 
-   Tento manifest definuje prístup k Vašemu repozitáru pre operátor [Flux CD]. Venujte pozornosť používaniu unikátnych názvov zdrojov v rámci klastra. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/wac-aks/gitops/install.kustomization.yaml` definujúci konfiguráciu Vašej aplikácie:
+   Tento manifest definuje prístup k Vašemu repozitáru pre operátor [Flux CD]. Venujte pozornosť používaniu unikátnych názvov objektov v rámci klastra. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/wac-aks/gitops/install.kustomization.yaml` definujúci konfiguráciu Vašej aplikácie:
 
    ```yaml
    apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -177,7 +177,7 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
      - gitops  
    ```
 
-   >info:> Pokiaľ používate privátny repozitár, nezabudnite vytvoriť aj zdroje pre autentifikačné údaje, pozri tiež bod 8 v kapitole [Kontinuálne nasadenie pomocou nástroja Flux - Príprava konfigurácie](./081-flux)
+   >info:> Pokiaľ používate privátny repozitár, nezabudnite vytvoriť aj objekty pre autentifikačné údaje, pozri tiež bod 8 v kapitole [Kontinuálne nasadenie pomocou nástroja Flux - Príprava konfigurácie](./081-flux)
 
 5. Uložte zmeny a overte správnosť konfigurácie - v priečinku  `${WAC_ROOT}/ambulance-gitops` vykonajte príkaz:
 
@@ -226,9 +226,9 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
    >build_circle:> Ak je stav `READY` na hodnote `False`, skontrolujte 
    položku `Status` vo výpise príkazu `kubectl describe kustomization <name> -n wac-hospital`,
    a opravte prípadnu chybu. Aplikujte opravu komitom vášich zmien do repozitára. Pokiaľ sa chyba týka
-   zdroja `gitops-repo`, vykonajte aj príkaz `kubectl apply -k clusters/localhost`, v opačnom prípade je komit do repozitára postačujúci.
+   objektu `gitops-repo`, vykonajte aj príkaz `kubectl apply -k clusters/localhost`, v opačnom prípade je komit do repozitára postačujúci.
 
-   Nakoniec overte, či sú všetky nasadené zdroje pripravené a či sú všetky pody v stave `Running`:
+   Nakoniec overte, či sú všetky nasadené objekty pripravené a či sú všetky pody v stave `Running`:
 
    ```ps
    kubectl get all -n wac-hospital

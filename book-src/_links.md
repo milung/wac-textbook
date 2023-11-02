@@ -12,7 +12,7 @@
 [bitbucket]:[https://bitbucket.org/]
 [cert-manager]:https://cert-manager.io/
 [chocolatey]:https://chocolatey.org/
-[common-cluster]:https://wac-2023.westeurope.cloudapp.azure.com/ui/
+[common-cluster]:https://wac-2024.westeurope.cloudapp.azure.com/ui/
 [containers]:https://www.ibm.com/cloud/learn/containerization
 [cors]:https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 [cURL]:https://curl.haxx.se/
@@ -25,9 +25,11 @@
 [docker-hub]:https://hub.docker.com/
 [docker hub]:https://hub.docker.com/
 [Envoy Gateway]:https://gateway.envoyproxy.io/
+[envoy proxy]:https://www.envoyproxy.io/
 [flux]:https://fluxcd.io/
 [flux cd]:https://fluxcd.io/
 [gatewayapi]:https://gateway-api.sigs.k8s.io/
+[gateway api]:https://gateway-api.sigs.k8s.io/
 [gin]:https://gin-gonic.com/docs/
 [git]:https://git-scm.com/
 [github]:[https://github.com/]
@@ -63,6 +65,7 @@
 [nginx]:https://www.nginx.com/
 [nodejs]:https://nodejs.org/en/
 [npmjs.com]:https://www.npmjs.com/
+[oauth2-proxy]:https://oauth2-proxy.github.io/oauth2-proxy/
 [openapi generator online]:http://api.openapi-generator.tech/index.html
 [openapi-generator]:https://openapi-generator.tech/
 [openapi]:https://www.openapis.org/about
@@ -74,6 +77,7 @@
 [promise]:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [rancher-desktop]:https://rancherdesktop.io/
 [React]:https://reactjs.org/ 
+[redis]:https://redis.io/
 [Redux]:https://redux.js.org/
 [REST API]:https://en.wikipedia.org/wiki/Representational_state_transfer
 [REST Client]:https://marketplace.visualstudio.com/items?itemName=humao.rest-client

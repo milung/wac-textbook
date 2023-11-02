@@ -551,7 +551,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
 
    Pokiaľ nie je Váš [Docker Desktop] klaster aktívny, naštartujte ho. Po chvíli, keď operátor [Flux CD] obnoví všetky zmeny - obnovenie verzie obrazu, nasadenie zmien v konfigurácii, prejdite na stránku [http://localhost:30331](http://localhost:30331) a následne vyberte aplikáciu _Zoznam čakajúcich ..._. Mala by sa Vám zobraziť stránka s komponentom `<pfx>-ambulance-wl-list`. Po kliknutí na záznam by sa Vám mal zobraziť editor záznamu. Po stlačení na tlačidlo "Zrušiť" by ste sa mali vrátiť na zoznam čakajúcich. Hoci sme v súbore `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` explicitne nenastavili atribút `base-path`, tento je k elementu automaticky pridávaný službou `ufe-controller` na základe hodnoty atribútu `path` .
 
-   >build_circle:> V prípade problémov s nasadením zmien v konfigurácii, môžete overiť stav jednotlivých zdrojov v klustri príkazmi:
+   >build_circle:> V prípade problémov s nasadením zmien v konfigurácii, môžete overiť stav jednotlivých objektov v klustri príkazmi:
    >
    > ```ps
    > kubectl -n wac-hospital get gitrepository 

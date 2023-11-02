@@ -558,7 +558,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Všimnite si ako simulujeme chybovú odpoveď z API serveru pomocou metódy `networkError`. V teste očakávame, že sa zobrazí chybové hlásenie a že sa nezobrazí žiadny záznam v zozname pacientov.
 
-   >info:> Testovaniu negatívný scénarov - takzvaných _rainy days use cases_ - je v praxi potrebné venovať náležitú pozernosť. Vývoj častokrát prebieha v umelých prostrediach, za ideálnych podmienok sieťového pripojenia a pri dostatku systémových zdrojov. Obmedzenia v reálnych prostrediach môžu mať za dôsledok oneskorenie dodania produktu, alebo úplne odmietnutie produktu zo strany používateľov. Ako bolo uvedené, v tomto cvičení sa testovaniu venujeme len okrajovo, rozsah tu uvedených testov by bol v praxi nedostatočný.
+   >info:> Testovaniu negatívný scénarov - takzvaných _rainy days use cases_ - je v praxi potrebné venovať náležitú pozernosť. Vývoj častokrát prebieha v umelých prostrediach, za ideálnych podmienok sieťového pripojenia a pri dostatku systémových objektov. Obmedzenia v reálnych prostrediach môžu mať za dôsledok oneskorenie dodania produktu, alebo úplne odmietnutie produktu zo strany používateľov. Ako bolo uvedené, v tomto cvičení sa testovaniu venujeme len okrajovo, rozsah tu uvedených testov by bol v praxi nedostatočný.
 
 10. (_Voliteľné_) Pokiaľ chcete využívať testovacie prostredie [Jest] priamo, napríklad chcete využiť niektoré z popúlárnych rozšírení ako napríklad [vscode-jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest), doplňte do projektu konfiguráciu pre správny beh [jest cli](https://jestjs.io/docs/cli) nástrojov. Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/jest.config.js` s nasledujúcim obsahom:
 

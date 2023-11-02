@@ -67,7 +67,7 @@ Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre t
                 memory: '128M'
     ```
 
-    Všimnite si, že sa odkazujeme na secret `mongodb-auth` a configmap `mongodb-connection`. Tieto zdroje sme už prevzali z konfigurácie webapi služby. Tu využijeme fakt, že sme pri týchto zdrojoch potlačili generovanie mena s hashom. Nastaveniem premenných prostredia `ME_CONFIG_BASICAUTH_...` na prázdny reťazec, sme zároveň potlačili authentifikáciu pri prístupe na túto službu. Predpokladáme, že autentifikácia a autorizácia bude zabezpečená na úrovni kubernetes klastra - viď nasledujúce kapitoly. Premennou prostredia `ME_CONFIG_SITE_BASEURL` sme nastavili cestu pre [&lt;base&gt; element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base), čo zabezpečí správne načítavanie zdrojov tejto aplikácie
+    Všimnite si, že sa odkazujeme na secret `mongodb-auth` a configmap `mongodb-connection`. Tieto objekty sme už prevzali z konfigurácie webapi služby. Tu využijeme fakt, že sme pri týchto objektoch potlačili generovanie mena s hashom. Nastaveniem premenných prostredia `ME_CONFIG_BASICAUTH_...` na prázdny reťazec, sme zároveň potlačili authentifikáciu pri prístupe na túto službu. Predpokladáme, že autentifikácia a autorizácia bude zabezpečená na úrovni kubernetes klastra - viď nasledujúce kapitoly. Premennou prostredia `ME_CONFIG_SITE_BASEURL` sme nastavili cestu pre [&lt;base&gt; element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base), čo zabezpečí správne načítavanie zdrojov tejto aplikácie
 
 2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/mongo-express/service.yaml` s obsahom:
 

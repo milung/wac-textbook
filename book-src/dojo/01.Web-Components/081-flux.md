@@ -180,7 +180,7 @@ uložíme do git repozitára aby boli prirpavené pre priebežné nasadenie do k
       - gitops
    ```
 
-   Táto konfigurácia sa odkazuje na priečinok `gitops`, ktorý sme vytvorili v predchádzajúcom kroku. Znamená to, že konfigurácia klastra je riadená zdrojmi Flux CD, ktorý zabezpečuje priebežné nasadenie podľa konfigurácie v git repozitári na príslušných cestách.
+   Táto konfigurácia sa odkazuje na priečinok `gitops`, ktorý sme vytvorili v predchádzajúcom kroku. Znamená to, že konfigurácia klastra je riadená objektmi Flux CD, ktorý zabezpečuje priebežné nasadenie podľa konfigurácie v git repozitári na príslušných cestách.
 
 8. Ak je náš repozitár verejný, FluxCD môže získať informácie bez potreby konfigurovania prístupových práv. Avšak v praxi je bežnejšie, že konfigurácie sú špecifické a súkromné. Preto predpokladáme, že tento repozitár je súkromný a musíme nakonfigurovať prístupové údaje pre FluxCD.
 
@@ -280,13 +280,13 @@ Aby sme mohli začať využívať služby [Flux], musíme ich prvotne nasadiť d
    kubectl apply -k clusters/localhost
    ```
 
-   Týmto príkazom sme do klatra priamo nasadili zdroje z priečinku `${WAC_ROOT}/ambulance-gitops/clusters/localhost\gitops`. Pomocou zdroja `gitops-repo` typu `GitRepository` vytvorí Flux lokálnu kópiu určenej vetvy nášho repozitára. Následne, v neurčenom poradí, pomocou zdroja `cd` typu `Kustomization.kustomize.toolkit.fluxcd.io` aplikuje v klastri konfiguráciu z priečinka `clusters/localhost`, čím zabezpečí obnovenie konfigurácie samotného predpisu priebežnéhi nasadenia. Zároveň pomocou zdroja `prepare` tiež typu  `Kustomization.kustomize.toolkit.fluxcd.io`, nainštaluje do klastra služby, ktoré tam naša aplikácia implicitne predpokladá. V tomto prípade to je služba `ufe-controller` a samotný operátor [Flux CD][flux], ktorý môžeme takto napríklad obnoviť na novšiu verziu.
+   Týmto príkazom sme do klatra priamo nasadili objekty z priečinku `${WAC_ROOT}/ambulance-gitops/clusters/localhost\gitops`. Pomocou objektu `gitops-repo` typu `GitRepository` vytvorí Flux lokálnu kópiu určenej vetvy nášho repozitára. Následne, v neurčenom poradí, pomocou objektu `cd` typu `Kustomization.kustomize.toolkit.fluxcd.io` aplikuje v klastri konfiguráciu z priečinka `clusters/localhost`, čím zabezpečí obnovenie konfigurácie samotného predpisu priebežnéhi nasadenia. Zároveň pomocou objektu `prepare` tiež typu  `Kustomization.kustomize.toolkit.fluxcd.io`, nainštaluje do klastra služby, ktoré tam naša aplikácia implicitne predpokladá. V tomto prípade to je služba `ufe-controller` a samotný operátor [Flux CD][flux], ktorý môžeme takto napríklad obnoviť na novšiu verziu.
 
-   Po aplikovaní a priravenosti konfigurácie pomocou zdroja `prepare` sa začne aplikovať konfigurácia uvedená v zdroji `install` typu `Kustomization.kustomize.toolkit.fluxcd.io`, ktorá nasadí vlastné služby a zdroje nášho projektu.
+   Po aplikovaní a priravenosti konfigurácie pomocou objekt `prepare` sa začne aplikovať konfigurácia uvedená v objekte `install` typu `Kustomization.kustomize.toolkit.fluxcd.io`, ktorá nasadí vlastné služby a objekty nášho projektu.
 
-   [Flux Cd][flux] pravidelne kontroluje či nedošlo k zmenáv v repozitári alebo či stav klastra nie je odlišný konfigurácie určenej niektorým zo zdrojov typu `Kustomization`. Pri akejkoľvek zistenej zmene sa pokúsi dosiahnuť stav totožný so stavom predpísanym v konfigurácii. V prípade, že sa zmení konfigurácia v repozitári, Flux CD automaticky zmení konfiguráciu v klastri.
+   [Flux Cd][flux] pravidelne kontroluje či nedošlo k zmenáv v repozitári alebo či stav klastra nie je odlišný konfigurácie určenej niektorým zo objektov typu `Kustomization`. Pri akejkoľvek zistenej zmene sa pokúsi dosiahnuť stav totožný so stavom predpísanym v konfigurácii. V prípade, že sa zmení konfigurácia v repozitári, Flux CD automaticky zmení konfiguráciu v klastri.
 
-   >build_circle:> Niekedy potrebujeme dočasne zmeniť stav zdrojov v klastri, napríklad pri analýze hláseného problému, môžeme chcieť dočasne zmeniť úroveň logov generovaných našou mikroslužbou. Pokiaľ pridáte v klastri zdroju anotáciu `kustomize.toolkit.fluxcd.io/reconcile: disabled`, tak stav zdroja sa nezmení až do momentu, kedy túto anotáciu odstránite. Anotáciu môžete aplokovať napríklad príkazom:
+   >build_circle:> Niekedy potrebujeme dočasne zmeniť stav objektov v klastri, napríklad pri analýze hláseného problému, môžeme chcieť dočasne zmeniť úroveň logov generovaných našou mikroslužbou. Pokiaľ pridáte v klastri objektu anotáciu `kustomize.toolkit.fluxcd.io/reconcile: disabled`, tak stav objektu sa nezmení až do momentu, kedy túto anotáciu odstránite. Anotáciu môžete aplokovať napríklad príkazom:
    >
    > ```ps
    > kubectl annotate deployment <name> kustomize.toolkit.fluxcd.io/reconcile=disabled
@@ -321,9 +321,9 @@ Aby sme mohli začať využívať služby [Flux], musíme ich prvotne nasadiť d
    >build_circle:> Ak je stav `READY` na hodnote `False`, skontrolujte 
    položku `Status` vo výpise príkazu `kubectl describe kustomization <name> -n wac-hospital`,
    a opravte prípadnu chybu. Aplikujte opravu komitom vášich zmien do repozitára. Pokiaľ sa chyba týka
-   zdroja `gitops-repo`, vykonajte aj príkaz `kubectl apply -k clusters/localhost`, v opačnom prípade je komit do repozitára postačujúci.
+   objektu `gitops-repo`, vykonajte aj príkaz `kubectl apply -k clusters/localhost`, v opačnom prípade je komit do repozitára postačujúci.
 
-   Nakoniec overte, či sú všetky nasadené zdroje pripravené a či sú všetky pody v stave `Running`:
+   Nakoniec overte, či sú všetky nasadené objekty pripravené a či sú všetky pody v stave `Running`:
 
     ```ps
     kubectl get all -n wac-hospital
