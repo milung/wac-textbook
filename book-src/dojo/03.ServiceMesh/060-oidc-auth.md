@@ -243,7 +243,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
 6. Aby sme mohli vyššie nakonfigurovanú službu využiť musíme upraviť konfiguráciu [Envoy Gateway]. Z technického hľadiska, implementuje [Envoy Gateway] návrhový vzor [Kubernetes Controller](https://kubernetes.io/docs/concepts/architecture/controller/) - sleduje zmeny v registrovaných objektoch skupiny [Gateway API] a následne vytvorí novú inštanciu služby [Envoy Proxy], ktorej konfigurácia je určená na základe registrovaných zdrojov. [Envoy Proxy] je vysoko efektívna implementácie reverznej proxy, ktorá umožňuje konfigurovať detaily spracovania a smerovania požiadaviek do klastra (tu vo všeobecnom zmysle klastra výpočtových prostredkov, nie je limitovaná len na kubernetes klaster). Jedným z konceptov [Envoy Proxy] je takzvaný [HTTP filter](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/http/http_filters), ktorý umožňuje upraviť parametre spracovania HTTP požiadaviek. V našom prípade budeme využívať filter [_External Authorization_](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter), ktorý predá riadenie našej službe `oauth2-proxy`, a jedine pokiaľ táto vráti pozitívny stavový kód (menší než 400), umožní ďaľšie spracovanie požiadavky, v opačnom prípade vráti chybový stav `403 Forbidden.
 
-   [Envoy Gateway] umožňuje rozšíriť konfiguráciu dynamicky vytváraných inštancií [envoy proxy] pomocou objektu typu [_Envoy Patch Policy_](https://gateway.envoyproxy.io/v0.6.0/user/envoy-patch-policy/). K dispozícii je aj nástroj [_egctl_](https://gateway.envoyproxy.io/v0.5.0/user/egctl/), ktorý umožňuje získať aktuálnu konfiguráciu, vytvorenú na základe registrovaných zdrojov. My tento typ objektov využijeme na pridanie konfigurácie [_External Authorization_](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter) do konfigurácie [Envoy Gateway].
+   [Envoy Gateway] umožňuje rozšíriť konfiguráciu dynamicky vytváraných inštancií [envoy proxy] pomocou objektu typu [_Envoy Patch Policy_](https://gateway.envoyproxy.io/latest/user/envoy-patch-policy/). K dispozícii je aj nástroj [_egctl_](https://gateway.envoyproxy.io/latest/user/egctl/), ktorý umožňuje získať aktuálnu konfiguráciu, vytvorenú na základe registrovaných zdrojov. My tento typ objektov využijeme na pridanie konfigurácie [_External Authorization_](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter) do konfigurácie [Envoy Gateway].
 
    >info:> Jedná sa o pokročilú techniku, ktorá predpokladá znalosť konfigurácie [Envoy Proxy]. Keďže je pravdepodobné, že sa s _Envoy Proxy_ pri práci s komplexnejšími systémami v praxi stretnete, doporučujeme sa s jej detailami oboznámiť. Podrobnejšie informácie nájdete v [dokumentácii](https://www.envoyproxy.io/docs/envoy/latest/intro/intro).
 
@@ -273,7 +273,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
              # use config `egctl config envoy-proxy listener -A` to find out actual xDS configuration
              path: "/filter_chains/0/filters/0/typed_config/http_filters/0"  @_important_@
              value:
-               name: envoy.filters.http.ext_authz
+               name: authentication.ext_authz
                typed_config:
                  "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
                  http_service:
@@ -303,6 +303,24 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
   
    >warning:> [Envoy Gateway] je stále aktívne vyvíjaný, je možné, že v budúcnosti bude konfigurácia OpenID protokolu doplnená ako súčasť základnej konfigurácie.
 
+   Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/envoy-gateway/params/envoy-gateway.yaml` s obsahom
+
+   ```yaml
+   apiVersion: gateway.envoyproxy.io/v1alpha1
+   kind: EnvoyGateway
+   gateway:
+     controllerName: gateway.envoyproxy.io/gatewayclass-controller
+   logging:
+     level:
+       default: info
+   provider:
+     type: Kubernetes
+   extensionApis:
+     enableEnvoyPatchPolicy: true @_important_@
+   ```
+
+   Tento súbor upravuje konfiguračný súbor [_EnvoyGateway_](https://gateway.envoyproxy.io/latest/api/extension_types/#envoygateway), konkrétne povoluje použitie objektu [_Envoy Patch Policy_](https://gateway.envoyproxy.io/latest/user/envoy-patch-policy/).
+
    Upravte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/envoy-gateway/kustomization` a pridajte referenciu k novovytvorenej konfigurácii
 
    ```yaml
@@ -310,6 +328,13 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
    ...
    - gateway.yaml
    - envoy-patch-policy.yaml @_add_@
+     @_add_@
+   configMapGenerator:    @_add_@
+     - name: envoy-gateway-config    @_add_@
+       namespace: envoy-gateway-system    @_add_@
+       behavior: replace    @_add_@
+       files:    @_add_@
+         - params/envoy-gateway.yaml    @_add_@
    ```
 
 7. Uložte zmeny a archivujte ich vo vzdialenom repozitári:
@@ -348,7 +373,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
     _OAuth2 Proxy_ si teraz bude pamätať Vaše prihlásenie počas nasledujúcich 168 hodín (platnosť cookie) a platforma GitHub si pamätá udelenie oprávnenia pre Vašu aplikáciu. Pri opätovnom načítaní preto budete automaticky presmerovaný na stránky aplikácie a iba pri dlhšom nepoužívaní aplikácie budete opätovne vyzvaný na prihlásenie. Alternatívne sa môžete skúsiť prihlásiť z nového súkromneho okna prehliadača, ktoré nezdieľa vašu identitu (cookies a pod) s ostatnymi  oknami prehliadača.
 
-8. Mikro služba _oauth2-proxy_ poskytuje identitu prihláseného používateľa v hlavičkách preposielaných požiadaviek. Aby sme si to overili, doplníme do nášho klastra jednoduchú službu [http-echo](https://github.com/mendhak/docker-http-https-echo). Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/http-echo/deployment.yaml`
+9. Mikro služba _oauth2-proxy_ poskytuje identitu prihláseného používateľa v hlavičkách preposielaných požiadaviek. Aby sme si to overili, doplníme do nášho klastra jednoduchú službu [http-echo](https://github.com/mendhak/docker-http-https-echo). Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/http-echo/deployment.yaml`
 
    ```yaml
    apiVersion: apps/v1
@@ -460,6 +485,6 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
     Prejdite na stránku [https://wac-hospital.loc/http-echo](https://wac-hospital.loc/http-echo) a prezrite si vygenerovaný JSON súbor. V časti `headers` si všimnite hlavičky `x-auth-request-email`, a `x-auth-request-user`, ktoré boli do požiadavky doplnené službou `oauth2-proxy`.
 
-    > Odporúčame nainštalovať si do prehliadača niektorý z prídavkov pre zobrazovanie JSON súborov, ktorý je užitočným nástrojom pri vývoji webových aplikácii.
+    > Odporúčame nainštalovať si do prehliadača niektorý z prídavkov pre zobrazovanie JSON súborov, ktorý je užitočným nástrojom pri vývoji webových aplikácii. Príkladom takéhoto rozšírenie pre prehliadač Chrome je napríklad [JSONFormatter](https://github.com/callumlocke/json-formatter)
 
 Naša aplikácia je teraz schopná identifikovať používateľov a v určitom rozsahu aj kontrolovať, kto môže k našim stránkam pristúpiť.

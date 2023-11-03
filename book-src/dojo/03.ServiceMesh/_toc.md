@@ -6,4 +6,4 @@
 [shield> Bezpečné pripojenie protokolom HTTPS](./040-secure-connection.md)
 [key> Správa prihlasovacích údajov pomocou SecretsOps](./050-secrets-ops.md)
 [$openid> Authentifikácia používateľov s OpenID Connect](./060-oidc-auth.md)
-<!-- [[badge> Autorizácia používateľov s Open Policy Agent](./003-opa-autz.md) -->
+[badge> Autorizácia používateľov s Open Policy Agent](./070-opa-autz.md)

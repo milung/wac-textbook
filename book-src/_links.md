@@ -77,6 +77,7 @@
 [promise]:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [rancher-desktop]:https://rancherdesktop.io/
 [React]:https://reactjs.org/ 
+[Rego]:https://www.openpolicyagent.org/docs/latest/policy-language/
 [redis]:https://redis.io/
 [Redux]:https://redux.js.org/
 [REST API]:https://en.wikipedia.org/wiki/Representational_state_transfer
