@@ -92,9 +92,9 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
 
 3. Opätovne načítajte stránku stlačením klávesy _F5_. Prehliadač zastane na bode prerušenia, ktorý sme nastavili v predchádzajúcom bode a v pravom paneli sa zobrazia informácie o stavu výpočtu v tomto bode. Postupným stláčaním tlačidla _F10_ odkrokujte program až na posledný riadok bloku `try` v tejto funkcii. Všímajte si, ako sa menia hodnoty v pravom paneli v záložke _Rozsah_ (_Scope_). Pridajte nový výraz sledovania v pravom paneli - stlačte ikonu '+' v riadku _Sledovanie_ (_Watch_): a zadajte výraz `new Date(Date.now()).toISOString()` a následne výraz `new Date(lastPatientOut).toISOString()`. Tieto výrazy reprezentujú hodnoty v čase, keď sa zastavil program na bode prerušenia. Výsledok by mal vyzerať nasledovne: 
 
-   ![Nastavenie bodu prerušenia](./img/120-02-Debugging.png)
+   ![Nastavenie bodu prerušenia](./img/120-01-Debugging.png)
 
-   Porovnajte časy uvedené v zadaných výrazoch - čas v premennej `lastPatientOut` zodpovedá nášmu očakávaniu, chyba musí byť teda inde. Po preskúmaní výrazu `Math.min(Date.parse(this.entry.waitingSince), lastPatientOut)` zistíme, že sme omylom použili operátor `min` namiesto operátora `max`.
+   Porovnajte časy uvedené v zadaných výrazoch - čas v premennej `lastPatientOut` zodpovedá nášmu očakávaniu, chyba musí byť teda inde. Po preskúmaní výrazu `Math.min(Date.Now(), lastPatientOut)` zistíme, že sme omylom použili operátor `min` namiesto operátora `max`.
 
    Preskúmajte aj ďalšie prvky rozhrania pre ladenie programu. Na vrchu nástroja sú ovládacie prvky pre krokovanie programu. V okne si môžme prezrieť hodnoty jednotlivých premenných, viditeľných v rozsahu bodu prerušenia programu. Tiež vidíme zásobník volaní, pomocou ktorého môžme vyhodnotiť hodnoty premenných v rozsahu nadradenom súčasnému rozsahu.
 
