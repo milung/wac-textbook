@@ -26,6 +26,7 @@
 [docker hub]:https://hub.docker.com/
 [Envoy Gateway]:https://gateway.envoyproxy.io/
 [envoy proxy]:https://www.envoyproxy.io/
+[Fluentbit]:https://fluentbit.io/
 [flux]:https://fluxcd.io/
 [flux cd]:https://fluxcd.io/
 [gatewayapi]:https://gateway-api.sigs.k8s.io/
@@ -71,6 +72,7 @@
 [openapi]:https://www.openapis.org/about
 [openapi-spec]:https://spec.openapis.org/oas/latest.html
 [openlens]:https://github.com/MuhammedKalkan/OpenLens
+[Opensearch]:https://opensearch.org/
 [paas]:https://azure.microsoft.com/en-in/resources/cloud-computing-dictionary/what-is-paas/
 [Postman]:https://www.getpostman.com/
 [powershell]:https://docs.microsoft.com/en-us/powershell/

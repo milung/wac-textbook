@@ -7,3 +7,4 @@
 [key> Správa prihlasovacích údajov pomocou SecretsOps](./050-secrets-ops.md)
 [$openid> Authentifikácia používateľov s OpenID Connect](./060-oidc-auth.md)
 [badge> Autorizácia používateľov s Open Policy Agent](./070-opa-autz.md)
+[$bars-staggered> Zber a analýza logov](./080-log-analytics.md)
