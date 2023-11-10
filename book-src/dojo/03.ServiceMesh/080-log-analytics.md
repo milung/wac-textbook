@@ -113,6 +113,9 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
      name: &PODNAME monitoring-opensearch-server
    spec:
      replicas: 1
+     strategy:
+        # recreate to avoid simultanopus locking of the data volume during updates
+        type: Recreate
      selector:
        matchLabels:
          app.kubernetes.io/component: *PODNAME
@@ -125,6 +128,26 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
          - name: *PODNAME
            persistentVolumeClaim:
              claimName: *PODNAME
+         initContainers:
+          - name: fsgroup-volume
+            image: busybox:latest
+            imagePullPolicy: IfNotPresent
+            command: ['sh', '-c']
+            args:
+            # change data ownership to avoid "permision denied" errors
+            - 'chown -R 1000:1000 /usr/share/opensearch/data'
+            securityContext:
+            runAsUser: 0
+            resources:
+            requests:
+                cpu: 1m
+                memory: 32Mi
+            limits:
+                cpu: 10m
+                memory: 128Mi
+            volumeMounts:
+            - mountPath: /usr/share/opensearch/data
+                name: *PODNAME
          containers:
          - name: *PODNAME
            image: opensearchproject/opensearch:latest
@@ -216,13 +239,12 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
              - name: web
                containerPort: 5601
            resources:
-             limits:
-               cpu: '0.1'
-               memory: '512M'
-             requests:
-               cpu: '0.01'
-               memory: '320M'
-       
+            limits:
+                cpu: '0.5'
+                memory: '1Gi'
+            requests:
+                cpu: '0.1'
+                memory: '512M'
    ```
 
    Služba [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) bude dostupná za našou [Gateway API][gatewayapi], preto nastavujeme `SERVER_BASEPATH` na `/monitoring`.
@@ -354,7 +376,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
 
    ![Vytvorenie Index Pattern](./img/080-04-CreateIndexPattern-Timefield.png)
 
-6. V bočnom menu aplikácie _Opensearch Daschboards_ vyberte položku _Discover_. Teraz sa zobrazí  okno s výpisom logov vo Vašom klastri za posledných 15 minút. V ľavom bočnom paneli môžete upraviť ktoré údaje logov sa Vám budú zobrazovať. V hornom panely môžete určiť frázu pre vyhľadávanie v záznamoch systému, prípadne výpis filtrovať podľa rôznych kritérií, alebo si nastaviť iný časový rozsach záznamov systému. V prípade nepredvídaného správania sa systému, môžete túto funkcionalitu využiť na dohľadanie možnej príčiny takéhoto správania sa.
+6. V bočnom menu aplikácie _Opensearch Daschboards_ vyberte položku _Discover_. Teraz sa zobrazí  okno s výpisom logov vo Vašom klastri za posledných 15 minút. V ľavom bočnom paneli môžete upraviť ktoré údaje logov sa Vám budú zobrazovať. V hornom panely môžete určiť frázu pre vyhľadávanie v záznamoch systému, prípadne výpis filtrovať podľa rôznych kritérií, alebo si nastaviť iný časový rozsach záznamov systému. V prípade nepredvídaného správania sa systému, môžete túto funkcionalitu využiť na dohľadanie možnej príčiny takéhoto správania sa. Ďaľšie možnosti analýzy logov nájdete v bočnom menu v položke "Logs". Pre viac informácií o možnostiach využitia OpenSearch Dashboard pre analýzu a monitorovanie systému si pozrite [dokumentáciu](https://opensearch.org/docs/latest/dashboards/index/).
 
    ![Výpis a analýza logov pre namespace `wac-hospital`](./img/080-05-LogAnalysis.png)
 
