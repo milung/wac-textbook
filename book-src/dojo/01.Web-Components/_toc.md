@@ -18,5 +18,3 @@
 [deployed-code-update> Nasadenia tímového projektu na lokálnom klastri](./112-team-projekt-lokalne.md)
 [pest-control> Ladenie aplikácia v Nástrojoch vývojára](./120-debugging.md)
 [summarize> Zhrnutie](./990-zaver.md)
-
-<hr />

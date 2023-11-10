@@ -8,5 +8,3 @@
 [$docker> Kontajnerizovanie aplikácie - webového api](./060-dockerization.md)
 [$puzzle-piece> Vytvorenie znovupoužiteľných manifestov](./070-manifests.md)
 [$cubes> Nasadenie webapi na lokálny klaster](./080-deployment.md)
-
-<hr />
