@@ -38,6 +38,7 @@
 [gitops-class]:https://github.com/SevcikMichal/WACAppsRepo
 [gitops]:https://www.gitops.tech/
 [Go]:https://go.dev/
+[Grafana]:https://grafana.com/
 [helm]:https://helm.sh/
 [http]:https://developer.mozilla.org/en-US/docs/Web/HTTP
 [_Ingress_]:https://kubernetes.io/docs/concepts/services-networking/ingress/
@@ -76,6 +77,7 @@
 [paas]:https://azure.microsoft.com/en-in/resources/cloud-computing-dictionary/what-is-paas/
 [Postman]:https://www.getpostman.com/
 [powershell]:https://docs.microsoft.com/en-us/powershell/
+[prometheus]:https://prometheus.io/
 [promise]:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [rancher-desktop]:https://rancherdesktop.io/
 [React]:https://reactjs.org/ 

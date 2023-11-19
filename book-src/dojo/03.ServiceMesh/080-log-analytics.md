@@ -299,7 +299,8 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
      navigation:
        - element: ufe-frame 
          path: monitoring
-         title: Monitoring Dashboards
+         title: Analýza logov
+         details: Analytické nástroje pre prácu so záznamami systému
          attributes:  
            - name: src
              value: /monitoring
