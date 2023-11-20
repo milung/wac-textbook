@@ -293,7 +293,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    go run cmd/ambulance-api-service/main.go
    ```
 
-   a potom v druhom terminály vykonajte príkaz `curl -v http://localhost:8080/api/waiting-list/bobulova/conditions`. Výsledok by mal byť podobný tomuto:
+   a potom v druhom terminály vykonajte príkaz `curl -v http://localhost:8080/api/waiting-list/bobulova/condition`. Výsledok by mal byť podobný tomuto:
 
    ```text
    *   Trying 127.0.0.1:8080...
