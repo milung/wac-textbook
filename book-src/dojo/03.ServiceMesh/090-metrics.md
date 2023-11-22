@@ -187,7 +187,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
          incrementalQueryOverlapWindow: 10m
    ```
 
-   [Grafana] umožňuje konfigurovať zdroj údajov cez používateľské rozhranie, alebo formou automatického nastavenia -  [_provisioning_](https://grafana.com/docs/grafana/latest/administration/provisioning/), ktorý umožňuje predpripraviť konfiguráciu známych zdrojových súborov. Táto konfigurácia sa aplikuje pri štarte služby _Grafana_. V našom prípade sme konfigurovali zdroj údajov pre nástroj [Prometheus], ktorý sme nasadili v predchádzajúcom kroku.
+   [Grafana] umožňuje konfigurovať zdroj údajov cez používateľské rozhranie, alebo formou automatického nastavenia -  [_provisioning_](https://grafana.com/docs/grafana/latest/administration/provisioning/), ktorý umožňuje predpripraviť konfiguráciu známych zdrojov údajov. Táto konfigurácia sa aplikuje pri štarte služby _Grafana_. V našom prípade sme konfigurovali zdroj údajov pre nástroj [Prometheus], ktorý sme nasadili v predchádzajúcom kroku.
 
    >info:> [Grafana] podporuje aj automatické nastavenie údajových panelov - _dashboards_. V cvičení budeme postupovať manuálnym vytváranim údajových panelov. Ich konfiguráciu vo forme JSON špecifikácií si potom môžete zobraziť v používateľskom rozhraní, uložiť a použiť pre automatické nastavenie. Tieto špecifikácia musia byť uložené v adresári `/etc/grafana/provisioning/dashboards` - _mountPath_ parameter kontajnera `grafana`.
 
