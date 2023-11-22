@@ -1,4 +1,12 @@
-## Autorizácia používateľov s Open Policy Agent
+# Autorizácia používateľov s Open Policy Agent
+
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-070
+```
+
+---
 
 Autentifikácia používateľov ešte nerieši riadenie prístupu k jednotlivým zdrojom v našej aplikácii. V praxi môžeme napríklad požadovať, aby k jednotlivým ambulanciám mali prístup len používatelia s rolou `hospital-supervisor` alebo `general-practitioner` - takzvané [_Role-Based Access Control_](https://en.wikipedia.org/wiki/Role-based_access_control), alebo aby sa do čakárne mohli v určitý deň prihlasovať len pacienti s príznakom `pregnant-women` - takzvaný [_Attribute-Based Access Control_](https://en.wikipedia.org/wiki/Attribute-based_access_control).
 

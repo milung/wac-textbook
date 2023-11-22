@@ -1,5 +1,13 @@
 # Sledovanie stavu systému pomocou metrík s využitím služieb Prometheus a Grafana
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-090
+```
+
+---
+
 Pokiaľ sú naše logy vhodne vytvorené, môžeme z nich okrem analýzy problémov získať aj dostatok informácii o aktuálnom stave systému. Logy však primárne neriešia túto úlohu a vo väčšine prípadov nie sú najvhodnejším spôsobom na sledovanie rôznych výkonnvých parametrov systému a a iných metrík systému  vo všeobecnosti. V tejto časti si ukážeme ako náš systém obohotiť o zber metrík formou časových série aktuálneho stavu systému. Na začiatok si ukážeme ako zozbierať tieto metriky pre samotný klaster, a v ďaľšej časti si ukážeme postup ako generovať špecifické metriky pre našu aplikáciu. Pre účel zberu metrík využijeme nástroj [Prometheus] a pre ich vizualizáciu nástroj [Grafana](https://grafana.com/).
 
 Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monitorovanie stavu komplexných systémov. Zaznamenáva merania získavané z rôznych zdrojov, pričom každému meraniu priradí časovú značku, čím vznikne časová séria takýchto meraní. Meraním môže byť objem alokovanej pamäti, oneskorenie odpovede na HTTP požiadavku, a mnoho ďaších ukozaovateľov. Jednotlivé merania potom možno zo zystému získať, vzájomne kombinovať alebo agregovať dotazovacieho jazyka [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/). [Prometheus] obsahuje aj jednoduché rozhranie na získanie a vizualizáciu údajov, vo všeobecnosti sa ale na účely vizualizácie stavu systému využívaju špecializované nástroje, v našom prípade to bude nástroj [Grafana].

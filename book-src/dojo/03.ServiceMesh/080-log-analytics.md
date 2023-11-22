@@ -1,5 +1,13 @@
 # Zber a analýza logov s Fluentbit a OpenSearch
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-080
+```
+
+---
+
 Náš systém sa postupne rozrastá o nové mikroslužby, ktoré obsluhú rôzne aspekty našej aplikácie. Zároveň predpokladáme rozrastanie sa aj samotnej funkcionality aplikácie, čo bude viesť k pridávaniu ďaľších mikroslužieb do systému. Napriek všetkej snahe o dodanie čo najkvalitnejších komponentov, musíme predpokladať, že počas prevádzky systému bude dochádzať k situáciam kedy sa správanie systému bude odchylovať od predpokladaného špecifikovaného správania. V takýchto situáciach je potrebné mať k dispozícii nástroje, ktoré nám umožnia zistiť, čo sa v systéme deje a kde sa nachádza problém. Zároveň potrebujeme mať k dispozícii informácie o tom, ako je súčasný systém využívaný a zaťažovaný aby sme prípadnym problémom dokázali včas predchádzať. V kontexte [DevOps](https://en.wikipedia.org/wiki/DevOps)cvývoja, sa tieto schopnosti a aktivity očakávajú od samotného vývojového tímu. V tejto a nasledujúcej časti si ukážeme ako takéto nástroje nasadiť do systému a ako sledovanie (monitorovanie) systému podporiť aj pri implementácii mikroslužieb.
 
 Väčšina softverových riešení generuje nejakým spôsobom záznamy o činnosti - _log_, v ideálnom prípade ich zapisuje rovno do štandardného výstupu. V prvok kroku preto nasadíme do klastra nástroje na zber a analýzu logov. V našom prípade to budú [FluentBit] a [Opensearch].

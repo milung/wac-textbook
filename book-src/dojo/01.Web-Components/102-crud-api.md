@@ -733,12 +733,12 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
     
 
     private handleCondition(ev: InputEvent) {  @_add_@
-      if (this.entry) {  @_add_@
-         this.entry.condition = {} as Condition;
-         this.entry.condition.code = this.handleInputEvent(ev)  @_add_@
-         const condition = this.conditions.find(condition => condition.code === this.entry.condition.code);  @_add_@
-         this.entry.estimatedDurationMinutes = condition.typicalDurationMinutes;  @_add_@
-         this.duration = condition.typicalDurationMinutes;  @_add_@
+      if(this.entry) {  @_add_@
+        const code = this.handleInputEvent(ev)   @_add_@
+        const condition = this.conditions.find(condition => condition.code === code);   @_add_@
+        this.entry.condition = Object.assign({}, condition);   @_add_@
+        this.entry.estimatedDurationMinutes = condition.typicalDurationMinutes;   @_add_@
+        this.duration = condition.typicalDurationMinutes;   @_add_@
       }  @_add_@
     }  @_add_@
     ```

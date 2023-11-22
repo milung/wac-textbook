@@ -964,7 +964,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 }, http.StatusBadRequest    @_add_@
             }    @_add_@
         @_add_@
-            if entry.Id == "" {    @_add_@
+            if entry.Id == "" || entry.Id == "@new" {    @_add_@
                 entry.Id = uuid.NewString()    @_add_@
             }    @_add_@
         @_add_@

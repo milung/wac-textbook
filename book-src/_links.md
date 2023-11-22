@@ -74,6 +74,7 @@
 [openapi-spec]:https://spec.openapis.org/oas/latest.html
 [openlens]:https://github.com/MuhammedKalkan/OpenLens
 [Opensearch]:https://opensearch.org/
+[OpenTelemetry]:https://opentelemetry.io/docs/
 [paas]:https://azure.microsoft.com/en-in/resources/cloud-computing-dictionary/what-is-paas/
 [Postman]:https://www.getpostman.com/
 [powershell]:https://docs.microsoft.com/en-us/powershell/

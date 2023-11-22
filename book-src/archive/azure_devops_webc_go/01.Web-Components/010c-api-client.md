@@ -291,7 +291,7 @@ Teraz, keď máme k dispozícii implementáciu nášho API, upravíme zoznam ča
         // was duration manually altered? if so keep them, otherwise reflect condition preset
         const selectedValue = (ev.target as HTMLSelectElement).value;
         const newCondition = this.ambulanceConditions.find(_ => _.code === selectedValue);
-        @_empty_line_@
+        
         const duration 
           = this.entry.condition.typicalDurationMinutes === this.entry.estimatedDurationMinutes
           ? ( newCondition.typicalDurationMinutes || this.entry.estimatedDurationMinutes)
