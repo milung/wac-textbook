@@ -9,3 +9,4 @@
 [badge> Autorizácia používateľov s Open Policy Agent](./070-opa-autz.md)  
 [$bars-staggered> Zber a analýza logov](./080-log-analytics.md)  
 [speed> Sledovanie stavu systému pomocou metrík](./090-metrics.md)
+[readiness-score> Vlastné metriky](./100-custom-metrics.md)

@@ -57,6 +57,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
        @_add_@
      metricProvider := metric.NewMeterProvider(metric.WithReader(metricExporter), metric.WithResource(res))   @_add_@
      otel.SetMeterProvider(metricProvider)   @_add_@
+   }   @_add_@
    ```
 
    Funkcia `initTelemetry()` pripravuje globálnu inštanciu metrického poskytovateľa - [_metric provider_](https://opentelemetry.io/docs/concepts/signals/metrics/#meter-provider), ktorý bude zodpovedný za zber metrík a ich exportovanie. Všetky naše metriky (a neskôr [_traces_](https://opentelemetry.io/docs/concepts/signals/traces/) ) budú asociované s objektom, ktorý je opísaný inštanciou vytvorenou volaním funkcie `resource.New`, a ktorému priraďujeme atribuúty, pomocou ktorých tento objekt môžeme identifikovať.
@@ -196,8 +197,8 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
                attribute.String("operation", "update"),    @_add_@
                attribute.String("ambulance_id", ambulanceId),    @_add_@
                attribute.String("ambulance_name", ambulance.Name),    @_add_@
-           ))
-   
+           ))@_add_@
+            @_add_@
            // demonstration of possible handling of async instruments:    @_add_@
            // not really an operational metric, it would be more of a business metric/KPI.    @_add_@
            // also UpDownCounter may be of better use in practical cases.    @_add_@
@@ -211,19 +212,19 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
                    log.Printf("Failed to create waiting list length gauge for ambulance %v: %v", ambulanceId, err)    @_add_@
                }    @_add_@
                waitingListLength[ambulanceId] = 0    @_add_@
-   
+                @_add_@
                _, err = dbMeter.RegisterCallback(func(_ context.Context, o metric.Observer) error {    @_add_@
                    // we could have looked up the ambulance in the database here, but we already have it in memory    @_add_@
                    // so use the latest snapshots to update the gauge    @_add_@
                    o.ObserveInt64(newGauge, waitingListLength[ambulanceId])    @_add_@
                    return nil    @_add_@
                }, newGauge)    @_add_@
-   
+                @_add_@
                if err != nil {    @_add_@
                    log.Printf("Failed to register callback for waiting list length gauge for ambulance %v: %v", ambulanceId,     @_add_@err)    @_add_@
                }    @_add_@
-           }
-   
+           }@_add_@
+            @_add_@
            // set the gauge snapshot    @_add_@
            waitingListLength[ambulanceId] = int64(len(updatedAmbulance.WaitingList))    @_add_@
    
@@ -285,6 +286,6 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
 
    Prejdite na stránku [https://wac-hospital.loc/ui/](https://wac-hospital.loc/ui/) a v svojej aplikácii _Zoznam čakajúcich <pfx>_ vytvorte niekoľko záznamov Vyčakjte približne 2 minúty, kým služba [Prometheus] aktivuje proces načítania metrík. Prejdite na aplikáciu _System Dashboards_ a v ľavom navigačnom panely zvoľte položku _Explore_. V poli _Metric_ vyhľadajte merania `bobulova_waiting_patients` a stlačte tlačidlo _Run query_. V grafe by ste mali vidieť hodnoty zodpovedajúce aktuálnemu počtu čakajúcich pacientov. Pokiaľ budete ďalej vytvárať alebo mazať záznamy v zozname čakajúcich, budú na to hodnoty v grafe náležite reagovať, s príslušným oneskorením. Podobným spôsobom možete sledovať aj metriku `ambulance_wl_time_spent_in_db_milliseconds_total`, ktorá zobrazuje celkový čas strávený čítaním a zápisom do databázy.
 
-   ![Graf metriky](./img/100-01-AmbulanceWaitingListMetric.png)
+   ![Graf metriky bobulova_waiting_patients](./img/100-01-AmbulanceWaitingListMetric.png)
 
    >homework:> Výtvorte údajové panely pre tieto metriky v aplikácii _System Dashboards_ - [Grafana]. Vyskúšajte aj metriky začínajúce prefixom `http_server_` a `promhttp_`.
