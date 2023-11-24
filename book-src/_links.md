@@ -8,8 +8,9 @@
 [azure-devops]:https://azure.microsoft.com/en-us/services/devops/
 [azure-portal]:https://portal.azure.com
 [babel]:https://babeljs.io/
+[Bash]:https://www.gnu.org/software/bash/
 [bit]:https://bit.dev/
-[bitbucket]:[https://bitbucket.org/]
+[bitbucket]:https://bitbucket.org/
 [cert-manager]:https://cert-manager.io/
 [chocolatey]:https://chocolatey.org/
 [common-cluster]:https://wac-2024.westeurope.cloudapp.azure.com/ui/
@@ -33,8 +34,8 @@
 [gateway api]:https://gateway-api.sigs.k8s.io/
 [gin]:https://gin-gonic.com/docs/
 [git]:https://git-scm.com/
-[github]:[https://github.com/]
-[gitlab]:[https://about.gitlab.com/]
+[github]:https://github.com/
+[gitlab]:https://about.gitlab.com/
 [gitops-class]:https://github.com/SevcikMichal/WACAppsRepo
 [gitops]:https://www.gitops.tech/
 [Go]:https://go.dev/

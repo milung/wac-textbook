@@ -8,7 +8,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-010
 
 ---
 
-V tejto kapitole vytvoríme základnu kostru našej aplikácie. Jej funkcionalita bude síce limitovaná, ale umožní nám
+V tejto kapitole vytvoríme základnú kostru našej aplikácie. Jej funkcionalita bude síce limitovaná, ale umožní nám
 pripraviť si projektové prostredie s nevyhnutnou automatizáciou tak, aby sme sa pri ďalšom postupe mohli sústrediť na vývoj
 a evolúciu našej aplikácie a nechali automaty vykonávať opakujúce sa kroky súvisiace s integráciou a nasadením našej aplikácie.
 
@@ -27,7 +27,7 @@ Pri tejto aplikácii budeme využívať knižnicu [Stencil JS][stencil], pomocou
 
    >info:> V rámci vykonávania tohto príkazu vám budú doinštalované chýbajúce knižnice pre vytvorenie projektu.
 
-   Ako druh projektu zvoľte `components` a ako meno `ambulance-ufe`. StencilJS umožňuje vytvoriť aj samostatnú SPA/PWA aplikáciu, v našom prípade máme ale záujem iba o vytvorenie
+   Ako druh projektu zvoľte `component` a ako meno `ambulance-ufe`. StencilJS umožňuje vytvoriť aj samostatnú SPA/PWA aplikáciu, v našom prípade máme ale záujem iba o vytvorenie
    sady webových komponentov, ktoré budeme používať v spoločnej aplikácii. Z praktického
    hľadiska je rozdiel najmä vo vytváraní konečného balíka pre nasadenie našej aplikácie/webového komponentu.
 
