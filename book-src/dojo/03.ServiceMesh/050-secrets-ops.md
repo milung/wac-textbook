@@ -1,5 +1,13 @@
 # Správa prihlasovacích údajov pomocou SecretsOps
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-050
+```
+
+---
+
 Pred tým než pristúpime k autentifikácii používateľov, si pripravíme spôsob ako bezpečne nasadiť citlivé informácie do nášho kubernetes klastra. V našom prípade sa zatiaľ jedná o prihlasovacie údaje do databázy a o _Personal Access Token_ k repozitári. S tým ako budú pribúdať citlivé údaje, je ich správa na lokálnom disku, bez archivácie čoraz menej efektívna. Riešením je pre nás použitie metódy [_Secrets Ops_]. Ich princíp spočíva v použití asymetrických kľúčov na šifrovanie citlivých informácií pomocou verejného kľúča a schopnosť ich rozšifrovania len pri použití súkromného kľúča. Súkromný kľúč je ručne uložený na príslušný klastri. Verejný kľúč a zašifrované údaje potom môžme bezpečne uložiť a archivovať v našom repozitári. Zároveň využijeme zabudovanú vlastnosť [Flux CD](https://fluxcd.io/flux/guides/mozilla-sops/), ktorá umožňuje aby Flux automaticky dešifroval tieto údaje pri ich nasadení do klastra.
 
 1. K využitiu tejto techniky potrebujete mať nainštalované nástroje [sops] zo stránky [https://github.com/getsops/sops/releases](https://github.com/getsops/sops/releases). V tomto cvičení budeme ako šifrovací nástroj používať [AGE], ktorý si môžete nainštalovať zo stránky [https://github.com/FiloSottile/age/releases/tag/v1.1.1](https://github.com/FiloSottile/age/releases). Oba nástroje sa dajú nainštalovať aj pomocou správcu balíčku [Chocolatey]. Nástroj [AGE] možno nainštalovať príkazom `apt-get` na systémoch linux.

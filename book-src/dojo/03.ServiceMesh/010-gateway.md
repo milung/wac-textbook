@@ -156,6 +156,8 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
              path:
                type: ReplaceFullPath
                replaceFullPath: /ui
+           scheme: https
+           port: 443
    ```
 
    Vo všeobecnosti platí, že každá požiadavka musí byť spracovaná jedným alebo žiadny pravidlom uvedeným v objektoch `HTTRoute` pre daný `Gateway` objekt.  Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta začína segmentom `/ui` budú presmerované na službu `ufe-controller`. Požiadavky na root dokument `/` budú vrátene klientovi so stavom `303 -Redirect` a presmerovaním na cestu `/ui`.

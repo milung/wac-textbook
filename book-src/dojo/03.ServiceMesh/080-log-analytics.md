@@ -1,5 +1,13 @@
 # Zber a analýza logov s Fluentbit a OpenSearch
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-080
+```
+
+---
+
 Náš systém sa postupne rozrastá o nové mikroslužby, ktoré obsluhú rôzne aspekty našej aplikácie. Zároveň predpokladáme rozrastanie sa aj samotnej funkcionality aplikácie, čo bude viesť k pridávaniu ďaľších mikroslužieb do systému. Napriek všetkej snahe o dodanie čo najkvalitnejších komponentov, musíme predpokladať, že počas prevádzky systému bude dochádzať k situáciam kedy sa správanie systému bude odchylovať od predpokladaného špecifikovaného správania. V takýchto situáciach je potrebné mať k dispozícii nástroje, ktoré nám umožnia zistiť, čo sa v systéme deje a kde sa nachádza problém. Zároveň potrebujeme mať k dispozícii informácie o tom, ako je súčasný systém využívaný a zaťažovaný aby sme prípadnym problémom dokázali včas predchádzať. V kontexte [DevOps](https://en.wikipedia.org/wiki/DevOps)cvývoja, sa tieto schopnosti a aktivity očakávajú od samotného vývojového tímu. V tejto a nasledujúcej časti si ukážeme ako takéto nástroje nasadiť do systému a ako sledovanie (monitorovanie) systému podporiť aj pri implementácii mikroslužieb.
 
 Väčšina softverových riešení generuje nejakým spôsobom záznamy o činnosti - _log_, v ideálnom prípade ich zapisuje rovno do štandardného výstupu. V prvok kroku preto nasadíme do klastra nástroje na zber a analýzu logov. V našom prípade to budú [FluentBit] a [Opensearch].
@@ -113,6 +121,9 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
      name: &PODNAME monitoring-opensearch-server
    spec:
      replicas: 1
+     strategy:
+        # recreate to avoid simultanopus locking of the data volume during updates
+        type: Recreate
      selector:
        matchLabels:
          app.kubernetes.io/component: *PODNAME
@@ -125,6 +136,26 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
          - name: *PODNAME
            persistentVolumeClaim:
              claimName: *PODNAME
+         initContainers:
+          - name: fsgroup-volume
+            image: busybox:latest
+            imagePullPolicy: IfNotPresent
+            command: ['sh', '-c']
+            args:
+            # change data ownership to avoid "permision denied" errors
+            - 'chown -R 1000:1000 /usr/share/opensearch/data'
+            securityContext:
+            runAsUser: 0
+            resources:
+            requests:
+                cpu: 1m
+                memory: 32Mi
+            limits:
+                cpu: 10m
+                memory: 128Mi
+            volumeMounts:
+            - mountPath: /usr/share/opensearch/data
+                name: *PODNAME
          containers:
          - name: *PODNAME
            image: opensearchproject/opensearch:latest
@@ -216,13 +247,12 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
              - name: web
                containerPort: 5601
            resources:
-             limits:
-               cpu: '0.1'
-               memory: '512M'
-             requests:
-               cpu: '0.01'
-               memory: '320M'
-       
+            limits:
+                cpu: '0.5'
+                memory: '1Gi'
+            requests:
+                cpu: '0.1'
+                memory: '512M'
    ```
 
    Služba [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) bude dostupná za našou [Gateway API][gatewayapi], preto nastavujeme `SERVER_BASEPATH` na `/monitoring`.
@@ -277,7 +307,8 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
      navigation:
        - element: ufe-frame 
          path: monitoring
-         title: Monitoring Dashboards
+         title: Analýza logov
+         details: Analytické nástroje pre prácu so záznamami systému
          attributes:  
            - name: src
              value: /monitoring
@@ -354,7 +385,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
 
    ![Vytvorenie Index Pattern](./img/080-04-CreateIndexPattern-Timefield.png)
 
-6. V bočnom menu aplikácie _Opensearch Daschboards_ vyberte položku _Discover_. Teraz sa zobrazí  okno s výpisom logov vo Vašom klastri za posledných 15 minút. V ľavom bočnom paneli môžete upraviť ktoré údaje logov sa Vám budú zobrazovať. V hornom panely môžete určiť frázu pre vyhľadávanie v záznamoch systému, prípadne výpis filtrovať podľa rôznych kritérií, alebo si nastaviť iný časový rozsach záznamov systému. V prípade nepredvídaného správania sa systému, môžete túto funkcionalitu využiť na dohľadanie možnej príčiny takéhoto správania sa.
+6. V bočnom menu aplikácie _Opensearch Daschboards_ vyberte položku _Discover_. Teraz sa zobrazí  okno s výpisom logov vo Vašom klastri za posledných 15 minút. V ľavom bočnom paneli môžete upraviť ktoré údaje logov sa Vám budú zobrazovať. V hornom panely môžete určiť frázu pre vyhľadávanie v záznamoch systému, prípadne výpis filtrovať podľa rôznych kritérií, alebo si nastaviť iný časový rozsach záznamov systému. V prípade nepredvídaného správania sa systému, môžete túto funkcionalitu využiť na dohľadanie možnej príčiny takéhoto správania sa. Ďaľšie možnosti analýzy logov nájdete v bočnom menu v položke "Logs". Pre viac informácií o možnostiach využitia OpenSearch Dashboard pre analýzu a monitorovanie systému si pozrite [dokumentáciu](https://opensearch.org/docs/latest/dashboards/index/).
 
    ![Výpis a analýza logov pre namespace `wac-hospital`](./img/080-05-LogAnalysis.png)
 

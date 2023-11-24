@@ -1,5 +1,13 @@
 # Bezpečné pripojenie k aplikácii protokolom HTTPS
 
+---
+
+```ps
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-040
+```
+
+---
+
 Naša aplikácia je teraz dostupná na porte 80 (HTTP) a javí sa ako jeden aplikačný server. [HTTP protocol] však sám o sebe prenáša všetky údaje v textovej podobe a v nezabezpečenom formáte, čo môže spôsobiť únik informácii na verejných sieťach. Navyše, k našej aplikácii môže pristupovať hociktorá osoba, čo nemusí byť vždy žiadúce, napríklad môžeme chcieť obmedziť prístup k inštancii mongo express, alebo umožniť len prístup pre registrovaných pacientov. V tejto časti si ukážeme ako zabezpečiť prístup k našej aplikácii pomocou [TLS](https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security), v ďaľšej časti sa potom budeme zaoberať autentifikáciou a autorizáciou požiadaviek.
 
 Pre vytvorenie bezpečného pripojenia k našej aplikácii potrebujeme vytvoriť TLS certifikát pomocou infraštruktúry PKI, a nasadiť ho do nášho kubernetes klastra. Aby bol cartifikát akceptovaný klientom, musí byť vydaný, respektíve overený, známou certifikačnou autoritou, ktorej klient dôveruje. Prehliadač má vopred nastavené certifikačné autority, ktorým dôveruje, a ktoré sú schopné overiť platnosť certifikátu, prípadne môžeme doplniť vlastné certifikačné autority.

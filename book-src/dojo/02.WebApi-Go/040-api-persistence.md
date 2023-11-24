@@ -322,7 +322,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         }
 
         if svc.DbName == "" {
-            svc.DbName = enviro("AMBULANCE_API_MONGODB_DATABASE", "milung-ambulance-wl")
+            svc.DbName = enviro("AMBULANCE_API_MONGODB_DATABASE", "<pfx>-ambulance-wl")
         }
 
         if svc.Collection == "" {
@@ -516,7 +516,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     
     import (
         ...
-        "github.com/milung/ambulance-webapi/internal/db_service" @_add_@
+        "github.com/<pfx>/ambulance-webapi/internal/db_service" @_add_@
     )
     
     func main() {
@@ -547,7 +547,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
         "github.com/gin-gonic/gin"
         "github.com/google/uuid" @_add_@
-        "github.com/milung/ambulance-webapi/internal/db_service" @_add_@
+        "github.com/<pfx>/ambulance-webapi/internal/db_service" @_add_@
     )
 
     // CreateAmbulance - Saves new ambulance definition
@@ -686,9 +686,10 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         }    @_add_@
     ```
 
-9. Uložte zmeny. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte nasledujúci príkaz:
+9. Uložte zmeny. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte nasledujúce príkazi:
 
     ```ps
+    go mod tidy
     ./scripts/run.ps1 start
     ```
 
@@ -705,7 +706,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
        )
    }
 
-    Invoke-RestMethod -Method Post -Uri http://localhost:8080/ambulance -Body ($Body | ConvertTo-Json) -ContentType "application/json"
+    Invoke-RestMethod -Method Post -Uri http://localhost:808/api/ambulance -Body ($Body | ConvertTo-Json) -ContentType "application/json"
     ```
 
     Výsledkom by mal byť výpis v tejto podobe:
@@ -733,7 +734,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         "net/http"
 
         "github.com/gin-gonic/gin"
-        "github.com/milung/ambulance-webapi/internal/db_service"
+        "github.com/<pfx>/ambulance-webapi/internal/db_service"
     )
 
     type ambulanceUpdater = func( @_important_@
@@ -964,7 +965,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 }, http.StatusBadRequest    @_add_@
             }    @_add_@
         @_add_@
-            if entry.Id == "" {    @_add_@
+            if entry.Id == "" || entry.Id == "@new" {    @_add_@
                 entry.Id = uuid.NewString()    @_add_@
             }    @_add_@
         @_add_@
@@ -993,7 +994,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
             }    @_add_@
             return ambulance, ambulance.WaitingList[entryIndx], http.StatusOK    @_add_@
         })    @_add_@
-    }    @_add_@
+    }
     ```
 
     V tejto funkcii postupujeme obdobne ako v prípade funkcie `GetConditions`, musíme ale ošetriť situácie kedy je požiadavka neprípustna, napríklad odmietneme požiadavku na registráciu už čakajúceho pacienta, alebo požiadavku s duplikátnym identifikátorom. V prípade úspešného vytvorenia záznamu v zozname čakajúcich, zavoláme metódu `reconcileWaitingList` na objekte `Ambulance`, ktorá zabezpečí konzistentnosť časových značiek zoznamu.
