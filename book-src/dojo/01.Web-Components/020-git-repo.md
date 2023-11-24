@@ -2,9 +2,9 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-020
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):  
+`registry-1.docker.io/milung/wac-ufe-020`
 
 ---
 
@@ -12,21 +12,21 @@ V tejto kapitole si vytvoríme nový repozitár a archivujeme kód. Využijeme n
 služby poskytované na serveroch [GitHub]. Repozitár odporúčame vytvoriť ako verejný,
 nie je to ale podmienkou.
 
-1. Na stránke [GitHub] sa prihláste do svojho účtu a v hornom panely rozbaľte tlačidlo označené
+1. Na stránke [GitHub] sa prihláste do svojho účtu a v hornom paneli rozbaľte tlačidlo označené
    "+" a zvoľte _New Repository_.
   ![Vytvorenie nového repozitára](./img/020-01-NewRepo.png)
 
-2. V zobrazenom okne zvoľte meno repozitára `ambulance-ufe`, a ostatné voľby ponechajte v pôvodonom stave.  
+2. V zobrazenom okne zvoľte meno repozitára `ambulance-ufe`, a ostatné voľby ponechajte v pôvodnom stave.  
    Skontrolujte, že všetky možnosti v sekcii _Initialize this repository with:_ sú prázdne. Následne stlačte 
    na tlačidlo _Create repository_.
 
    ![Vytvorenie nového repozitára](./img/020-02-CreateRepo.png)
 
-   Na nasledujúcej stránke máte uvedené pokyny na vytvorenie lokálneho repozitára a jeho synchronizáciu s vzdialeným repozitárom.
-   V našom prípade budeme používať príkazy zobrazené v sekcii _…or push an existing repository from the command line_.
+   Po vytvorení repozitára sa zobrazí stránka s pokynmi na vytvorenie lokálneho repozitára a jeho synchronizáciu so vzdialeným repozitárom.
+   V našom prípade budeme používať príkazy zobrazené v sekcii __…or push an existing repository from the command line__.
 
 3. Pokiaľ ste zvolili vytvorenie súkromného repozitára, zvoľte na zobrazenej stránke možnosť _Invite Collaborators_
-   a pridajte do repozitára cvičiacich ako spolupracovníkov, tak aby mali k repozitáru prístup.
+   a pridajte do repozitára cvičiacich ako spolupracovníkov tak, aby mali k repozitáru prístup.
    Tento úkon im umožní analyzovať prípadné problémy vo Vašom kóde.
 
 4. Vo VS Code prejdite do priečinka `${WAC_ROOT}/ambulance-ufe` a inicializujte lokálny git repozitár príkazmi:
@@ -85,7 +85,7 @@ vetve `main` repozitára. Pri práci v tíme sa ale odporúča používať vývo
 postup [_Fork and Pull Requests_](https://gist.github.com/Chaser324/ce0505fbed06b947d962).
 
 Git repozitár je možné vytvoriť aj na iných serveroch, napríklad populárnych
-[Azure DevOps][[azure-devops]], [GitLabs][gitlab], alebo
+[Azure DevOps][azure-devops], [GitLabs][gitlab], alebo
 [Bitbucket][bitbucket]. Dôležitým kritériom pri výbere je podpora
 automatizovanej kontinuálnej integrácie a nasadenia, profesionálna podpora tímu
 a ľahká správa prostriedkov samotným vývojovým tímom. V kontexte tejto učebnice
