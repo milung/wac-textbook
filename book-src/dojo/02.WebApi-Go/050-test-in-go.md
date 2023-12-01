@@ -40,7 +40,7 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
         suite.Run(t, new(AmbulanceWlSuite))
     }
 
-    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
         // ARRANGE
 
         // ACT
@@ -49,7 +49,7 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
     }
     ```
 
-   Vytvorili sme základnú štruktúru nášho testu a testovacej zostavy. Súbor `impl_ambulance_waiting_list_test.go` je ukončený príponou `_test.go`, čo umožní nástrojom jazyka GO rozoznať ho ako súbor obsahujúci testovacie funkcie. Funkcia `TestAmbulanceWlSuite(t *testing.T)` zasa dodržuje pravidlá pre testovacie funkcie, ktoré sme spomínali vyššie. Funkcia `Test_UpdateWl_DbServiceUpdateCalled(t *testing.T)` je našou testovacou funkciou, ktorá zasa spĺňa interné požiadavky knižnice _testify_.
+   Vytvorili sme základnú štruktúru nášho testu a testovacej zostavy. Súbor `impl_ambulance_waiting_list_test.go` je ukončený príponou `_test.go`, čo umožní nástrojom jazyka GO rozoznať ho ako súbor obsahujúci testovacie funkcie. Funkcia `TestAmbulanceWlSuite(t *testing.T)` zasa dodržuje pravidlá pre testovacie funkcie, ktoré sme spomínali vyššie. Funkcia `Test_UpdateWl_DbServiceUpdateCalled()` je našou testovacou funkciou, ktorá zasa spĺňa interné požiadavky knižnice _testify_.
 
    Testovaciu funkciu sme najprv rozdelili do sekcií `// ARRANGE`, `// ACT`, a `// ASSERT`. Tento prístup je odporúčaný, pretože zvyšuje čitateľnosť testovacej funkcie a zároveň umožňuje jednoduchšie vytváranie testov. V sekcii `// ARRANGE` vytvoríme všetky potrebné objekty a nastavíme ich do požadovaného stavu. V sekcii `// ACT` vykonáme _akciu_ alebo sadu akcií, ktorých funkcionalitu sa snažíme overiť.
 
@@ -59,13 +59,13 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
 
    ```go
    ...
-   func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+   func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
       // ARRANGE
 
       // ACT
 
       // ASSERT
-      suite.dbServiceMock.AssertCalled(t, "UpdateDocument", "test-ambulance", mock.Anything)  @_add_@
+      suite.dbServiceMock.AssertCalled(suite.T(), "UpdateDocument", mock.Anything, "test-ambulance", mock.Anything)  @_add_@
     }
     ```
 
@@ -74,41 +74,45 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
 3. Ďalej pokračujeme sekciou `// ACT`, kde určíme ako sa má vyvolať požadovaná funkcionalita - v našom prípade to bude volanie funkcie `UpdateWaitingListEntry` našej triedy `implAmbulanceWaitingListAPI`. V tejto sekcii vždy používame funkcie, ktorých volanie je očakávane od externých subjektov - subjektov mimo našej testovanej jednotky. Typicky to sú funkcie označované ako aplikačné rozhranie, verejné metódy, a podobne. Vytvorte v sekcii `// ACT` nasledujúci kód:
 
    ```go
-   func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+   func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
         // ARRANGE
 
         // ACT
         sut.UpdateWaitingListEntry(ctx) @_add_@
 
         // ASSERT
-        suite.dbServiceMock.AssertCalled(t, "UpdateDocument", "test-ambulance", mock.Anything)
+        suite.dbServiceMock.AssertCalled(suite.T(), "UpdateDocument", mock.Anything, "test-ambulance", mock.Anything)
    }
    ```
 
 4. Nakoniec pripravíme podmienky pre testovanie. V sekcii `// ARRANGE` vytvoríme inštanciu triedy `implAmbulanceWaitingListAPI`. Vytvoríme inštanciu triedy `gin.Context` a upravíme jej vlastnosti tak aby zodpovedali reálnemu volaniu metódy `UpdateWaitingListEntry`. V kóde použijeme zástupné objekty poskytované knižnico [gin] ako aj zástupne objekty z knižnice [httptest](https://pkg.go.dev/net/http/httptest). Vytvorte v sekcii `// ARRANGE` nasledujúci kód:
 
    ```go
-   func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+   func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
         // ARRANGE
-        json := `{
-          "id": "test-entry",
-          "patientId": "test-patient",
-          "estimatedDurationMinutes": 42
-        }`    
+        json := `{ @_add_@
+          "id": "test-entry", @_add_@
+          "patientId": "test-patient", @_add_@
+          "estimatedDurationMinutes": 42 @_add_@
+        }`    @_add_@
+        @_add_@
+        gin.SetMode(gin.TestMode) @_add_@
+        recorder := httptest.NewRecorder() @_add_@
+        ctx, _ := gin.CreateTestContext(recorder) @_add_@
+        ctx.Set("db_service", suite.dbServiceMock) @_add_@
+	    ctx.Params = []gin.Param{ @_add_@
+		    {Key: "ambulanceId", Value: "test-ambulance"}, @_add_@
+		    {Key: "entryId", Value: "test-entry"}, @_add_@
+	    } @_add_@
+        ctx.Request = httptest.NewRequest("POST", "/ambulance/test-ambulance/waitinglist/test-entry", strings.NewReader(json)) @_add_@
 
-        gin.SetMode(gin.TestMode)
-        recorder := httptest.NewRecorder()
-        ctx, _ := gin.CreateTestContext(recorder)
-        ctx.Params = []gin.Param{gin.Param{Key: "ambulanceId", Value: "test-ambulance"}}
-        ctx.Request = httptest.NewRequest("POST", "/ambulance/test-ambulance/waitinglist/test-entry", strings.NewReader(json))
-
-        sut := implAmbulanceWaitingListAPI{}
+        sut := implAmbulanceWaitingListAPI{} @_add_@
 
         // ACT
-        sut.UpdateWaitingListEntry(ctx) @_add_@
+        sut.UpdateWaitingListEntry(ctx)
 
         // ASSERT
-        suite.dbServiceMock.AssertCalled(t, "UpdateDocument", "test-ambulance", mock.Anything)
+        suite.dbServiceMock.AssertCalled(suite.T(), "UpdateDocument", mock.Anything, "test-ambulance", mock.Anything)
     }
    ```
 
@@ -118,14 +122,14 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
     ...
     type AmbulanceWlSuite struct {
       suite.Suite
-      dbServiceMock *DbServiceMock @_add_@
+      dbServiceMock *DbServiceMock[Ambulance] @_add_@
     }
 
     func TestAmbulanceWlSuite(t *testing.T) {
         suite.Run(t, new(AmbulanceWlSuite))
     }
 
-    type DbServiceMock[DocType interface{}] struct {    @_add_@           @_add_@
+    type DbServiceMock[DocType interface{}] struct {    @_add_@
         mock.Mock              @_add_@
     }              @_add_@
                @_add_@
@@ -149,27 +153,27 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
         return args.Error(0)               @_add_@
     }              @_add_@
                @_add_@
-    func (this *DbServiceMock[DocType]) Disconnect(ctx context.Context) error {            @_add_@
+    func (this *[DocType]) Disconnect(ctx context.Context) error {            @_add_@
         args := this.Called(ctx)               @_add_@
         return args.Error(0)               @_add_@
     }              @_add_@
 
-    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
     ...
     ```
 
     Implementované metódy len prevolávajú funkciu `Called`, ktorej implementácia je poskytnutá obsiahnutým objektom `mock.Mock`. Samotný výsledok je typu `mock.Arguments`, a je určený pomocou metódy `mock.Mock.On`, ktorú použijeme v ďaľšom kroku.
 
-6. Väčšina našich testov bude používať rovnaký objekt `DbServiceMock`, preto ho vytvoríme v metóde `SetupTest`, taktiež v ňom pripravíme odpoveď pre volanie metódy `FindDocument`, kde poskytneme nejakú jednoduchú inštanciu typu `Ambulance`. V súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_waiting_list_test.go` doplňte nasledujúci kód:
+6. Väčšina našich testov bude používať rovnaký objekt ``, preto ho vytvoríme v metóde `SetupTest`, taktiež v ňom pripravíme odpoveď pre volanie metódy `FindDocument`, kde poskytneme nejakú jednoduchú inštanciu typu `Ambulance`. V súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_waiting_list_test.go` doplňte nasledujúci kód:
 
     ```go
     ...
-    func (this *DbServiceMock) Disconnect(ctx context.Context) error {
+    func (this *) Disconnect(ctx context.Context) error {
         ...
     }
 
-    func (suite *AmbulanceWlSuite) SetupTest() {    @_add_@             @_add_@
-        suite.dbServiceMock = &DbServiceMock[Ambulance]{}                @_add_@
+    func (suite *AmbulanceWlSuite) SetupTest() {    @_add_@
+        suite.dbServiceMock = &[Ambulance]{}                @_add_@
                  @_add_@
         // Compile time Assert that the mock is of type db_service.DbService[Ambulance]              @_add_@
         var _ db_service.DbService[Ambulance] = suite.dbServiceMock              @_add_@
@@ -192,18 +196,18 @@ Tak ako v prípade vývoja web komponentu, aj tu si ukážeme len príklad vytvo
             )                @_add_@
     }                @_add_@
     
-    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
     ...
     ```
 
     Podobne ako sme pripravili volanie metódy `FindDocument`, pripravíme aj volanie metódy `UpdateDocument`, tentoraz túto prípravu vykonáme v sekcii `// ARRANGE` nášho testu:
 
     ```go
-    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled(t *testing.T) {
+    func (suite *AmbulanceWlSuite) Test_UpdateWl_DbServiceUpdateCalled() {
       // ARRANGE
-      suite.dbServiceMock.
-          On("UpdateDocument", mock.Anything, mock.Anything, mock.Anything).
-          Return(nil)
+      suite.dbServiceMock.  @_add_@
+          On("UpdateDocument", mock.Anything, mock.Anything, mock.Anything).  @_add_@
+          Return(nil)  @_add_@
 
       json := `{
       ...
