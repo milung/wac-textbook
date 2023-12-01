@@ -219,6 +219,41 @@ Podobne ako v prípade metrík, sa pre distribuovanoim trasovaní asi nzjčastej
      encryption: "off"    @_add_@
    ```
 
+   Ďalšie úpravy sú potrebné v službe [Grafana](https://grafana.com/docs/grafana/v9.3/setup-grafana/configure-grafana/#tracingopentelemetry). Otvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/params/grafana.ini` a pridajte konfiguráciu pre distribuované trasovanie:
+
+   ```ini
+   ...
+   [tracing.opentelemetry]
+   sampler_type = rateLimiting
+   sampler_param=10
+   sampling_server_url = 
+   
+   [tracing.opentelemetry.otlp]
+   address= jaeger-collector.wac-hospital:4317
+   propagation= w3c
+   ```
+
+   Upravte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/deployment.yaml`:
+
+   ```yaml
+   ...
+   spec:
+     template:
+       spec:
+         ...
+         containers:
+           - name: grafana
+             image: grafana/grafana:latest
+             imagePullPolicy: IfNotPresent
+             env:    @_add_@
+               # workaround for issue https://github.com/grafana/grafana/issues/58608   @_add_@
+               - name: JAEGER_AGENT_HOST   @_add_@
+                 value: ""   @_add_@
+               - name: JAEGER_AGENT_PORT   @_add_@
+                 value: ""   @_add_@
+              ...
+   ```
+
 4. Overte správnosť konfigurácie príkazmy v priečinku `${WAC_ROOT}/ambulance-gitops`
 
    ```ps
@@ -262,4 +297,3 @@ Podobne ako v prípade metrík, sa pre distribuovanoim trasovaní asi nzjčastej
    ...
    }
    ```
-
