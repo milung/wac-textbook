@@ -19,7 +19,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    kind: Kustomization
 
    resources:
-   - 'https://github.com/<your-account>/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
+   - 'https://github.com/<github-id>/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
    ```
 
    >info:> Dva po sebe idúce znaky `//` oddeľujú URL repozitára od cesty k repozitáru. Pokiaľ by ste chceli získať konkrétnu verziu - git tag allebo commit - pridajte za na koniec URL  `?ref=<tag>`.
@@ -30,14 +30,13 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    kind: Service
    apiVersion: v1
    metadata:
-   name: pfx-ambulance-webapi
+    name: <pfx>-ambulance-webapi
    spec:  
-   ports:
-   - name: http
-     protocol: TCP
-
-     type: NodePort
-     nodePort: 30081
+    ports:
+    - name: http
+      protocol: TCP
+      type: NodePort
+      nodePort: 30081
    ```
 
    Tento súbor upraví definíciu služby tak, aby bola dostupná z lokálnej siete na porte `30081`.
@@ -55,7 +54,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
     components: 
     - ../../../components/version-developers
-    - https://github.com/<your-account>/ambulance-webapi//deployments/kustomize/components/mongodb @_add_@
+    - https://github.com/<github-id>/ambulance-webapi//deployments/kustomize/components/mongodb @_add_@
 
     patches: @_add_@
     - path: patches/ambulance-webapi.service.yaml @_add_@
@@ -89,7 +88,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
      name: ambulance-webapi
      namespace: wac-hospital
    spec:
-     image: <github-id>/ambulance-wl-webapi
+     image: <docker-id>/ambulance-wl-webapi
      interval: 1m0s
    ```
 
@@ -135,34 +134,15 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    ...
    ```
 
-6. Ďalej upravte atribúty web componentu aby sa pokúsil pripojiť k nasadenému webapi. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a upravte ho:
-
-    ```yaml
-    ...
-    spec:   
-      ...
-      navigation:
-        - element: pfx-ambulance-wl-app    
-        ...
-          attributes:  @_add_@
-            - name: api-base  @_add_@
-              value: http://localhost:30081/api @_add_@
-            - name: ambulance-id 
-              value: bobulova 
-            ...
-    ```
-  
-    Týmto sme nášmu mikro frontendu povedali, že má komunikovať s webapi na porte `30081`.
-
-7. Otvorte okno príkazového riadku v adresári ``${WAC_ROOT}/ambulance-gitops` a overte správnosť konfigurácie príkazom:
+6. Otvorte okno príkazového riadku v adresári `${WAC_ROOT}/ambulance-gitops` a overte správnosť konfigurácie príkazom:
 
    ```ps
-   kustomize build clusters/localhost/install
+   kubectl kustomize clusters/localhost/install
    ```
 
    Výstupom by mali byť manifesty pre nasadenie aplikácie bez chybovej správy.
 
-8. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
+7. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
 
    ```ps
    git add .
@@ -176,7 +156,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
     kubectl get pods  -n wac
     ```
 
-9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
+8. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 
 <hr/>
 

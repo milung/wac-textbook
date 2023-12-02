@@ -94,7 +94,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
               imagePullPolicy: Always   @_add_@
               ports:   @_add_@
               - name: api-ui   @_add_@
-                containerPort: "8080"   @_add_@
+                containerPort: 8081   @_add_@
               env:           @_add_@
                 - name: PORT   @_add_@
                   value: "8081"   @_add_@
@@ -136,7 +136,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
            - name: init-mongodb        @_add_@
              image: mongo:latest        @_add_@
              imagePullPolicy: Always        @_add_@
-             command: ['mongosh', '-f', '/scripts/init-db.js']        @_add_@
+             command: ['mongosh', "--nodb", '-f', '/scripts/init-db.js']        @_add_@
              volumeMounts:        @_add_@
              - name: init-scripts        @_add_@
                mountPath: /scripts        @_add_@
@@ -174,7 +174,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
             ...
    ```
 
-   Inicializačný proces je určený príkazom `command: ['mongosh', '-f', '/scripts/init-db.js']` a referuje na inicializačný skript v súbore `/scripts/init-db.js`. Tento súbor musí byť dostupný v rámci kontajnera, preto je potrebné ho pridať ako zdieľaný objekt pomocou `volumeMounts`, ktorý mapuje na adresár `/scripts` obsah objektu `<pfx>-ambulance-webapi-mongodb-init`.
+   Inicializačný proces je určený príkazom `command: ['mongosh', "--nodb", '-f', '/scripts/init-db.js']` a referuje na inicializačný skript v súbore `/scripts/init-db.js`. Tento súbor musí byť dostupný v rámci kontajnera, preto je potrebné ho pridať ako zdieľaný objekt pomocou `volumeMounts`, ktorý mapuje na adresár `/scripts` obsah objektu `<pfx>-ambulance-webapi-mongodb-init`.
 
    Samotný inicializačný skript zatiaľ uložíme do súboru `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/params/init-db.js` a obsahuje nasledujúci kód:
 
@@ -303,7 +303,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
            volumes: 
            - name: db-data
              persistentVolumeClaim: @_important_@
-               claimName: mongodb-pvc @_important_@
+               claimName: mongo-pvc @_important_@
            containers:
            - name: *PODNAME
              image: mongo:latest
@@ -327,10 +327,10 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                     key: password
              resources:
                requests:
-                 memory: "1GB"
+                 memory: "1Gi"
                  cpu: "0.1"
                limits:
-                 memory: "4GB"
+                 memory: "4Gi"
                  cpu: "0.5"
    ```
 
@@ -431,7 +431,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                    configMapKeyRef:
                      name: mongodb-connection
                      key: host
-               - name: AMBULANCE_API_MONGODB_PORTň
+               - name: AMBULANCE_API_MONGODB_PORT
                  value: null    @_important_@
                  valueFrom:
                    configMapKeyRef:
