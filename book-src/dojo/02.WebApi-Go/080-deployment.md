@@ -32,10 +32,11 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    metadata:
     name: <pfx>-ambulance-webapi
    spec:  
+    type: NodePort
     ports:
     - name: http
       protocol: TCP
-      type: NodePort
+      port: 80
       nodePort: 30081
    ```
 
@@ -156,7 +157,33 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
     kubectl get pods  -n wac
     ```
 
-8. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
+8. Momentálne je náš frontend zabezpečený tak že dovoluje načítavať requesty iba z rovnakého hosta. Aby sme mohli pristupovat na lokane API na inom porte musime upravit CSP hlavičku servera. Pridajte patch pre configuraciu CSP hlavičky do nášho lokálneho klastra. V súbore `clusters/localhost/prepare/kustomization.yaml` pridajte nasledovné riadky:
+
+  ```yaml
+    apiVersion: kustomize.config.k8s.io/v1beta1
+    kind: Kustomization
+    resources:
+    ...
+    patches: 
+    ...
+    - patch: |- @_add_@
+        - op: add @_add_@
+          path: "/spec/template/spec/containers/0/env/-" @_add_@
+          value: @_add_@
+            name: "HTTP_CSP_HEADER" @_add_@
+            value: "default-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://fonts.gstatic.com/; font-src 'self' https://fonts.googleapis.com/ https://fonts.gstatic.com/; script-src 'nonce-{NONCE_VALUE}'; connect-src 'self' localhost:30331 localhost:30081" @_add_@
+      target: @_add_@
+        group: apps @_add_@
+        version: v1 @_add_@
+        kind: Deployment @_add_@
+        name: ufe-controller @_add_@
+    components:
+    ...
+  ```
+
+   Tento súbor upraví definíciu deploymentu tak, aby bol vytvorený s CSP hlavičkou, ktorá umožní prístup na lokálne API na porte `30081`.
+
+9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 
 <hr/>
 
