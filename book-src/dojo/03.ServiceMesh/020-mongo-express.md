@@ -44,7 +44,7 @@ Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre t
               valueFrom:  
                 secretKeyRef: 
                   name: mongodb-auth @_important_@
-                  key: username
+                  key: password
             - name: ME_CONFIG_MONGODB_SERVER
               valueFrom:
                 configMapKeyRef:
@@ -105,7 +105,7 @@ Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre t
            - group: ""
              kind: Service
              name: mongo-express
-             port: 80
+             port: 8081
    ```
 
 4. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/mongo-express/webcomponent.yaml` s obsahom:
