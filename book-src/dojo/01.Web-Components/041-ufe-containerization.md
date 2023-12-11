@@ -2,9 +2,9 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-041
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-041`
 
 ---
 
@@ -50,9 +50,9 @@ Softvérové kontajnery sú vytvárané z ich obrazov, čo je binárna forma rep
 
    V našom prípade potrebujeme systém [Node JS][nodejs] len počas kompilácie, k vytvoreniu súborov poskytovaných webovým serverom. Samotný program bude vykonávaný webovým  prehliadačom na prostriedkoch koncového používateľa. Z toho dôvodu je prvý stupeň - identifikovaný  príkazom `FROM node:latest AS build` - takzvaný dočasný obraz, oddelený od druhého stupňa.
 
-   Druhý  stupeň - začínajúci príkazom `FROM milung/spa-server` - potom predstavuje ďaľší stupeň vytvárania obrazu. V tomto kroku sú statické súbory skopírované do adresára public v pracovnom priečinku kontajnera milung/spa-server a príkaz `build.sh` vykoná kompiláciu predpripraveného programu vytvoreného v jazyku [Golang][go]. Účelom tohto kroku je zminimalizovať výslednu veľkosť cieľového obrazu a množstvo jeho závislostí. Viac informácii o tomto obraze nájdete v repozitári [SirCremefresh/spa-server](https://github.com/SirCremefresh/spa-server). _(Obraz `milung/spa-server` je len multiplatformovou verziou tohto obrazu, ktorý je dostupný aj pre procesory s architektúrou ARM64.)_
+   Druhý stupeň - začínajúci príkazom `FROM milung/spa-server` - potom predstavuje ďalší stupeň vytvárania obrazu. V tomto kroku sú statické súbory skopírované do adresára public v pracovnom priečinku kontajnera milung/spa-server a príkaz `build.sh` vykoná kompiláciu predpripraveného programu vytvoreného v jazyku [Golang][go]. Účelom tohto kroku je zminimalizovať výslednú veľkosť cieľového obrazu a množstvo jeho závislostí. Viac informácií o tomto obraze nájdete v repozitári [SirCremefresh/spa-server](https://github.com/SirCremefresh/spa-server). _(Obraz `milung/spa-server` je len multiplatformovou verziou tohto obrazu, ktorý je dostupný aj pre procesory s architektúrou ARM64.)_
 
-   Finálny obraz je založený na takzvanej _scratch_ vrstve, čo je v zásade prázdna vrstva kontajnera. Tým pádom už neobsahuje žiadne ďalšie závislosti ale len komunikuje z vrstvou hostiteľského počítača. Do tejto vrstvy potom kopírujeme náš výsledný proces, ktorý implementuje HTTP službu upravenú pre potreby _Single Page Application_ funkcionality. V tomto stupni sme použili aj definíciu premennej prostredia `CSP_HEADER` ktorá je implicitne nastavená na hodnotu `false`. Takéto premenné prostredia sú viditeľné v procesoch, ktoré bežia v kontajneri (nie počas vytvárania kontajnera), a ich aktuálnu hodnotu možno upraviť pri vytváraní inštanice príslušného kontajnera z predom vytvoreného obrazu.
+   Finálny obraz je založený na takzvanej _scratch_ vrstve, čo je v zásade prázdna vrstva kontajnera. Tým pádom už neobsahuje žiadne ďalšie závislosti, ale len komunikuje s vrstvou hostiteľského počítača. Do tejto vrstvy potom kopírujeme náš výsledný proces, ktorý implementuje HTTP službu upravenú pre potreby _Single Page Application_ funkcionality. V tomto stupni sme použili aj definíciu premennej prostredia `CSP_HEADER` ktorá je implicitne nastavená na hodnotu `false`. Takéto premenné prostredia sú viditeľné v procesoch, ktoré bežia v kontajneri (nie počas vytvárania kontajnera), a ich aktuálnu hodnotu možno upraviť pri vytváraní inštancie príslušného kontajnera z predom vytvoreného obrazu.
 
    Teoreticky by bolo možné použiť len jediný stupeň vytvárania obrazu, napríklad doplnením príkazu `CMD npm run start` v prvom stupni. Takto vytvorený obraz by bol však zbytočne veľký - obsahoval by celý subsystém [Node.js][nodejs] ako aj všetky závislosti našej aplikácie v priečinku _node_modules_. Viacero stupňov vytvárania výsledného obrazu a kompilácia programu priamo pri jeho vytváraní zabezpečuje prenositeľnosť a reprodukovateľnosť celého procesu.
 
@@ -67,7 +67,7 @@ Softvérové kontajnery sú vytvárané z ich obrazov, čo je binárna forma rep
    node_modules
    ```
 
-    Počas kompilácie súboru `Dockerfile` je do vyrovnávacej pamäte rekurzívne kopírovaný obsah aktuálneho priečinku (pričinka _context_-u). Súbor `.dockerignore` umožňuje  špecifikovať, ktoré súbory alebo priečinky nie sú pre kompiláciu potrebné, čo  najmä v prípade priečinka `node_modules` značne skráti čas inicializácie kompilácie.
+    Počas kompilácie súboru `Dockerfile` je do vyrovnávacej pamäte rekurzívne kopírovaný obsah aktuálneho priečinku (priečinku _context_-u). Súbor `.dockerignore` umožňuje  špecifikovať, ktoré súbory alebo priečinky nie sú pre kompiláciu potrebné, čo  najmä v prípade priečinka `node_modules` značne skráti čas inicializácie kompilácie.
 
 3. Komitnite a synchronizujte zmeny so vzdialeným repozitárom.
 
@@ -77,13 +77,13 @@ Softvérové kontajnery sú vytvárané z ich obrazov, čo je binárna forma rep
     git push
     ```
 
-4. Kompilujte súbor `Dockerfile` do nového obrazu `ambulance-ufe` príkazom:
+4. Skompilujte súbor `Dockerfile` do nového obrazu `ambulance-ufe` príkazom:
 
    ```ps
    docker build -t ambulance-ufe -f build/docker/Dockerfile .
    ```
 
-   >$apple:> V prípade že máte procesor s arm64 architektúrou a build docker obrazu končí  neúspešne s hláškou: `The chromium binary is not available for arm64.`, treba pred riadok v  Dockerfile: `COPY package.json .` pridať riadok: `ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true`.
+   >$apple:> V prípade, že máte procesor s arm64 architektúrou a build docker obrazu skončí neúspešne s hláškou: `The chromium binary is not available for arm64.`, treba pred riadok v  Dockerfile: `COPY package.json .` pridať riadok: `ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true`.
 
    Inštalácia balíčkov môže byť pri prvom vykonaní tohto príkazu zdĺhavá a závislá od rýchlosti  sieťového pripojenia, v nasledujúcich kompiláciách sa ale bude vytváranie tejto vrstvy  preskakovať, pokiaľ nedôjde k zmene súboru `package.json`. Po úspešnom vykonaní príkazu môžete  naštartovať kontajner príkazom
 

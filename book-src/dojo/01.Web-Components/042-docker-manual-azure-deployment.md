@@ -2,9 +2,9 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-042
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-042`
 
 ---
 
@@ -72,4 +72,4 @@ Naša aplikácia je nasadená.
 Ako bolo spomenuté vyššie, toto je najzákladnejší manuálny spôsob nasadenia
 aplikácie na cloud. V ďalších krokoch si ukážeme, ako tento proces automatizovať.
 
->$apple:> V prípade, že máte procesor s arm64 architektúrou, je možné, že bude v tejto chvíli Vaša aplikácia nefunkčná z dôvodu nekompatibility architektúry procesorov. Pokračujte do ďalšej kapitole, kde bude upravený predpis priebežnej integrácie tak aby vytváral obraz pre rôzne platformy a architektúry procesora.
+>$apple:> V prípade, že máte procesor s arm64 architektúrou, je možné, že bude v tejto chvíli Vaša aplikácia nefunkčná z dôvodu nekompatibility architektúry procesorov. Pokračujte do ďalšej kapitoly, kde bude upravený predpis priebežnej integrácie tak, aby vytváral obraz pre rôzne platformy a architektúry procesora.
