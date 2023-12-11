@@ -167,4 +167,4 @@ Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre t
    git push
    ```
 
-   Po aplikovaní zmien službou [FluxCD] prejdite na stránku [http://localhost/ui](http://localhost/ui) a overte, že sa Vám zobrazuje aj aplikácia [Mongo Express].
+   Po aplikovaní zmien službou [FluxCD][flux] prejdite na stránku [http://localhost/ui](http://localhost/ui) a overte, že sa Vám zobrazuje aj aplikácia [Mongo Express][mongoexpress].
