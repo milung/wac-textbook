@@ -10,3 +10,5 @@
 [$bars-staggered> Zber a analýza logov](./080-log-analytics.md)  
 [speed> Sledovanie stavu systému pomocou metrík](./090-metrics.md)
 [readiness-score> Vlastné metriky](./100-custom-metrics.md)
+[$chart-gantt> Distribuované trasovanie](./110-tracing.md)
+[barefoot> Pridanie trasovanie do  WEBAPI služby](./120-custom-tracing.md)

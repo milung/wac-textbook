@@ -38,13 +38,9 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
    )
    
    // initialize OpenTelemetry instrumentations   @_add_@
-   func initTelemetry() {   @_add_@
-     metricExporter, err := prometheus.New()   @_add_@
-     if err != nil {   @_add_@
-      panic(err)   @_add_@
-     }   @_add_@
-       @_add_@
-     res, err := resource.New(context.Background(),   @_add_@
+   func initTelemetry() error {   @_add_@
+     ctx := context.Background()   @_add_@
+     res, err := resource.New(ctx,   @_add_@
       resource.WithAttributes(semconv.ServiceNameKey.String("Ambulance WebAPI Service")),   @_add_@
       resource.WithAttributes(semconv.ServiceNamespaceKey.String("WAC Hospital")),   @_add_@
       resource.WithSchemaURL(semconv.SchemaURL),   @_add_@
@@ -52,7 +48,12 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
      )   @_add_@
        @_add_@
      if err != nil {   @_add_@
-      panic(err)   @_add_@
+      return err   @_add_@
+     }   @_add_@
+       @_add_@
+     metricExporter, err := prometheus.New()   @_add_@
+     if err != nil {   @_add_@
+      return er   @_add_@
      }   @_add_@
        @_add_@
      metricProvider := metric.NewMeterProvider(metric.WithReader(metricExporter), metric.WithResource(res))   @_add_@
@@ -85,6 +86,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
        // setup telemetry    @_add_@
        initTelemetry()    @_add_@
        @_add_@
+       // instrument gin engine
        engine.Use(otelginmetrics.Middleware(    @_add_@
            "Ambulance WebAPI Service",    @_add_@
            // Custom attributes    @_add_@

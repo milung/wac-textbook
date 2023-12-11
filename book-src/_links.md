@@ -44,6 +44,7 @@
 [http]:https://developer.mozilla.org/en-US/docs/Web/HTTP
 [_Ingress_]:https://kubernetes.io/docs/concepts/services-networking/ingress/
 [Inversify]:https://github.com/inversify/InversifyJS
+[Jaeger]:https://www.jaegertracing.io/
 [jest]:https://jestjs.io/
 [jquery]:https://jquery.com/
 [jsonschema]:https://json-schema.org/

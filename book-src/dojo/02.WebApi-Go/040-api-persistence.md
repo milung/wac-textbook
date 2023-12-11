@@ -507,7 +507,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
     Týmto máme náš prístup k databáze naimplementovaný.
 
-7. Aby sme mohli naše rozhranie `DbService` využiť v kóde obsluhy požiadaviek, ktorý sme vygenerovali v _package_ `ambulance_wl`, pridáme jeho inštanciu do _context_-u, ktorý je predaný vygenerovaným funkciám ako argument. K tomu využijeme [_middleware_](https://gin-gonic.com/docs/examples/custom-middleware/) funkciu, ktorú zaregistrujeme do _router_-a knižnice `gin`.
+7. Aby sme mohli naše rozhranie `DbService` využiť v kóde obsluhy požiadaviek, ktorý sme vygenerovali v _package_ `ambulance_wl`, pridáme jeho inštanciu do _context_-u, ktorý je predaný vygenerovaným funkciám ako argument. K tomu využijeme [_middleware_](https://gin-gonic.com/docs/examples/custom-middleware/) funkciu, ktorú zaregistrujeme do _router_-a knižnice `gin`. Zároveň pridáme CORS configuráciu.
 
    Otvorte súbor `${WAC_ROOT}/workspaces/wac-test/ambulance-webapi/cmd/ambulance-api-service/main.go` a do funkcie `main` doplňte uvedený kód:
 
@@ -523,6 +523,17 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         ...
         engine := gin.New()
         engine.Use(gin.Recovery())
+
+        corsConfig := cors.Config{  @_add_@
+            Origins:         "*",  @_add_@
+            Methods:         "GET, PUT, POST, DELETE, PATCH",  @_add_@
+            RequestHeaders:  "Origin, Authorization, Content-Type",  @_add_@
+            ExposedHeaders:  "", @_add_@
+            MaxAge:          12 * time.Hour, @_add_@
+            Credentials:     false, @_add_@
+            ValidateHeaders: false, @_add_@
+        }
+        engine.Use(cors.Middleware(corsConfig)) @_add_@
     
         // setup context update  middleware     @_add_@
         dbService := db_service.NewMongoService[ambulance_wl.Ambulance](db_service.MongoServiceConfig{})     @_add_@

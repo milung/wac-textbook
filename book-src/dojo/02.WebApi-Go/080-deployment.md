@@ -19,7 +19,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    kind: Kustomization
 
    resources:
-   - 'https://github.com/<your-account>/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
+   - 'https://github.com/<github-id>/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
    ```
 
    >info:> Dva po sebe idúce znaky `//` oddeľujú URL repozitára od cesty k repozitáru. Pokiaľ by ste chceli získať konkrétnu verziu - git tag allebo commit - pridajte za na koniec URL  `?ref=<tag>`.
@@ -30,14 +30,14 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    kind: Service
    apiVersion: v1
    metadata:
-   name: pfx-ambulance-webapi
+    name: <pfx>-ambulance-webapi
    spec:  
-   ports:
-   - name: http
-     protocol: TCP
-
-     type: NodePort
-     nodePort: 30081
+    type: NodePort
+    ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      nodePort: 30081
    ```
 
    Tento súbor upraví definíciu služby tak, aby bola dostupná z lokálnej siete na porte `30081`.
@@ -55,7 +55,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
     components: 
     - ../../../components/version-developers
-    - https://github.com/<your-account>/ambulance-webapi//deployments/kustomize/components/mongodb @_add_@
+    - https://github.com/<github-id>/ambulance-webapi//deployments/kustomize/components/mongodb @_add_@
 
     patches: @_add_@
     - path: patches/ambulance-webapi.service.yaml @_add_@
@@ -89,7 +89,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
      name: ambulance-webapi
      namespace: wac-hospital
    spec:
-     image: <github-id>/ambulance-wl-webapi
+     image: <docker-id>/ambulance-wl-webapi
      interval: 1m0s
    ```
 
@@ -135,34 +135,15 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    ...
    ```
 
-6. Ďalej upravte atribúty web componentu aby sa pokúsil pripojiť k nasadenému webapi. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a upravte ho:
-
-    ```yaml
-    ...
-    spec:   
-      ...
-      navigation:
-        - element: pfx-ambulance-wl-app    
-        ...
-          attributes:  @_add_@
-            - name: api-base  @_add_@
-              value: http://localhost:30081/api @_add_@
-            - name: ambulance-id 
-              value: bobulova 
-            ...
-    ```
-  
-    Týmto sme nášmu mikro frontendu povedali, že má komunikovať s webapi na porte `30081`.
-
-7. Otvorte okno príkazového riadku v adresári ``${WAC_ROOT}/ambulance-gitops` a overte správnosť konfigurácie príkazom:
+6. Otvorte okno príkazového riadku v adresári `${WAC_ROOT}/ambulance-gitops` a overte správnosť konfigurácie príkazom:
 
    ```ps
-   kustomize build clusters/localhost/install
+   kubectl kustomize clusters/localhost/install
    ```
 
    Výstupom by mali byť manifesty pre nasadenie aplikácie bez chybovej správy.
 
-8. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
+7. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
 
    ```ps
    git add .
@@ -175,6 +156,32 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    ```ps
     kubectl get pods  -n wac
     ```
+
+8. Momentálne je náš frontend zabezpečený tak že dovoluje načítavať requesty iba z rovnakého hosta. Aby sme mohli pristupovat na lokane API na inom porte musime upravit CSP hlavičku servera. Pridajte patch pre configuraciu CSP hlavičky do nášho lokálneho klastra. V súbore `clusters/localhost/prepare/kustomization.yaml` pridajte nasledovné riadky:
+
+  ```yaml
+    apiVersion: kustomize.config.k8s.io/v1beta1
+    kind: Kustomization
+    resources:
+    ...
+    patches: 
+    ...
+    - patch: |- @_add_@
+        - op: add @_add_@
+          path: "/spec/template/spec/containers/0/env/-" @_add_@
+          value: @_add_@
+            name: "HTTP_CSP_HEADER" @_add_@
+            value: "default-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://fonts.gstatic.com/; font-src 'self' https://fonts.googleapis.com/ https://fonts.gstatic.com/; script-src 'nonce-{NONCE_VALUE}'; connect-src 'self' localhost:30331 localhost:30081" @_add_@
+      target: @_add_@
+        group: apps @_add_@
+        version: v1 @_add_@
+        kind: Deployment @_add_@
+        name: ufe-controller @_add_@
+    components:
+    ...
+  ```
+
+   Tento súbor upraví definíciu deploymentu tak, aby bol vytvorený s CSP hlavičkou, ktorá umožní prístup na lokálne API na porte `30081`.
 
 9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 

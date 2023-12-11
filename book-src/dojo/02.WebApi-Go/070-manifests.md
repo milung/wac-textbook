@@ -56,15 +56,15 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_MONGODB_DATABASE
                   valueFrom:
                     configMapKeyRef:
-                      name: milung-ambulance-webapi-config
+                      name: <pfx>-ambulance-webapi-config
                       key: database
                 - name: AMBULANCE_API_MONGODB_COLLECTION
                   valueFrom:
                     configMapKeyRef:
-                      name: milung-ambulance-webapi-config 
+                      name: <pfx>-ambulance-webapi-config 
                       key: collection
-                    - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
-                      value: "5"
+                - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
+                  value: "5"
               resources:
                 requests:
                   memory: "64Mi"
@@ -90,29 +90,29 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
             - name: <pfx>-ambulance-wl-webapi-container
             ...
             - name: openapi-ui   @_add_@
-            image: swaggerapi/swagger-ui   @_add_@
-            imagePullPolicy: Always   @_add_@
-            ports:   @_add_@
-            - name: api-ui   @_add_@
-                containerPort: "8080"   @_add_@
-            env:           @_add_@
-              - name: PORT   @_add_@
-                value: "8081"   @_add_@
-              - name:   URL   @_add_@
-                value: /openapi   @_add_@
-              - name: BASE_URL   @_add_@
-                value: /openapi-ui   @_add_@
-              - name: FILTER   @_add_@
-                value: 'true'   @_add_@
-              - name: DISPLAY_OPERATION_ID   @_add_@
-                value: 'true'   @_add_@
-            resources:   @_add_@
-                requests:   @_add_@
-                    memory: "16M"   @_add_@
-                    cpu: "0.01"   @_add_@
-                limits:   @_add_@
-                    memory: "64M"   @_add_@
-                    cpu: "0.1"   @_add_@
+              image: swaggerapi/swagger-ui   @_add_@
+              imagePullPolicy: Always   @_add_@
+              ports:   @_add_@
+              - name: api-ui   @_add_@
+                containerPort: 8081   @_add_@
+              env:           @_add_@
+                - name: PORT   @_add_@
+                  value: "8081"   @_add_@
+                - name:   URL   @_add_@
+                  value: /openapi   @_add_@
+                - name: BASE_URL   @_add_@
+                  value: /openapi-ui   @_add_@
+                - name: FILTER   @_add_@
+                  value: 'true'   @_add_@
+                - name: DISPLAY_OPERATION_ID   @_add_@
+                  value: 'true'   @_add_@
+              resources:   @_add_@
+                  requests:   @_add_@
+                      memory: "16M"   @_add_@
+                      cpu: "0.01"   @_add_@
+                  limits:   @_add_@
+                      memory: "64M"   @_add_@
+                      cpu: "0.1"   @_add_@
     ```
 
    Adresa `http://localhost:8080/.openapi/` ukazuje z pohľadu podu na to isté zariadenie, to znamená ten istý pod, akurát sa použije iný socket port.
@@ -129,19 +129,19 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
          ...
          spec:
            volumes:    @_add_@
-            - name: init-scripts     @_add_@
-              configMap:    @_add_@
-                name: <pfx>-ambulance-webapi-mongodb-init @_add_@
+           - name: init-scripts     @_add_@
+             configMap:    @_add_@
+               name: <pfx>-ambulance-webapi-mongodb-init @_add_@
            initContainers:        @_add_@
            - name: init-mongodb        @_add_@
              image: mongo:latest        @_add_@
              imagePullPolicy: Always        @_add_@
-             command: ['mongosh', '-f', '/scripts/init-db.js']        @_add_@
+             command: ['mongosh', "--nodb", '-f', '/scripts/init-db.js']        @_add_@
              volumeMounts:        @_add_@
              - name: init-scripts        @_add_@
                mountPath: /scripts        @_add_@
              env:        @_add_@
-                - name: AMBULANCE_API_PORT    @_add_@@_add_@
+                - name: AMBULANCE_API_PORT    @_add_@
                   value: "8080"   @_add_@
                 - name: AMBULANCE_API_MONGODB_HOST    @_add_@
                   value: mongo    @_add_@
@@ -154,12 +154,12 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_MONGODB_DATABASE     @_add_@
                   valueFrom:     @_add_@
                     configMapKeyRef:     @_add_@
-                      name: milung-ambulance-webapi-config     @_add_@
+                      name: <pfx>-ambulance-webapi-config     @_add_@
                       key: database     @_add_@
                 - name: AMBULANCE_API_MONGODB_COLLECTION     @_add_@
                   valueFrom:     @_add_@
                     configMapKeyRef:     @_add_@
-                      name: milung-ambulance-webapi-config      @_add_@
+                      name: <pfx>-ambulance-webapi-config      @_add_@
                       key: collection     @_add_@
                 - name: RETRY_CONNECTION_SECONDS    @_add_@
                   value: "5"    @_add_@
@@ -174,9 +174,9 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
             ...
    ```
 
-   Inicializačný proces je určený príkazom `command: ['mongosh', '-f', '/scripts/init-db.js']` a referuje na inicializačný skript v súbore `/scripts/init-db.js`. Tento súbor musí byť dostupný v rámci kontajnera, preto je potrebné ho pridať ako zdieľaný objekt pomocou `volumeMounts`, ktorý mapuje na adresár `/scripts` obsah objektu `<pfx>-ambulance-webapi-mongodb-init`.
+   Inicializačný proces je určený príkazom `command: ['mongosh', "--nodb", '-f', '/scripts/init-db.js']` a referuje na inicializačný skript v súbore `/scripts/init-db.js`. Tento súbor musí byť dostupný v rámci kontajnera, preto je potrebné ho pridať ako zdieľaný objekt pomocou `volumeMounts`, ktorý mapuje na adresár `/scripts` obsah objektu `<pfx>-ambulance-webapi-mongodb-init`.
 
-   Samotný inicializačný skript zatiaľ uložíme do súboru ``${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/params/init-db.js` a obsahuje nasledujúci kód:
+   Samotný inicializačný skript zatiaľ uložíme do súboru `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/params/init-db.js` a obsahuje nasledujúci kód:
 
    ```js
    const mongoHost = process.env.AMBULANCE_API_MONGODB_HOST
@@ -244,7 +244,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
    process.exit(0);
    ```
 
-   Tento kód načíta konfiguráciu prostredia a pokúsi sa pripojiť k databáze. Po úspešnom pripojení sa, overí či predpísana databáza a kolekcia existujú, prípadne ich vytvorí a naplní počiatočnými údajmi.
+   Tento kód načíta konfiguráciu prostredia a pokúsi sa pripojiť k databáze. Po úspešnom pripojení, overí či predpísana databáza a kolekcia existujú, prípadne ich vytvorí a naplní počiatočnými údajmi.
 
 4. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/service.yaml` s nasledujúcim obsahom, ktorý určuje definíciu objektu [_Service_](https://kubernetes.io/docs/concepts/services-networking/service/), ktorý bude použitý na zabezpečenie prístupu k našej službe z iných objektov v rámci klastra Kubernetes:
 
@@ -303,7 +303,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
            volumes: 
            - name: db-data
              persistentVolumeClaim: @_important_@
-               claimName: mongodb-pvc @_important_@
+               claimName: mongo-pvc @_important_@
            containers:
            - name: *PODNAME
              image: mongo:latest
@@ -327,10 +327,10 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                     key: password
              resources:
                requests:
-                 memory: "1GB"
+                 memory: "1Gi"
                  cpu: "0.1"
                limits:
-                 memory: "4GB"
+                 memory: "4Gi"
                  cpu: "0.5"
    ```
 
@@ -391,22 +391,22 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
         - port=27017
 
     secretGenerator:
-      - name: mongodb-auth
-        options:   @_important_@
-          disableNameSuffixHash: true   @_important_@
-        literals:
-        - username=admin
-        - password=admin
-
+    - name: mongodb-auth
+      options:   @_important_@
+        disableNameSuffixHash: true   @_important_@
+      literals:
+      - username=admin
+      - password=admin
+    patches:
     - path: patches/webapi.deployment.yaml
       target:
         group: apps
         version: v1
         kind: Deployment
-        name: ${templateOption:pfx}-ambulance-webapi
+        name: <pfx>-ambulance-webapi
     ```
 
-   Okrem referencie na zdrojové manifesty konfigurácie obsahuje tento súbor aj deklaráciu [konfiguračnej mapy - _ConfigMap_](https://kubernetes.io/docs/concepts/configuration/configmap/) a objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Všimnite si, že tieto deklarácie majú nastavenú predvoľbu `disableNameSuffixHash: true`. Za normálnych okolností generovaná konfiguračná mapa obsahuje aj hash jej obsahu a upravené meno sa zamení na všetkých miestach jej použitia. To nampriklád umožňí automatický reštart podu pri zmene je manifestu - pretože so zmenou obsahu sa mení aj meno mapy a následne aj manifest Deployment-u, kde je táto mapa použitá. V niektorých prípadoch, pokiaľ je ale mapa použitá v rôznych štruktúrach manifestov - čo bude neskôr aj náš prípad napríklad pri nasadení do spoločného klastra, však potrebuje refrenciu abstraktnú, na mapu, alebo Secret s vopred neznámym obsahom. Použitá voľby nám teda umožní vygenerovať mapu s pevným menom, ktoré bude použité v rôznych štruktúrach manifestov.
+   Okrem referencie na zdrojové manifesty konfigurácie obsahuje tento súbor aj deklaráciu [konfiguračnej mapy - _ConfigMap_](https://kubernetes.io/docs/concepts/configuration/configmap/) a objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Všimnite si, že tieto deklarácie majú nastavenú predvoľbu `disableNameSuffixHash: true`. Za normálnych okolností generovaná konfiguračná mapa obsahuje aj hash jej obsahu a upravené meno sa zamení na všetkých miestach jej použitia. To nampriklád umožňí automatický reštart podu pri zmene je manifestu - pretože so zmenou obsahu sa mení aj meno mapy a následne aj manifest Deployment-u, kde je táto mapa použitá. V niektorých prípadoch, pokiaľ je ale mapa použitá v rôznych štruktúrach manifestov - čo bude neskôr aj náš prípad napríklad pri nasadení do spoločného klastra, však potrebuje refrenciu abstraktnú, na mapu, alebo Secret s vopred neznámym obsahom. Použitá voľba nám teda umožní vygenerovať mapu s pevným menom, ktoré bude použité v rôznych štruktúrach manifestov.
 
    Ďalej náš súbor obsahuje referenciu na úpravu manifestu pre nasadenie nášho webapi - `patches/webapi.deployment.patch.yaml`. Táto úprava je potrebná preto, aby sme mohli použiť hodnoty z konfiguračnej mapy a objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) v rámci konfigurácie našej služby. V tomto prípade realizujem úpravu pomocou manifestu typu [JSONPatch]. Dôvodom je najmä fakt, že potrebujeme zmazať pôvodné vlastnosti `value` v definíciach premenných prostredia.
 
@@ -418,7 +418,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
    apiVersion: apps/v1
    kind: Deployment
    metadata:
-     name: milung-ambulance-webapi 
+     name: <pfx>-ambulance-webapi 
    spec:
      template:
       spec:
@@ -431,7 +431,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                    configMapKeyRef:
                      name: mongodb-connection
                      key: host
-               - name: AMBULANCE_API_MONGODB_PORTň
+               - name: AMBULANCE_API_MONGODB_PORT
                  value: null    @_important_@
                  valueFrom:
                    configMapKeyRef:
@@ -450,7 +450,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                      name: mongodb-auth
                      key: password
          containers:
-           - name: milung-ambulance-wl-webapi-container 
+           - name: <pfx>-ambulance-wl-webapi-container 
              env:
                - name: AMBULANCE_API_MONGODB_HOST
                  value: null    @_important_@

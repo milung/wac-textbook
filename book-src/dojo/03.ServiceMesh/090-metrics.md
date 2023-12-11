@@ -12,6 +12,8 @@ Pokiaľ sú naše logy vhodne vytvorené, môžeme z nich okrem analýzy problé
 
 Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monitorovanie stavu komplexných systémov. Zaznamenáva merania získavané z rôznych zdrojov, pričom každému meraniu priradí časovú značku, čím vznikne časová séria takýchto meraní. Meraním môže byť objem alokovanej pamäti, oneskorenie odpovede na HTTP požiadavku, a mnoho ďaších ukozaovateľov. Jednotlivé merania potom možno zo zystému získať, vzájomne kombinovať alebo agregovať dotazovacieho jazyka [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/). [Prometheus] obsahuje aj jednoduché rozhranie na získanie a vizualizáciu údajov, vo všeobecnosti sa ale na účely vizualizácie stavu systému využívaju špecializované nástroje, v našom prípade to bude nástroj [Grafana].
 
+>info:> Metriky zo služby [Prometheus] je možné sprístupniť aj v službe [OpernSearch], avšak v dobe písania tohto textu - november 2023 - táto funkcionalita bola ešte limitovaná a nie celkom stabilná. Aktuálny stav a návod na použitie nájdete v [dokumentácii](https://opensearch.org/docs/latest/observing-your-data/prometheusmetrics/).
+
 1. Pri nasadení [Prometheus] na kubernetes klaster je potrebné zvoliť vhodný spôsob nasadenia. V našom prípade použijeme [Helm] chart [prometheus-community/prometheus](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus), ktorý okrem konfigurácie servera _Prometheus_ zabezpečí aj nasadenie ďaľších komponentov, v našom prípade je asi najdôležitejšou služba [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics#readme), ktorá zabezpečí zber metrík z kubernetes klastera. Nasadenie budeme vykonávať použitím objektov operátora [FluxCD].
 
    Vytvorte adresár `${WAC_ROOT}/ambulance-gitops/infrastructure/prometheus` a v ňom súbor `${WAC_ROOT}ambulance-gitops/infrastructure/prometheus/helm-repository.yaml` s nasledujúcim obsahom:
@@ -220,7 +222,33 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
          targetPort: http-grafana
    ```
 
-   a objekt [_HTTPRoute_](https://gateway-api.sigs.k8s.io/docs/concepts/httproute/) v súbore `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/http-route.yaml`:
+   Nakoniec všetky konfiguráčné súbory integrujte pomocou súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/kustomization.yaml`:
+
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1beta1
+   kind: Kustomization
+
+   namespace: wac-hospital
+   
+   commonLabels:
+     app.kubernetes.io/component: grafana
+     
+   resources:
+   - deployment.yaml
+   - pvc.yaml
+   - service.yaml
+   
+   
+   configMapGenerator:
+     - name: grafana-config
+       files: 
+       - params/grafana.ini
+     - name: grafana-datasources
+       files:
+       - params/prometheus-datasource.yaml
+   ```
+
+3. Vytvorte objekt [_HTTPRoute_](https://gateway-api.sigs.k8s.io/docs/concepts/httproute/) v súbore `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/grafana.http-route.yaml`:
 
    ```yaml
    apiVersion: gateway.networking.k8s.io/v1
@@ -242,22 +270,13 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
              port: 80
    ```
 
-   Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/webcomponent.yaml`:
+   Vytvorte súbor `${WAC_ROOT}/apps/observability-webc/grafana.webcomponent.yaml`:
 
    ```yaml
    apiVersion: fe.milung.eu/v1
    kind: WebComponent
    metadata:
-     creationTimestamp: "2023-11-18T16:16:01Z"
-     generation: 2
-     labels:
-       app.kubernetes.io/component: grafana
-       kustomize.toolkit.fluxcd.io/name: prepare
-       kustomize.toolkit.fluxcd.io/namespace: wac-hospital
      name: grafana
-     namespace: wac-hospital
-     resourceVersion: "1620678"
-     uid: 835e1845-7cde-4f25-831f-20633627a878
    spec:
      module-uri: built-in
      navigation:
@@ -273,35 +292,18 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
      proxy: true
    ```
 
-   Nakoniec všetky konfiguráčné súbory integrujte pomocou súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/kustomization.yaml`:
+   a upravte súbor `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/kustomization.yaml`:
 
    ```yaml
-   apiVersion: kustomize.config.k8s.io/v1beta1
-   kind: Kustomization
-
-   namespace: wac-hospital
-   
-   commonLabels:
-     app.kubernetes.io/component: grafana
-     
+   ...
    resources:
-   - deployment.yaml
-   - pvc.yaml
-   - service.yaml
-   - http-route.yaml
-   - webcomponent.yaml
-   
-   
-   configMapGenerator:
-     - name: grafana-config
-       files: 
-       - params/grafana.ini
-     - name: grafana-datasources
-       files:
-       - params/prometheus-datasource.yaml
+    - monitoring-opensearch.webcomponent.yaml
+    - monitoring-opensearch.http-route.yaml
+    - grafana.webcomponent.yaml     @_add_@
+    - grafana.http-route.yaml     @_add_@
    ```
 
-3. Upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`:
+4. Upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`:
 
    ```yaml
    ...
@@ -313,10 +315,11 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
    ...
    ```
 
-4. Overte správnosť konfigurácie. Otvorte príkazové okno v priečinku `${WAC_ROOT}/ambulance-gitops` a vykonajte príkaz
+5. Overte správnosť konfigurácie. Otvorte príkazové okno v priečinku `${WAC_ROOT}/ambulance-gitops` a vykonajte príkaz
 
    ```ps
    kubectl kustomize clusters/localhost/prepare
+   kubectl kustomize clusters/localhost/install
    ```
 
    Archivujte Vaše zmeny príkazmy:
@@ -333,7 +336,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
    flux get kustomizations --namespace wac-hospital
    ```
 
-5. Otvorte prehliadač a zobrazte si nástroj [Grafana] na adrese [https://localhost/grafana](https://localhost/grafana). Otvorte bočný navigačný panel, zvoľte položku _Connection_ a následne položku _Data Sources_.V zozname zdrojov by ste mali vidieť zdroj údajov pre nástroj [Prometheus], nastavený na adresu `http://prometheus-server.wac-hospital`.
+6. Otvorte prehliadač a zobrazte si nástroj [Grafana] na adrese [https://localhost/grafana](https://localhost/grafana). Otvorte bočný navigačný panel, zvoľte položku _Connection_ a následne položku _Data Sources_.V zozname zdrojov by ste mali vidieť zdroj údajov pre nástroj [Prometheus], nastavený na adresu `http://prometheus-server.wac-hospital`.
 
    ![Grafana - zdroje údajov](img/090-01-GrafanaDataSources.png)
 

@@ -13,7 +13,7 @@ Náš systém sa postupne rozrastá o nové mikroslužby, ktoré obsluhú rôzne
 Väčšina softverových riešení generuje nejakým spôsobom záznamy o činnosti - _log_, v ideálnom prípade ich zapisuje rovno do štandardného výstupu. V prvok kroku preto nasadíme do klastra nástroje na zber a analýzu logov. V našom prípade to budú [FluentBit] a [Opensearch].
 
 1. Služba [FluentBit] slúži na zber a spracovanie prúdu údajov, optimalizovaná na spracovanie logov, typicky v prostredí kubernetes a mikroslužieb. Spracované záznamy potom odosiela na ďaľšie uloženie a analýzu, pričom pre konkrétny cieľ kde sa tieto údaje majú uložiť môžme využiť niektorý z existujúcich pluginov. [FluentBit] musíme nainštalovať do klastra kubernetes ako objekt typu [_DaemonSet_](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/), čo zabezpečí, že na každom [_Node_-e](https://kubernetes.io/docs/concepts/architecture/nodes/) bude vytvorená jedna replika služby [FluentBit], ktorá z tohto prostriedku zabezpečí zber údajov a ich odoslanie na ďaľšie spracovanie. 
-   
+
    Pri konfigurácii [FluentBit] budeme vychádzať z ukážky v repozitári [Kubernetes Logging with Fluent Bit](https://github.com/fluent/fluent-bit-kubernetes-logging), ktorú upravíme pre našu potreby. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/fluentbit/kustomization.yaml` s nasledujúcim obsahom:
 
    ```yaml
@@ -273,7 +273,45 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
        targetPort: 5601
    ```
 
-    Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/monitoring-opensearch/http-route.yaml`:
+   Nakoniec vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/monitoring-opensearch/kustomization.yaml`:
+
+   ```yaml
+   apiVersion: kustomize.config.k8s.io/v1beta1
+   kind: Kustomization
+   
+   namespace: wac-hospital
+   
+   commonLabels:
+     app.kubernetes.io/part-of: wac-hospital
+   
+   resources:
+   - server.deployment.yaml
+   - server.service.yaml
+   - pvc.yaml
+   - dashboards.deployment.yaml
+   - dashboards.service.yaml
+   ```
+
+3. Vytvorte adresár  `${WAC_ROOT}/ambulance-gitops/apps/observability-webc` a v ňom súbor `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/monitoring-opensearch.webcomponent.yaml`:
+
+   ```yaml
+   apiVersion: fe.milung.eu/v1
+   kind: WebComponent
+   metadata: 
+     name: monitoring-dashboards
+   spec:   
+     module-uri: built-in
+     navigation:
+       - element: ufe-frame 
+         path: monitoring
+         title: Analýza logov
+         details: Analytické nástroje pre prácu so záznamami systému
+         attributes:  
+           - name: src
+             value: /monitoring
+   ```
+
+   a súbor `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/monitoring-opensearch.http-route.yaml`:
 
    ```yaml
    apiVersion: gateway.networking.k8s.io/v1
@@ -295,47 +333,22 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
              port: 80
    ```
 
-   a súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/monitoring-opensearch/webcomponent.yaml`:
-
-   ```yaml
-   apiVersion: fe.milung.eu/v1
-   kind: WebComponent
-   metadata: 
-     name: monitoring-dashboards
-   spec:   
-     module-uri: built-in
-     navigation:
-       - element: ufe-frame 
-         path: monitoring
-         title: Analýza logov
-         details: Analytické nástroje pre prácu so záznamami systému
-         attributes:  
-           - name: src
-             value: /monitoring
-   ```
-
-   Nakoniec vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/monitoring-opensearch/kustomization.yaml`:
+   Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/kustomization.yaml`:
 
    ```yaml
    apiVersion: kustomize.config.k8s.io/v1beta1
    kind: Kustomization
-   
+
    namespace: wac-hospital
-   
-   commonLabels:
-     app.kubernetes.io/part-of: wac-hospital
-   
+
    resources:
-   - server.deployment.yaml
-   - server.service.yaml
-   - pvc.yaml
-   - dashboards.deployment.yaml
-   - dashboards.service.yaml
-   - http-route.yaml
-   - webcomponent.yaml
+   - monitoring-opensearch.webcomponent.yaml
+   - monitoring-opensearch.http-route.yaml
    ```
 
-3. Upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`
+   Objekty _WebComponent_ a _HTTPRoute_ vytvárame ako súčasť aplikácii, aby sme sa vyhli kríťovej závislosti medzi týmito objektami a inštaláciou používateľských typov objektov - [_Custom Resource Definition_](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/). ALternatívou by bolo rozdeliť nasadenie infraštruktúry do ďalších na sebe závislých krokov napríklad `prepare-crd` a `prepare-instances`, kvôli zjednodušeniu sme ale zvolili umiestnenie integrácie s mikrofrontendom do sekcie _apps_, čo viac menej aj zodpovedá sémantike registrácie týchto mikro-frontend komponentov do našej aplikácie.
+
+4. Upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`
 
    ```yaml
    ...
@@ -345,13 +358,24 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    - ../../infrastructure/monitoring-opensearch   @_add_@
    ```
 
+   a súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/install/kustomization.yaml`:
+
+   ```yaml
+   ...
+   resources:
+    ...
+    - ../../../apps/http-echo
+    - ../../../apps/observability-webc  @_add_@
+   ```
+
    Overte správnosť konfigurácie pomocou príkazu v priečinku `${WAC_ROOT}/ambulance-gitops/`:
 
    ```bash
    kubectl kustomize ./clusters/localhost/prepare
+   kubectl kustomize ./clusters/localhost/install
    ```
 
-4. Archivujte zmenu a uložte ich do vzdialeného repozitára:
+5. Archivujte zmenu a uložte ich do vzdialeného repozitára:
 
    ```bash
    git add .
@@ -367,7 +391,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    kubectl get pods -n wac-hospital
    ```
 
-5. Prejdite na stránku [http://localhost/monitoring](http://localhost/monitoring) a overte, že je dostupná.  Pri úvodnom prístupe zvoľte voľbu _Explore on my own_, a zrušte prípadné popup okno. Otvorte bočný panel menu, vyberte položku _Index Management_, a následne vyberte položku _Indices_. V zozname indexov by ste mali vidieť index _fluent-bit_.
+6. Prejdite na stránku [http://localhost/monitoring](http://localhost/monitoring) a overte, že je dostupná.  Pri úvodnom prístupe zvoľte voľbu _Explore on my own_, a zrušte prípadné popup okno. Otvorte bočný panel menu, vyberte položku _Index Management_, a následne vyberte položku _Indices_. V zozname indexov by ste mali vidieť index _fluent-bit_.
 
    ![Index Management](./img/080-01-IndexManagement.png)
 
@@ -385,7 +409,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
 
    ![Vytvorenie Index Pattern](./img/080-04-CreateIndexPattern-Timefield.png)
 
-6. V bočnom menu aplikácie _Opensearch Daschboards_ vyberte položku _Discover_. Teraz sa zobrazí  okno s výpisom logov vo Vašom klastri za posledných 15 minút. V ľavom bočnom paneli môžete upraviť ktoré údaje logov sa Vám budú zobrazovať. V hornom panely môžete určiť frázu pre vyhľadávanie v záznamoch systému, prípadne výpis filtrovať podľa rôznych kritérií, alebo si nastaviť iný časový rozsach záznamov systému. V prípade nepredvídaného správania sa systému, môžete túto funkcionalitu využiť na dohľadanie možnej príčiny takéhoto správania sa. Ďaľšie možnosti analýzy logov nájdete v bočnom menu v položke "Logs". Pre viac informácií o možnostiach využitia OpenSearch Dashboard pre analýzu a monitorovanie systému si pozrite [dokumentáciu](https://opensearch.org/docs/latest/dashboards/index/).
+7. V bočnom menu aplikácie _Opensearch Daschboards_ vyberte položku _Discover_. Teraz sa zobrazí  okno s výpisom logov vo Vašom klastri za posledných 15 minút. V ľavom bočnom paneli môžete upraviť ktoré údaje logov sa Vám budú zobrazovať. V hornom panely môžete určiť frázu pre vyhľadávanie v záznamoch systému, prípadne výpis filtrovať podľa rôznych kritérií, alebo si nastaviť iný časový rozsach záznamov systému. V prípade nepredvídaného správania sa systému, môžete túto funkcionalitu využiť na dohľadanie možnej príčiny takéhoto správania sa. Ďaľšie možnosti analýzy logov nájdete v bočnom menu v položke "Logs". Pre viac informácií o možnostiach využitia OpenSearch Dashboard pre analýzu a monitorovanie systému si pozrite [dokumentáciu](https://opensearch.org/docs/latest/dashboards/index/).
 
    ![Výpis a analýza logov pre namespace `wac-hospital`](./img/080-05-LogAnalysis.png)
 
