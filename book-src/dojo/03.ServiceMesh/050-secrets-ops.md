@@ -153,12 +153,12 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
       version: v1    @_add_@
       kind: Kustomization    @_add_@
     patch: |-    @_add_@
-      - op: add
-        path: /spec/decryption
-        value:
-          provider: sops
-          secretRef:
-            name: sops-age
+      - op: add @_add_@
+        path: /spec/decryption @_add_@
+        value: @_add_@
+          provider: sops @_add_@
+          secretRef: @_add_@
+            name: sops-age @_add_@
 ```
 
    Táto úprava pridá do všetkých objektov typu [_Kustomization_](https://fluxcd.io/flux/components/kustomize/kustomizations/), konfiguráciu pre dešifrovanie súborov pomocou nástroja [sops] s použitím nami vytvoreného objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) `sops-age`. Navyše sme pridali automatizáciu pre nasadenie citlivých údajov do klastra, čo sme doteraz museli vykonávať manuálne.
