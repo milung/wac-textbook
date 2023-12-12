@@ -8,13 +8,13 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-050
 
 ---
 
-Pred tým než pristúpime k autentifikácii používateľov, si pripravíme spôsob ako bezpečne nasadiť citlivé informácie do nášho kubernetes klastra. V našom prípade sa zatiaľ jedná o prihlasovacie údaje do databázy a o _Personal Access Token_ k repozitári. S tým ako budú pribúdať citlivé údaje, je ich správa na lokálnom disku, bez archivácie čoraz menej efektívna. Riešením je pre nás použitie metódy [_Secrets Ops_]. Ich princíp spočíva v použití asymetrických kľúčov na šifrovanie citlivých informácií pomocou verejného kľúča a schopnosť ich rozšifrovania len pri použití súkromného kľúča. Súkromný kľúč je ručne uložený na príslušný klastri. Verejný kľúč a zašifrované údaje potom môžme bezpečne uložiť a archivovať v našom repozitári. Zároveň využijeme zabudovanú vlastnosť [Flux CD](https://fluxcd.io/flux/guides/mozilla-sops/), ktorá umožňuje aby Flux automaticky dešifroval tieto údaje pri ich nasadení do klastra.
+Pred tým než pristúpime k autentifikácii používateľov, si pripravíme spôsob ako bezpečne nasadiť citlivé informácie do nášho kubernetes klastra. V našom prípade sa zatiaľ jedná o prihlasovacie údaje do databázy a o _Personal Access Token_ k repozitári. S tým ako budú pribúdať citlivé údaje, je ich správa na lokálnom disku, bez archivácie čoraz menej efektívna. Riešením je pre nás použitie metódy [_Secrets Ops_][sops]. Ich princíp spočíva v použití asymetrických kľúčov na šifrovanie citlivých informácií pomocou verejného kľúča a schopnosť ich rozšifrovania len pri použití súkromného kľúča. Súkromný kľúč je ručne uložený na príslušný klaster. Verejný kľúč a zašifrované údaje potom môžme bezpečne uložiť a archivovať v našom repozitári. Zároveň využijeme zabudovanú vlastnosť [Flux CD](https://fluxcd.io/flux/guides/mozilla-sops/), ktorá umožňuje aby Flux automaticky dešifroval tieto údaje pri ich nasadení do klastra.
 
 1. K využitiu tejto techniky potrebujete mať nainštalované nástroje [sops] zo stránky [https://github.com/getsops/sops/releases](https://github.com/getsops/sops/releases). V tomto cvičení budeme ako šifrovací nástroj používať [AGE], ktorý si môžete nainštalovať zo stránky [https://github.com/FiloSottile/age/releases/tag/v1.1.1](https://github.com/FiloSottile/age/releases). Oba nástroje sa dajú nainštalovať aj pomocou správcu balíčku [Chocolatey]. Nástroj [AGE] možno nainštalovať príkazom `apt-get` na systémoch linux.
 
    >info:> Nástroj [sops] podporuje aj iné spôsoby šifrovania a ukladania kľúčov, napríklad pomocou [GPG](https://www.gnupg.org/), alebo [Azure KeyVault](https://learn.microsoft.com/en-us/azure/key-vault/general/) a podobne. V závislosti od cieľových požiadavkach môžete použiť iný nástroj na šifrovanie, postup bude vo všetkých prípadoch obdobný, až na konfiguráciu sops parametrov.
 
-2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params/repository-pat.env` s obsahom zodpovedajkúcim Vášmu _Personal Access Token_ k repozitáru. Tieto úDaje by ste mali mať v súbore `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/repository-pat.yaml`. Obsah súboru `repository-pat.env` by mal vyzerať nasledovne:
+2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params/repository-pat.env` s obsahom zodpovedajkúcim Vášmu _Personal Access Token_ k repozitáru. Tieto údaje by ste mali mať v súbore `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/repository-pat.yaml`. Obsah súboru `repository-pat.env` by mal vyzerať nasledovne:
 
    ```env
    username=<github-id>
@@ -82,7 +82,7 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
      - path: patches/mongodb-auth.secret.yaml   @_add_@
    ```
 
-4. Vygenerujte si nový prá šifrovacích kľúčov pomocou príkazu:
+4. Vygenerujte si nový pár šifrovacích kľúčov pomocou príkazu:
 
    ```ps
    age-keygen
@@ -138,29 +138,28 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
 
    a upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/kustomization.yaml`:
 
-   ```yaml
-   ...
-   resources:
-   - prepare.kustomization.yaml
-   - cd.kustomization.yaml
-   - install.kustomization.yaml
-   - secrets.kustomization.yaml   @_add_@
-   ...
+```yaml
+  ...
+  resources:
+  - prepare.kustomization.yaml
+  - cd.kustomization.yaml
+  - install.kustomization.yaml
+  - secrets.kustomization.yaml   @_add_@
+  ...
 
-   patches:    @_add_@
-   - target:    @_add_@
-       group: kustomize.toolkit.fluxcd.io    @_add_@
-       version: v1    @_add_@
-       kind: Kustomization    @_add_@
-     patch: |-    @_add_@
-       path: /spec    @_add_@
-       op: add    @_add_@
-       value:    @_add_@
-           decryption:    @_add_@
-           provider: sops    @_add_@
-           secretRef:    @_add_@
-               name: sops-age    @_add_@
-   ```
+  patches:    @_add_@
+  - target:    @_add_@
+      group: kustomize.toolkit.fluxcd.io    @_add_@
+      version: v1    @_add_@
+      kind: Kustomization    @_add_@
+    patch: |-    @_add_@
+      - op: add
+        path: /spec/decryption
+        value:
+          provider: sops
+          secretRef:
+            name: sops-age
+```
 
    Táto úprava pridá do všetkých objektov typu [_Kustomization_](https://fluxcd.io/flux/components/kustomize/kustomizations/), konfiguráciu pre dešifrovanie súborov pomocou nástroja [sops] s použitím nami vytvoreného objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) `sops-age`. Navyše sme pridali automatizáciu pre nasadenie citlivých údajov do klastra, čo sme doteraz museli vykonávať manuálne.
 
