@@ -96,44 +96,44 @@ Za účelom vydávania certifikátov nasadíme do klastra službu [cert-manager]
 
 5. Upravíme konfiguráciu pre objekt `wac-hospital-gateway`. Upravte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/envoy-gateway/gateway.yaml`:
 
-   ```yaml
-   ...
-   metadata:
+```yaml
+  ...
+  metadata:
     name: wac-hospital-gateway
     namespace: wac-hospital
     annotations:
-        cert-manager.io/issuer: development-issuer # patch this to letsencrypt-issuer for production cluster   @_add_@
-        cert-manager.io/email-sans: "pfx@gmail.com"   @_add_@
-        cert-manager.io/subject-organizations: "WAC-Hospital"   @_add_@
-        cert-manager.io/subject-organizationalunits: "IT Support"   @_add_@
-        cert-manager.io/subject-countries: "SK"   @_add_@
-        cert-manager.io/subject-localities: "Bratislava"   @_add_@
-        cert-manager.io/revision-history-limit: "3"   @_add_@
-        cert-manager.io/private-key-rotation-policy: Always   @_add_@
-   spec:
+      cert-manager.io/issuer: development-issuer # patch this to letsencrypt-issuer for production cluster   @_add_@
+      cert-manager.io/email-sans: "pfx@gmail.com"   @_add_@
+      cert-manager.io/subject-organizations: "WAC-Hospital"   @_add_@
+      cert-manager.io/subject-organizationalunits: "IT Support"   @_add_@
+      cert-manager.io/subject-countries: "SK"   @_add_@
+      cert-manager.io/subject-localities: "Bratislava"   @_add_@
+      cert-manager.io/revision-history-limit: "3"   @_add_@
+      cert-manager.io/private-key-rotation-policy: Always   @_add_@
+  spec:
     gatewayClassName: wac-hospital-gateway-class
     listeners:
-        - name: http
-          ...
-        - hostname: wac-hospital.loc     @_add_@
-          name: https-dns     @_add_@
-          protocol: HTTPS     @_add_@
-          port: 443     @_add_@
-          tls:     @_add_@
-              mode: Terminate     @_add_@
-              certificateRefs:     @_add_@
-              - kind: Secret     @_add_@
-              name: wac-hospital-tls     @_add_@
-        - hostname: localhost     @_add_@
-          name: https-localhost     @_add_@
-          protocol: HTTPS     @_add_@
-          port: 443     @_add_@
-          tls:     @_add_@
-              mode: Terminate     @_add_@
-              certificateRefs:     @_add_@
-              - kind: Secret     @_add_@
-              name: wac-hospital-tls     @_add_@
-   ```
+    - name: http
+      ...
+    - hostname: wac-hospital.loc     @_add_@
+      name: https-dns     @_add_@
+      protocol: HTTPS     @_add_@
+      port: 443     @_add_@
+      tls:     @_add_@
+        mode: Terminate     @_add_@
+        certificateRefs:     @_add_@
+        - kind: Secret     @_add_@
+          name: wac-hospital-tls     @_add_@
+    - hostname: localhost     @_add_@
+      name: https-localhost     @_add_@
+      protocol: HTTPS     @_add_@
+      port: 443     @_add_@
+      tls:     @_add_@
+        mode: Terminate     @_add_@
+        certificateRefs:     @_add_@
+        - kind: Secret     @_add_@
+          name: wac-hospital-tls     @_add_@
+```
 
    Pomocou bloku anotácií informujeme _cert-manager_ o tom, že má vytvoriť certifikát pre doménu `wac-hospital.loc` a pre doménu `localhost`. V prípade produkčného klastra by sme museli zmeniť vydavateľa certifikátov na `letsencrypt-issuer` a zmeniť emailovú adresu, ako aj zmeniť doménu na verejne dostupnú doénu. Doménu `wac-hospital.loc` využijeme v ďaľšej časti, kedy bude potrebná pre správnu komunikáciu s [OpenID] poskytovateľom.
 

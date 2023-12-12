@@ -75,6 +75,7 @@
 [openapi-generator]:https://openapi-generator.tech/
 [openapi]:https://www.openapis.org/about
 [openapi-spec]:https://spec.openapis.org/oas/latest.html
+[OpenID]:https://openid.net
 [openlens]:https://github.com/MuhammedKalkan/OpenLens
 [Opensearch]:https://opensearch.org/
 [OpenTelemetry]:https://opentelemetry.io/docs/
