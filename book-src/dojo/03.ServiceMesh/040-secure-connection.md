@@ -116,7 +116,7 @@ Za účelom vydávania certifikátov nasadíme do klastra službu [cert-manager]
     - name: http
       ...
     - hostname: wac-hospital.loc     @_add_@
-      name: https-dns     @_add_@
+      name: fqdn     @_add_@
       protocol: HTTPS     @_add_@
       port: 443     @_add_@
       tls:     @_add_@
