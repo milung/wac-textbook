@@ -360,7 +360,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
     ```
 
     Overte, že stav objektu _Envoy Patch Policy_ je `Programmed`
-    >info:> V pripade že sa stav nemeni na Programmed je potrebné reštartovať pody envoy gateway.
+    >info:> V pripade že sa stav nemení na Programmed je potrebné reštartovať pody envoy gateway.
 
     ```ps
     kubectl -n wac-hospital get epp
