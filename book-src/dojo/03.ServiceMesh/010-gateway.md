@@ -10,9 +10,9 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-010
 
 Naše služby sú obsluhované z rôznych subdomén - rôznych adries hosťujúceho počítača - frontend je nasadení na adrese `http://localhost:30331` a WebAPI na adrese `http://localhost:30081`. Vo väčších systémoch s desiatkami mikroslužieb by tento prístup bol neudržateľný. Väčšina sietí filtruje HTTP protocol na portoch odlišných od portov `80` alebo `443`, čo by znamenalo, že každá mikroslužba musí mať vlastnú subdoménu. To by vyžadovalo správu desiatok domén a ich zabezpečenie, a tiež by znižoval flexibilitu pri evolúcii systémov. Jedným zo spôsobov ako tento problém adresovať, je zaintegrovať do systému takzvanú [_reverse proxy_](https://en.wikipedia.org/wiki/Reverse_proxy), niekedy tiež označovanú ako _Gateway_, alebo aj [_API Gateway_](https://www.redhat.com/en/topics/api/what-does-an-api-gateway-do). Označenia sa líšia ako aj rozsah funkcionality obsiahnutý za týmito službami. Pre náš účel je dôležité, aby táto služba dokázala presmerovať požiadavky na jednotlivé mikro služby na základe určitých pravidiel, typicky na základe cesty URL uvedenej v požiadavke.
 
-Typickými reprezentantmi takýchto reverse proxy sú aplikácie [_nginx_](https://www.nginx.com) a [_Envoy Proxy_](https://www.envoyproxy.io/), nie sú ale zďaleka jediné. Keďže smerovanie požiadaviek je jednou zo základných funkcionalít pri orchestrácii mikro služieb, uviedol tím kubernetes štandardizované api [_Ingress_][ingress], ktorého implementáciu ale prenechal tretím stranám. Toto API ale nepokrývalo v základnej verzii všetky prípady reálnej praxe, jednotlivé implementácie preto API rozširujú proprietárnymi anotáciami.
+Typickými reprezentantmi takýchto reverse proxy sú aplikácie [_nginx_](https://www.nginx.com) a [_Envoy Proxy_](https://www.envoyproxy.io/), nie sú ale zďaleka jediné. Keďže smerovanie požiadaviek je jednou zo základných funkcionalít pri orchestrácii mikro služieb, uviedol tím kubernetes štandardizované api [_Ingress_], ktorého implementáciu ale prenechal tretím stranám. Toto API ale nepokrývalo v základnej verzii všetky prípady reálnej praxe, jednotlivé implementácie preto API rozširujú proprietárnymi anotáciami.
 
-Na základe skúseností z implementácie [Ingress API][ingress], sa začala pripravovať nová sada [Gateway API]. Hoci je [Ingress API][ingress] zatiaľ najviac rozšíreným spôsobom riadenia smerovania požiadaviek v systémoch kubernetes, my si ukážeme spôsob založený na [Gateway API].
+Na základe skúseností z implementácie [_Ingress_], sa začala pripravovať nová sada [Gateway API]. Hoci je [_Ingress_] zatiaľ najviac rozšíreným spôsobom riadenia smerovania požiadaviek v systémoch kubernetes, my si ukážeme spôsob založený na [Gateway API].
 
 [Gateway API] poskytuje viacero objektov pre konfiguráciu systémov. V produkčnom nasadení sa predpokladá, že typ `Gateway Class` dodá poskytovateľ infraštruktúry - napríklad prevádzkovateľ verejného datového centra, typ `Gateway` poskytne správca klastru - napríklad informačné oddelenie zákazníka. Vývojari samotnej aplikácie budú typicky poskytovať objekty typu `HTTPRoute`. Pre potreby lokálneho vývoja je ale potrebné nasadiť všetky typy objektov.
 
@@ -37,14 +37,14 @@ Na základe skúseností z implementácie [Ingress API][ingress], sa začala pri
    apiVersion: gateway.networking.k8s.io/v1beta1
    kind: Gateway
    metadata:
-   name: wac-hospital-gateway
-   namespace: wac-hospital
+    name: wac-hospital-gateway
+    namespace: wac-hospital
    spec:
-   gatewayClassName: wac-hospital-gateway-class
-   listeners:
-       - name: http
-         protocol: HTTP
-         port: 80
+    gatewayClassName: wac-hospital-gateway-class
+    listeners:
+      - name: http
+        protocol: HTTP
+        port: 80
    ```
 
    Táto konfigurácia vytvorí v rámci klastra bod pripojenia na ktorom bude implementácia [Gateway API] čakať na prichádzajúce požiadavky a spracovávať ich podľa pravidiel definovaných v objektoch typu [`HTTPRoute`](https://gateway-api.sigs.k8s.io/api-types/httproute/).
@@ -127,38 +127,38 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
 
 1. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/ufe-controller/http-route.yaml`
 
-   ```yaml
-   apiVersion: gateway.networking.k8s.io/v1
-   kind: HTTPRoute
-   metadata:
-     name: ufe-controller
-   spec:
-     parentRefs:
-       - name: wac-hospital-gateway
-     rules:
-       - matches:
-           - path:
-               type: PathPrefix
-               value: /ui
-         backendRefs:
-           - group: ""
-             kind: Service
-             name: ufe-controller
-             port: 80
-         
-       - matches:
-         - path:
-             type: Exact
-             value: /
-         filters:
-         - type: RequestRedirect
-           requestRedirect:
-             path:
-               type: ReplaceFullPath
-               replaceFullPath: /ui
-           scheme: https
-           port: 443
-   ```
+```yaml
+  apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    name: ufe-controller
+  spec:
+    parentRefs:
+      - name: wac-hospital-gateway
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /ui
+        backendRefs:
+          - group: ""
+            kind: Service
+            name: ufe-controller
+            port: 80
+        
+      - matches:
+        - path:
+            type: Exact
+            value: /
+        filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ui
+            scheme: https
+            port: 443
+```
 
    Vo všeobecnosti platí, že každá požiadavka musí byť spracovaná jedným alebo žiadny pravidlom uvedeným v objektoch `HTTRoute` pre daný `Gateway` objekt.  Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta začína segmentom `/ui` budú presmerované na službu `ufe-controller`. Požiadavky na root dokument `/` budú vrátene klientovi so stavom `303 -Redirect` a presmerovaním na cestu `/ui`.
 
@@ -197,26 +197,26 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
    apiVersion: gateway.networking.k8s.io/v1
    kind: HTTPRoute
    metadata:
-   name: <pfx>-ambulance-webapi
+    name: <pfx>-ambulance-webapi
    spec:
-   parentRefs:
-       - name: wac-hospital-gateway
-   rules:
-   - matches:
-      - path:
-          type: PathPrefix
-          value: /<pfx>-api
-    filters: 
-    - type: URLRewrite    @_important_@
-      urlRewrite:    @_important_@
-        path:    @_important_@
-          type: ReplacePrefixMatch    @_important_@
-          replacePrefixMatch: /api    @_important_@
-    backendRefs:
-      - group: ""
-        kind: Service
-        name: <pfx>-ambulance-webapi
-        port: 80
+    parentRefs:
+      - name: wac-hospital-gateway
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /<pfx>-api
+        filters: 
+          - type: URLRewrite    @_important_@
+            urlRewrite:    @_important_@
+              path:    @_important_@
+                type: ReplacePrefixMatch    @_important_@
+                replacePrefixMatch: /api    @_important_@
+        backendRefs:
+          - group: ""
+            kind: Service
+            name: <pfx>-ambulance-webapi
+            port: 80
     ```
 
    Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta začína segmentom `/<pfx>-api` budú presmerované na službu `<pfx>-ambulance-webapi`.
@@ -346,9 +346,9 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
 4. Overte správnosť Vašej konfigurácie:
 
     ```ps
-    kubectl kustomize ambulance-gitops/clusters/localhost/prepare
-    kubectl kustomize ambulance-gitops/clusters/localhost/install
-    kubectl kustomize ambulance-gitops/clusters/localhost
+    kubectl kustomize clusters/localhost/prepare
+    kubectl kustomize clusters/localhost/install
+    kubectl kustomize clusters/localhost
     ```
 
 5. Archivujte zmeny do vzdialeného repozitára
@@ -359,5 +359,5 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
    git push
    ```
 
-   Potom čo [FluxCD] aplikuje zmeny vo Vašom lokálnom klastri, otvorte v prehliadači stránku [http://localhost](http://localhost). Mali by ste vidieť našu aplikáciu, ktorá je schopná komunikovať s WebAPI. Pokiaľ prejdete na stránku [http://localhost/<pfx>-openapi](http://localhost/<pfx>-openapi), mali by ste vidieť popis nášho WebAPI v rozhraní [Swagger UI](https://swagger.io/tools/swagger-ui/).
+   Potom čo [flux] aplikuje zmeny vo Vašom lokálnom klastri, otvorte v prehliadači stránku [http://localhost](http://localhost). Mali by ste vidieť našu aplikáciu, ktorá je schopná komunikovať s WebAPI. Pokiaľ prejdete na stránku [http://localhost/<pfx>-openapi](http://localhost/<pfx>-openapi), mali by ste vidieť popis nášho WebAPI v rozhraní [Swagger UI](https://swagger.io/tools/swagger-ui/).
 

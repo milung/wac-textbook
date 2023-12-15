@@ -43,6 +43,7 @@
 [helm]:https://helm.sh/
 [http]:https://developer.mozilla.org/en-US/docs/Web/HTTP
 [_Ingress_]:https://kubernetes.io/docs/concepts/services-networking/ingress/
+[ingress]:https://kubernetes.io/docs/concepts/services-networking/ingress/
 [Inversify]:https://github.com/inversify/InversifyJS
 [Jaeger]:https://www.jaegertracing.io/
 [jest]:https://jestjs.io/
@@ -75,6 +76,7 @@
 [openapi-generator]:https://openapi-generator.tech/
 [openapi]:https://www.openapis.org/about
 [openapi-spec]:https://spec.openapis.org/oas/latest.html
+[OpenID]:https://openid.net
 [openlens]:https://github.com/MuhammedKalkan/OpenLens
 [Opensearch]:https://opensearch.org/
 [OpenTelemetry]:https://opentelemetry.io/docs/

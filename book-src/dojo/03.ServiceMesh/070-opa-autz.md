@@ -12,82 +12,81 @@ Autentifikácia používateľov ešte nerieši riadenie prístupu k jednotlivým
 
 Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, ale pre definovanie takzvaných _policy rules_ vo všeobecnosti, použijeme [Open Policy Agent](https://www.openpolicyagent.org/). V našom prípade sa pokusíme nastaviť politiku, ktorá zabráni prístupu k mikroslužbe `http-echo` pre všetkých používateľov, okrem tých, ktorý majú našou politikou prístupu priradenú rolu "admin".
 
->info:> Službu [OPA Envoy Plugin](https://www.openpolicyagent.org/docs/latest/envoy-introduction/) možno použitie ako _side-car_ špecifickej služby, to znamená kontrolu dodržania politiky prístupu tesne pred prístupom k špecifickej mikroslužbe, čo z hľadiska bezpečnosti zabráni, aby škodliví aktéri obišli našu autorizáciu. Neskôr si ukážeme ako zabrániť nežiadúcej komunikácii v rámci nášho service mesh-u. Konkrétne riešenie a konfigurácia systému sa v praxi budú líšiť v závislosti od konkrétnych požiadaviek riešenia, častokrát to bude kombinácia rôznych politík a mechanizmov riadenia prístupov.
+>info:> Službu [OPA Envoy Plugin](https://www.openpolicyagent.org/docs/latest/envoy-introduction/) možno použiť ako _side-car_ špecifickej služby, to znamená kontrolu dodržania politiky prístupu tesne pred prístupom k špecifickej mikroslužbe, čo z hľadiska bezpečnosti zabráni, aby škodliví aktéri obišli našu autorizáciu. Neskôr si ukážeme ako zabrániť nežiadúcej komunikácii v rámci nášho service mesh-u. Konkrétne riešenie a konfigurácia systému sa v praxi budú líšiť v závislosti od konkrétnych požiadaviek riešenia, častokrát to bude kombinácia rôznych politík a mechanizmov riadenia prístupov.
 
 1. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/deployment.yaml` s nasledujúcim obsahom:
 
-   ```yaml
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: &PODNAME opa-plugin
-   spec:
-     replicas: 1
-     selector:
-       matchLabels:
-         pod: *PODNAME
-     template:
-       metadata: 
-         labels:
-           pod: *PODNAME
-       spec:
-         volumes:   
-         - name: opa-policy 
-           configMap:
-             name: opa-policy
-         - name: opa-config
-           configMap:
-             name: opa-config
-         containers:
-         - name: *PODNAME
-           image: openpolicyagent/opa:latest-envoy  @_important_@
-           securityContext:
-             runAsUser: 1111
-           volumeMounts:
-             - readOnly: true
-               mountPath: /policy  @_important_@
-               name: opa-policy
-             - readOnly: true
-               mountPath: /config
-               name: opa-config @_important_@
-           args:
-             - "run"
-             - "--server"
-             - "--config-file=/config/config.yaml"  @_important_@
-             - "--addr=localhost:8181"
-             - "--diagnostic-addr=0.0.0.0:8282"
-             - "--ignore=.*"
-             - "/policy/policy.rego"  @_important_@
-           ports: 
-             - containerPort: 8181
-               name: opa-rest
-             - containerPort: 8282
-               name: opa-diag
-             - containerPort: 9191
-               name: envoy-plugin   
-           resources:
-             limits:
-               cpu: '0.5'
-               memory: '320M'
-             requests:
-               cpu: '0.01'
-               memory: '128M'
-           livenessProbe:
-             httpGet:
-               path: /health?plugins
-               scheme: HTTP
-               port: 8282
-             initialDelaySeconds: 5
-             periodSeconds: 5
-           readinessProbe:
-             httpGet:
-               path: /health?plugins
-               scheme: HTTP
-               port: 8282
-             initialDelaySeconds: 5
-             periodSeconds: 5
-        
-   ```
+```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: &PODNAME opa-plugin
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        pod: *PODNAME
+    template:
+      metadata: 
+        labels:
+          pod: *PODNAME
+      spec:
+        volumes:   
+        - name: opa-policy 
+          configMap:
+            name: opa-policy
+        - name: opa-config
+          configMap:
+            name: opa-config
+        containers:
+        - name: *PODNAME
+          image: openpolicyagent/opa:latest-envoy  @_important_@
+          securityContext:
+            runAsUser: 1111
+          volumeMounts:
+            - readOnly: true
+              mountPath: /policy  @_important_@
+              name: opa-policy
+            - readOnly: true
+              mountPath: /config
+              name: opa-config @_important_@
+          args:
+            - "run"
+            - "--server"
+            - "--config-file=/config/config.yaml"  @_important_@
+            - "--addr=localhost:8181"
+            - "--diagnostic-addr=0.0.0.0:8282"
+            - "--ignore=.*"
+            - "/policy/policy.rego"  @_important_@
+          ports: 
+            - containerPort: 8181
+              name: opa-rest
+            - containerPort: 8282
+              name: opa-diag
+            - containerPort: 9191
+              name: envoy-plugin   
+          resources:
+            limits:
+              cpu: '0.5'
+              memory: '320M'
+            requests:
+              cpu: '0.01'
+              memory: '128M'
+          livenessProbe:
+            httpGet:
+              path: /health?plugins
+              scheme: HTTP
+              port: 8282
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health?plugins
+              scheme: HTTP
+              port: 8282
+            initialDelaySeconds: 5
+            periodSeconds: 5  
+```
 
    Všimnite si položky `volumes` a `volumeMounts`, ktoré budú priraďovať konfiguračné mapy do súborového systému.
 
@@ -138,7 +137,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    }
    ```
 
-   Vyššie uvedený zápis vytvára pravidlo `is_valid_user`, ktoré je splnené za predpokladu, že v prichádzajúcej požiadavke sa nachádza hlavička s názvom `x-auth-request-email`. Praivdlo `user` vytvára objekt, ktorý obsahuje informácie o používateľovi, ktorý sa prihlásil do systému. Ďalej v na koniec toho istého súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/policy.rego` pridajte definíciu pravidiel pre požadované oprávnenia (role) pre špecifické požiadavky:
+   Vyššie uvedený zápis vytvára pravidlo `is_valid_user`, ktoré je splnené za predpokladu, že v prichádzajúcej požiadavke sa nachádza hlavička s názvom `x-auth-request-email`. Praivdlo `user` vytvára objekt, ktorý obsahuje informácie o používateľovi, ktorý sa prihlásil do systému. Ďalej na koniec toho istého súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/policy.rego` pridajte definíciu pravidiel pre požadované oprávnenia (role) pre špecifické požiadavky:
 
    ```rego
    # define required roles for paths
@@ -182,12 +181,12 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    
    # this are admin users
    user_role[ "admin" ] { 
-       user.email == "<kolegov@email>"
+       user.email == "\<kolegov@email\>"
    }
    
    # this are users with access to monitoring actions
    user_role[ "monitoring" ] { 
-       user.email == "<your github account>" @_important_@
+       user.email == "\<your github account\>" @_important_@
    }
    ```
 
@@ -224,6 +223,10 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
        user_role[r] 
        role := r
    ])
+
+   # provide result to caller
+   result["allowed"] := allow
+   result["headers"] := headers
    ```
 
    Ako ste už mohli postrehnúť, pri full-stack vývoji potrebuje byť softvérový inžinier zbehlý v rôznych programovacích jazykov. [Rego] je logický a _rule-based_ programovací jazyk vychádzajúci z jazyka [datalog](https://datalog.sourceforge.net/). Vo vyššie uvedenom programe sú sady pravidiel, pomocou ktorých sa snažíme dospieť k výsledku pravidla `allow` - buď `true` alebo `false`. Vysledná hodnota určí, či bude povolené pokračovať v spracovaní požiadavky. Zároveň sa snažíme vytvoriť hlavičky odpovede, ktoré budú obsahovať informácie o používateľovi a jeho oprávneniach. V praxi sú pravidlá ako `request_allowed_role` a `user_role` definované v externých úložiskách (databázach) a sú dynamicky načítavané do služby - pre podrobnosti pozri [návod](https://www.openpolicyagent.org/docs/latest/external-data/) .
@@ -294,7 +297,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
 
    ```ps
     git add .
-    git commit -m "Add oauth2-proxy"
+    git commit -m "Add open policy agent"
     git push
    ```
 
@@ -305,6 +308,8 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
     ```
 
     Overte, že stav objektu _Envoy Patch Policy_ je `Programmed`
+    
+    >info:> V pripade že sa stav nemení na Programmed je potrebné reštartovať pody envoy gateway.
 
     ```ps
     kubectl -n wac-hospital get epp

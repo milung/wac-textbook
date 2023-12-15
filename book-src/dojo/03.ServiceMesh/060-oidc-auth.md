@@ -10,7 +10,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-060
 
 V tejto kapitole si ukážeme, ako zabezpečiť identifikáciu používateľov pomocou protokolu [OpenID Connect](https://openid.net/connect/). Nebudeme tu vykonávať autorizáciu používateľov, teda nebudeme ešte riadiť prístup používateľov k jednotlivým zdrojom, len zabezpečíme, že všetci používatelia pristupujúci do klastra sa musia identifikovať a to tak, aby sme vedeli jednoznačne určiť ich identitu. Ako poskytovateľa identít použijeme platformu [GitHub](https://github.com/), ale obdobným spôsobom by sme mohli použiť aj iných poskytovateľov identít, ako napríklad Google, Microsoft, Facebook, a podobne. Pokiaľ by sme si chceli zriadiť vlastného poskytovateľa identít, mohli by sme zaintegrovať do nášho systému niektorú z implementácií [Identity Provider](https://en.wikipedia.org/wiki/Identity_provider) služby. V oblasti menších projektov je napríklad populárna implementácia [dex](https://dexidp.io/), ale k dispozícii je [mnoho ďalších implementácií a knižníc](https://openid.net/developers/certified/).
 
-Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/), a postupne nakonfigureje [Envoy Gateway] tak aby túto službu použila na overovanie identity asociaovanej so vstupnou požiadavkou.
+Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/), a postupne nakonfigurujeme [Envoy Gateway] tak aby túto službu použila na overovanie identity asociaovanej so vstupnou požiadavkou.
 
 1. Dôležitým aspektom protokolu OIDC je predpoklad použitia štandardného prehliadača odolného voči rôznym bezpečnostným útokom. Prehliadač plní v protokole [Open ID Connect](https://openid.net/developers/how-connect-works/) dôležitú úlohu a naviguje používateľa medzi rôznymi poskytovateľmi - webová aplikácia, poskytovateľ identít, poskytovateľ chránených zdrojov. Protokol predpokladá vytvorenie viacstranného kontraktu medzi jednotlivými entitami. V tomto prostredí je preto potrebné používať jednoznačné označenia entít, čo neplatí pre doménu `localhost`, ktorá označuje akýkoľvek výpočtový prostriedok.  
 
@@ -74,107 +74,107 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
 4. Vytvorte konfiguráciu pre mikro službu [ouath2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/). Vytvorte adresár `${WAC_ROOT}/ambulance-gitops/infrastructure/oauth2-proxy` a v ňom súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/oauth2-proxy/deployment.yaml` s obsahom
 
-   ```yaml
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: &PODNAME oauth2-proxy
-   spec:
-     replicas: 1
-     selector:
-       matchLabels:
-         pod: *PODNAME
-     template:
-       metadata: 
-         labels:
-           pod: *PODNAME
-       spec:
-         containers:
-         - name: oauth2-proxy  
-           image: bitnami/oauth2-proxy
-           args: 
-           - --upstream="static://200" @_important_@
-           - --set-xauthrequest @_important_@
-           - --set-authorization-header
-           - --silence-ping-logging
-           env:
-              - name: OAUTH2_PROXY_HTTP_ADDRESS
-                # listen on standard interface - localhost will not work
-                value: ":4180"
-   
-              - name: OAUTH2_PROXY_PROXY_PREFIX
-                # oauth2-proxy route listens on path /authn
-                value: /authn @_important_@
-   
-              - name: OAUTH2_PROXY_PROVIDER
-                value: github @_important_@
-   
-              - name: OAUTH2_PROXY_CLIENT_ID
-                valueFrom:
-                  secretKeyRef:
-                      name: oidc-client  @_important_@
-                      key: client-id
-   
-              - name: OAUTH2_PROXY_CLIENT_SECRET
-                valueFrom:
-                  secretKeyRef:
-                      name: oidc-client @_important_@
-                      key: client-secret
-   
-              - name: OAUTH2_PROXY_REDIRECT_URL
-                # must match redirection registered at GitHub Oauth2 Application form
-                value: https://wac-hospital.loc/authn/callback     @_important_@
-   
-              - name: OAUTH2_PROXY_COOKIE_SECRET
-                valueFrom:
-                  secretKeyRef:
-                      name: oidc-client
-                      key: cookie-secret
-   
-              - name: OAUTH2_PROXY_SESSION_STORE_TYPE
-                # alternatively use redis and configure it
-                value: cookie
-   
-              - name: OAUTH2_PROXY_COOKIE_PREFIX
-                value: __Secure-
-              - name: OAUTH2_PROXY_COOKIE_SAMESITE
-                value: lax
-                
-              - name: OAUTH2_PROXY_EMAIL_DOMAINS
-                # only authenticate - we will authorize users later
-                value: "*"
-   
-              - name: OAUTH2_PROXY_SKIP_PROVIDER_BUTTON
-                # change to true to skip provider selection page. Here false for    demonstration only
-                value: "false"
-   
-              - name: OAUTH2_PROXY_SKIP_AUTH_ROUTES
-                # regex of routes where anonymous users are allowed
-                # either here or create separate gateway/listener for anonymous users
-                value: (\/.well-known\/|\/favicon.ico)
-   
-           resources:
-             limits:
-               cpu: '0.2'
-               memory: '320M'
-             requests:
-               cpu: '0.01'
-               memory: '128M'
-           livenessProbe:
-             httpGet:
-               path: /ready
-               scheme: HTTP
-               port: 4180
-             initialDelaySeconds: 5
-             periodSeconds: 15
-           readinessProbe:
-             httpGet:
-               path: /ready
-               scheme: HTTP
-               port: 4180
-             initialDelaySeconds: 5
-             periodSeconds: 5
-   ```
+```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: &PODNAME oauth2-proxy
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        pod: *PODNAME
+    template:
+      metadata: 
+        labels:
+          pod: *PODNAME
+      spec:
+        containers:
+        - name: oauth2-proxy  
+          image: bitnami/oauth2-proxy
+          args: 
+          - --upstream="static://200" @_important_@
+          - --set-xauthrequest @_important_@
+          - --set-authorization-header
+          - --silence-ping-logging
+          env:
+          - name: OAUTH2_PROXY_HTTP_ADDRESS
+            # listen on standard interface - localhost will not work
+            value: ":4180"
+  
+          - name: OAUTH2_PROXY_PROXY_PREFIX
+            # oauth2-proxy route listens on path /authn
+            value: /authn @_important_@
+
+          - name: OAUTH2_PROXY_PROVIDER
+            value: github @_important_@
+
+          - name: OAUTH2_PROXY_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: oidc-client  @_important_@
+                key: client-id
+  
+          - name: OAUTH2_PROXY_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: oidc-client @_important_@
+                key: client-secret
+  
+          - name: OAUTH2_PROXY_REDIRECT_URL
+            # must match redirection registered at GitHub Oauth2 Application form
+            value: https://wac-hospital.loc/authn/callback     @_important_@
+  
+          - name: OAUTH2_PROXY_COOKIE_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: oidc-client
+                key: cookie-secret
+  
+          - name: OAUTH2_PROXY_SESSION_STORE_TYPE
+            # alternatively use redis and configure it
+            value: cookie
+
+          - name: OAUTH2_PROXY_COOKIE_PREFIX
+            value: __Secure-
+          - name: OAUTH2_PROXY_COOKIE_SAMESITE
+            value: lax
+            
+          - name: OAUTH2_PROXY_EMAIL_DOMAINS
+            # only authenticate - we will authorize users later
+            value: "*"
+
+          - name: OAUTH2_PROXY_SKIP_PROVIDER_BUTTON
+            # change to true to skip provider selection page. Here false for    demonstration only
+            value: "false"
+
+          - name: OAUTH2_PROXY_SKIP_AUTH_ROUTES
+            # regex of routes where anonymous users are allowed
+            # either here or create separate gateway/listener for anonymous users
+            value: (\/.well-known\/|\/favicon.ico)
+  
+          resources:
+            limits:
+              cpu: '0.2'
+              memory: '320M'
+            requests:
+              cpu: '0.01'
+              memory: '128M'
+          livenessProbe:
+            httpGet:
+              path: /ready
+              scheme: HTTP
+              port: 4180
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /ready
+              scheme: HTTP
+              port: 4180
+            initialDelaySeconds: 5
+            periodSeconds: 5
+```
 
     Všimnite se, že referencujeme hodnoty zo _Secret_-u `oidc-client`, ktoré sme vytvroili v predchádzajúcom kroku. V tejto konfigurácii využívame na správu sedení takzvaný [_Secure Cookie_](https://en.wikipedia.org/wiki/Secure_cookie), v ktorom sú zašifrované údaje o sedení a token identifikujúci používateľa. Alternatívou by bolo ukladať tieto informácie v úložisku [redis], čo sme pre zjednodušenie vynechali.
 
@@ -197,7 +197,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
         targetPort: 4180
     ```
 
-    Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/oauth2-proxy/service.yaml`
+    Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/oauth2-proxy/http-route.yaml`
 
    ```yaml
    apiVersion: gateway.networking.k8s.io/v1
@@ -271,7 +271,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
          namespace: wac-hospital
        type: JSONPatch
        jsonPatches:
-         - "type": "type.googleapis.com/envoy.config.listener.v3.Listener"
+         - type: "type.googleapis.com/envoy.config.listener.v3.Listener"
            # The listener name is of the form <GatewayNamespace>/<GatewayName>/<GatewayListenerName>
            name:  wac-hospital/wac-hospital-gateway/fqdn  @_important_@
            operation:
@@ -286,7 +286,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
                  "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
                  http_service:
                    server_uri:
-                     uri: http://oauth2-proxy @_important_@
+                     uri: http://oauth2-proxy.wac-hospital @_important_@
                      timeout: 30s
                      # The cluster name is of the form <RouteType>/<RouteNamespace>/<RouteName>/rule/   <RuleIndex>
                      # use  `egctl config envoy-proxy cluster -A` to find out actual xDS configuration
@@ -360,6 +360,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
     ```
 
     Overte, že stav objektu _Envoy Patch Policy_ je `Programmed`
+    >info:> V pripade že sa stav nemení na Programmed je potrebné reštartovať pody envoy gateway.
 
     ```ps
     kubectl -n wac-hospital get epp
@@ -473,7 +474,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
     ...
     resources: 
     ...
-    - ../../infrastructure/http-echo
+    - ../../../apps/http-echo @_add_@
     ...
     ```
 
@@ -481,7 +482,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
 
    ```ps
     git add .
-    git commit -m "Add oauth2-proxy"
+    git commit -m "Add http-echo"
     git push
    ```
 
