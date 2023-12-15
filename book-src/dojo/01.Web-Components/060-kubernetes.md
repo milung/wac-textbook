@@ -2,9 +2,9 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-060
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-060`
 
 ---
 
@@ -87,7 +87,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
                    cpu: "0.3"
    ```
 
-   Súbor `deployment.yaml` je deklaráciou nasadenia našej služby - tzv. [_workload_](https://kubernetes.io/docs/concepts/workloads/) - do klastra. Všimnite si, že požaduje nasadenie dvoch replík - čo znamená, že v klastri budú vytvorené dva _pod_-y a v rámci každého z nich bude vytvorený aj bežiaci kontajner s našou aplikáciou. Všimnite si tiež, že v šablóne pre vytvorenie podu je definovaný štítok `pod: <pfx>-ambulance-ufe-label`, ktorý je použitý v selektore pre výber podov, ktoré majú byť súčasťou tohto nasadenia. Tento štítok je použitý aj v ďalších manifestoch, ktoré budeme vytvárať. Všetky objekty (_resources_) v systéme kubernetes môžu byť označené štítkami a tiež môžu byť vyhľadávané pomocou selektorov, ktoré štítky používajú. Prípony `-label`, `-deployment` a `-container` nie sú štandardnou konvenciou, sú tu uvedené najme pre lepšie sa zorientovanie ako jednotlivé názvy v manifeste súvisia.
+   Súbor `deployment.yaml` je deklaráciou nasadenia našej služby - tzv. [_workload_](https://kubernetes.io/docs/concepts/workloads/) - do klastra. Všimnite si, že požaduje nasadenie dvoch replík - čo znamená, že v klastri budú vytvorené dva _pod_-y a v rámci každého z nich bude vytvorený aj bežiaci kontajner s našou aplikáciou. Všimnite si tiež, že v šablóne pre vytvorenie podu je definovaný štítok `pod: <pfx>-ambulance-ufe-label`, ktorý je použitý v selektore pre výber podov, ktoré majú byť súčasťou tohto nasadenia. Tento štítok je použitý aj v ďalších manifestoch, ktoré budeme vytvárať. Všetky objekty (_resources_) v systéme kubernetes môžu byť označené štítkami a tiež môžu byť vyhľadávané pomocou selektorov, ktoré štítky používajú. Prípony `-label`, `-deployment` a `-container` nie sú štandardnou konvenciou, sú tu uvedené najmä pre lepšie sa zorientovanie ako jednotlivé názvy v manifeste súvisia.
 
 4. Takto vytvorený manifest je funkčný a možno ho nasadiť do klastra. Predpokladáme, že máte nainštalovaný systém [kubernetes] na svojom počítači a zvolený [aktívny kontext](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#define-clusters-users-and-contexts) pre tento klaster. To, ktorý kontext je aktívny môžete zistiť vykonaním príkazu
 
@@ -109,7 +109,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
    kubectl config use-context docker-desktop
    ```
 
-   >info:> Odporúčame nainštalovať si na svojom počítači aplikácie [kubectx], [kubens][kubectx], [OpenLens][lens] a naučiť sa ich používať pri práci s kubernetes klastrami. V cvičeniach sú uvedené len príkazy založené na [kubectl] nástroji, ktorý je súčasťou nainštalovaného [kubernetes] systému.
+   >info:> Odporúčame nainštalovať si na svojom počítači aplikácie [kubectx], [kubens], [OpenLens][lens] a naučiť sa ich používať pri práci s kubernetes klastrami. V cvičeniach sú uvedené len príkazy založené na [kubectl] nástroji, ktorý je súčasťou nainštalovaného [kubernetes] systému.
 
    Teraz prejdite do priečinka `${WAC_ROOT}/ambulance-gitops` a vykonajte príkaz
 
@@ -143,7 +143,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
    [presmerovania portov](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/) z lokálneho systému na cieľový pod (prípadne _service_) aktívneho klastra. Vykonajte príkaz:
 
    ```ps
-   kubectl port-forward <pfx>-ambulance-ufe-deployment-<your-hash> 8081:80
+   kubectl port-forward <pfx>-ambulance-ufe-deployment-<your-hash> 8081:8080
    ```
 
    a následne ak otvoríme v prehliadači stránku [http://localhost:8081](http://localhost:8081), uvidíme náš zoznam čakajúcich.
@@ -229,7 +229,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
    kubectl kustomize ./apps/<pfx>-ambulance-ufe/
    ```
 
-9. V tomto kroku pripravíme manifesty pre objekty našej _infraštruktúry_. V našom prípade sa teraz jedná najmä o radič mikro-aplikácií, teda akúsi aplikačnú obálku pre zobrazovanie jednotlivých web-komponentov. Pri skúmaní súčasného stavu sme nenašli implementáciu [micro-front-end systému][micro-fe], ktorý by vhodne kombinoval technológie [Web Components][webc], [Kubernetes] a [micro-Front-Ends][micro-fe]. Táto kombinácia sa pritom javí najvhodnejšia vzhľadom na súčasné trendy vývoja, keďže vytvára priestor na samostatný vývoj jednotlivých web komponentov založený na všeobecne uznávaných štandardoch, a ktoré je možno potom nasadiť deklaratívnym spôsobom v rôznych situáciach, čo priamo zodpovedá filozofii mikro služieb. Existujúce implementácie sú napríklad [bit], alebo [single-spa], ich integrácia ale väčšinou vyžaduje úzke previazanie mikro-front-end služieb.
+9. V tomto kroku pripravíme manifesty pre objekty našej _infraštruktúry_. V našom prípade sa teraz jedná najmä o radič mikro-aplikácií, teda akúsi aplikačnú obálku pre zobrazovanie jednotlivých web-komponentov. Pri skúmaní súčasného stavu sme nenašli implementáciu [micro-front-end systému][micro-fe], ktorý by vhodne kombinoval technológie [Web Components][webc], [Kubernetes] a [micro-Front-Ends][micro-fe]. Táto kombinácia sa pritom javí najvhodnejšia vzhľadom na súčasné trendy vývoja, keďže vytvára priestor na samostatný vývoj jednotlivých web komponentov založený na všeobecne uznávaných štandardoch, a ktoré je možno potom nasadiť deklaratívnym spôsobom v rôznych situáciách, čo priamo zodpovedá filozofii mikro služieb. Existujúce implementácie sú napríklad [bit], alebo [single-spa], ich integrácia ale väčšinou vyžaduje úzke previazanie mikro-front-end služieb.
 
    Aby sme využili deklaratívne princípy Kubernetes API a nezávislosť tímov vyvíjajúcich jednotlivé mikro-aplikácie, bol pre potreby cvičenia vytvorený jednoduchý [_kubernetes controller_][k8s-controller], ktorý obsluhuje neštandardné objekty systému kubernetes definované pomocou [_Custom Resource Definition_][k8s-crd]. Tento _controller_ nepretržite sleduje zmeny deklarovaných objektov - _webcomponents_ - a poskytuje ich zabudovanému webovému serveru, ktorý implementuje aplikačnú obálku. Jednotlivé webové komponenty sú potom dynamicky načítavané podľa potreby a zobrazené na základe špecifikácie v týchto neštandardných objektoch. _Controller_ je implementovaný v programovacom jazyku Prolog (back-end) a v jazyku Typescript (front-end) a jeho zdrojové súbory sú dostupné na [https://github.com/milung/ufe-controller](https://github.com/milung/ufe-controller). Slúži zároveň ako motivácia a ukážka rozšíriteľnosti [kubernetes api][k8s-api], ktoré sa zameriava na deklaratívny popis želaného stavu, namiesto procedurálneho popisu, ako želaný stav dosiahnuť. V cvičeniach budeme používať jeho kontajnerizovanú verziu `milung/ufe-controller:latest`.
 
@@ -250,22 +250,22 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
 
    Týmto spôsobom sme vytvorili konfiguráciu založenú na vopred pripravenej konfigurácii pre _controller_. Tiež sme určili, že všetky relevantné objekty budú umiestnené do subdomény klastra `wac-hospital`.
 
-   Obsah súborov si môžete pozrieť v repozitáry [tu](https://github.com/milung/ufe-controller/tree/master/configs/k8s/kustomize).  Súbory `deployment.yaml`, a `service.yaml` sú obdobné ako v prípade nášej `ambulance-ufe` mikroslužby, Súbor `crd.yaml`  deklaruje neštandardný objekt systému kubernetes - _Custom Resource Definition_ - pre deklaráciu webových komponentov. Okrem iného, určuje schému, na základe ktorej bol vytvorený súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml`.
+   Obsah súborov si môžete pozrieť v repozitáry [tu](https://github.com/milung/ufe-controller/tree/master/configs/k8s/kustomize).  Súbory `deployment.yaml`, a `service.yaml` sú obdobné ako v prípade našej `ambulance-ufe` mikroslužby. Súbor `crd.yaml`  deklaruje neštandardný objekt systému kubernetes - _Custom Resource Definition_ - pre deklaráciu webových komponentov. Okrem iného určuje schému, na základe ktorej bol vytvorený súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml`.
 
    Pod radiča potrebuje prístup k objektom typu `webcomponents`, ktoré sme definovali v predchádzajúcom súbore. Konfigurácia preto obsahuje aj definície pre [Kubernetes RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/), ktoré umožnia nášmu podu pristupovať k objektom `webcomponents.fe.milung.eu`. V súbore
    `deployment.yaml` sme pre náš pod určili `serviceAccountName: ufe-controller-account`, čo znamená, že bude používať účet `ufe-controller-account`, ktorý je definovaný v súbore `serviceaccount.yaml`. Tento účet je priradený k _ClusterRole_ `webcomponents-reader`, ktorý je definovaný v súbore `clusterrole.yaml`. Tento _ClusterRole_ je priradený k _ClusterRoleBinding_ `ufe-controller`, ktorý je definovaný v súbore `clusterrolebinding.yaml`. Týmto spôsobom sme vytvorili prístupové práva pre náš pod k objektom typu `webcomponents.fe.milung.eu`.
 
-   >info:> Takáto priama závislosť na externých manifestoch, bez špecifikácie príslušnej verzie, je v praxi nežiadúca, keďže riskujeme, že dôjde k zmenám, ktoré narušia funkčnosť našej aplikácie. V praxi by sa tieto manifesty bud skopírovali do lokálneho repozitára, alebo si určila konkrétna verzia (vetva/tag v GitHub), ktorá bude potom použitá v súbore `kustomization.yaml`.
+   >info:> Takáto priama závislosť na externých manifestoch, bez špecifikácie príslušnej verzie, je v praxi nežiadúca, keďže riskujeme, že dôjde k zmenám, ktoré narušia funkčnosť našej aplikácie. V praxi by sa tieto manifesty buď skopírovali do lokálneho repozitára, alebo sa určila konkrétna verzia (vetva/tag v GitHub), ktorá bude potom použitá v súbore `kustomization.yaml`.
 
 10. V predchádzajúcich krokoch sme vytvorili deklarácie pre našu aplikáciu `ambulance-ufe` a pre infraštrukturálnu aplikáciu `ufe-controller`. Teraz prejdeme k deklarácii konfigurácie do špecifických prostredí - klastrov. Keďže budeme nasadzovať do nášho lokálneho kubernetes klastra, potrebujeme nasadiť obe aplikácie a vytvoriť subdoménu klastra - [_namespace_](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) - do ktorých ich umiestnime. Nasadenie do klastra rozdelíme do dvoch krokov:
 
-    Krok `prepare` - vytvorenie _namespace_ a nasadenie infraštruktúry klastra. Tu budeme nasadzovať služby ktoré sú podmienkou na to aby náš klaster bol pripravený na nasadenie samotnej aplikácie;
+    Krok `prepare` - vytvorenie _namespace_ a nasadenie infraštruktúry klastra. Tu budeme nasadzovať služby, ktoré sú podmienkou na to, aby náš klaster bol pripravený na nasadenie samotnej aplikácie;
 
-    Krok `install` - nasadenie služieb samotnej aplikácie/aplikácii do klastra. Ak by sme mali klaster kompletne pripravený, tak stačí nasadiť tento krok
+    Krok `install` - nasadenie služieb samotnej aplikácie/aplikácií do klastra. Ak by sme mali klaster kompletne pripravený, tak stačí nasadiť tento krok.
 
     Implicitne tiež predpokladáme, že medzi týmito krokmi existujú nejaké závislosti - napríklad objekty typu `webc` v kroku `install` predpokladajú existenciu rozšírení Kubernetes API typu `webcomponents.fe.milung.eu` z kroku `prepare`.
 
-    >info:> Počet krokov sa snažíme limitovať, niekedy však môže byť potrebné rozdeliť nasadenie do viacerých krokov aby boli splnené určité predpoklady pre nasadenie našej aplikácie - typicky dostupnosť služieb, ktoré definujú spôsob ako nasadiť iné objekty, alebo objekty, ku ktorým chceme limitovať prístup pre lepšiu koordináciu jednotlivých tímov.
+    >info:> Počet krokov sa snažíme limitovať, niekedy však môže byť potrebné rozdeliť nasadenie do viacerých krokov, aby boli splnené určité predpoklady pre nasadenie našej aplikácie - typicky dostupnosť služieb, ktoré definujú spôsob ako nasadiť iné objekty alebo objekty, ku ktorým chceme limitovať prístup pre lepšiu koordináciu jednotlivých tímov.
 
     Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/namespace.yaml` s obsahom:
 
@@ -341,9 +341,9 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
     kubectl kustomize clusters/localhost/install
     ```
 
-    Pokiaľ sú vaše konfigurácie správne zobrazí sa výpis aplikovaných YAML dokumentov, v opačnom prípade musíte opraviť chybu podľa zobrazeného výpisu.
+    Pokiaľ sú vaše konfigurácie správne, zobrazí sa výpis aplikovaných YAML dokumentov, v opačnom prípade musíte opraviť chybu podľa zobrazeného výpisu.
 
-    Následne aplikujte prípravny krok príkazom v priečinku `${WAC_ROOT}/ambulance-gitops`:
+    Následne aplikujte prípravný krok príkazom v priečinku `${WAC_ROOT}/ambulance-gitops`:
 
     ```ps
      kubectl apply -k clusters/localhost/prepare
@@ -367,7 +367,7 @@ Pred samotnou prácou sa uistite, že máte zapnutú podporu Kubernetes v rámci
 
     ![Integrovaný zoznam čakajúcich](./img/060-02-appshell-list.png)
 
-    >build_circle:> Na niektorých systémoch nemusia byť `NodePort`-s prístupne na adrese `localhost`. Pozrite si akým spôsobom sú prístupné na vašom systéme. Na systéme [Docker Desktop][docker-desktop] je možné použiť adresu `host.docker.internal` alebo `localhost` s portom `30331`.
+    >build_circle:> Na niektorých systémoch nemusia byť `NodePort`-s prístupné na adrese `localhost`. Pozrite si, akým spôsobom sú prístupné na vašom systéme. Na systéme [Docker Desktop][docker-desktop] je možné použiť adresu `host.docker.internal` alebo `localhost` s portom `30331`.
 
 Nasledujúci obrázok znázorňuje deployment a komunikačnú schému nasadenej aplikácie.
 

@@ -55,6 +55,7 @@
 [k8s-crd]:https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/
 [kubectl]:https://kubectl.docs.kubernetes.io/
 [kubectx]:https://github.com/ahmetb/kubectx
+[kubens]:https://github.com/ahmetb/kubectx/blob/master/kubens
 [kubernetes]:https://kubernetes.io/
 [kustomize]:https://kustomize.io/
 [lens]:https://github.com/MuhammedKalkan/OpenLens
