@@ -394,6 +394,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    kubectl get pods -n wac-hospital
    ```
   >info:> Ak sa pody nevedia naštartovať je možné že klaster nemá dostatok miesta na disku. Napríklad v pripade docker-desktop je potrebné zvýšiť limit pre disky v nastaveniach aplikácie.
+
 6. Prejdite na stránku [http://localhost/monitoring](http://localhost/monitoring) a overte, že je dostupná.  Pri úvodnom prístupe zvoľte voľbu _Explore on my own_, a zrušte prípadné popup okno. Otvorte bočný panel menu, vyberte položku _Index Management_, a následne vyberte položku _Indices_. V zozname indexov by ste mali vidieť index _fluent-bit_.
 
    ![Index Management](./img/080-01-IndexManagement.png)
