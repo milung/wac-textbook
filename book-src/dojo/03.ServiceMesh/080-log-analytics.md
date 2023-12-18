@@ -320,7 +320,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    apiVersion: gateway.networking.k8s.io/v1
    kind: HTTPRoute
    metadata:
-     name: oauth2-proxy
+     name: monitoring-dashboards
    spec:
      parentRefs:
        - name: wac-hospital-gateway
