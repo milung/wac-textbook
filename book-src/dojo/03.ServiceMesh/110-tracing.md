@@ -63,7 +63,7 @@ Podobne ako v prípade metrík, sa pre distribuovanoim trasovaní asi nzjčastej
            - name: ES_TAGS_AS_FIELDS_ALL
              value: "true"
            - name: ES_SERVER_URLS
-             value: http://monitoring-opensearch-server.wac-hospital:9200 @_important_@
+             value: http://monitoring-opensearch.wac-hospital:9200 @_important_@
            - name: ES_TLS_ENABLED
              value: "false"
          service:
@@ -81,12 +81,12 @@ Podobne ako v prípade metrík, sa pre distribuovanoim trasovaní asi nzjčastej
            - name: SPAN_STORAGE_TYPE
              value: opensearch
            - name: ES_SERVER_URLS
-             value: http://monitoring-opensearch-server.wac-hospital:9200 @_important_@
+             value: http://monitoring-opensearch.wac-hospital:9200 @_important_@
            - name: ES_TLS_ENABLED
              value: "false"
    ```
 
-   Všimnite si konfiguráciu služieb `jaeger-collector` a `jaeger-query`. Táto konfigurácia nám umožňuje využiť službu `monitoring-opensearch-server` ako úložisko záznamov distribuovaného trasovania, a zároveň sprístupní funkcionalitu analýzy trace-ov v službe `monitoring-opensearch-dashboards`. Taktiež sme v službe `collector` zapli podporu pre [OpenTelemetry Protocol](https://opentelemetry.io/docs/specs/otlp/), čo nám zjednoduší pripojenie externých služieb.
+   Všimnite si konfiguráciu služieb `jaeger-collector` a `jaeger-query`. Táto konfigurácia nám umožňuje využiť službu `monitoring-opensearch` ako úložisko záznamov distribuovaného trasovania, a zároveň sprístupní funkcionalitu analýzy trace-ov v službe `monitoring-opensearch-dashboards`. Taktiež sme v službe `collector` zapli podporu pre [OpenTelemetry Protocol](https://opentelemetry.io/docs/specs/otlp/), čo nám zjednoduší pripojenie externých služieb.
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/jaegertracing/kustomization.yaml`: 
 

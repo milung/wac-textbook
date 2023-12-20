@@ -8,7 +8,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-080
 
 ---
 
-Náš systém sa postupne rozrastá o nové mikroslužby, ktoré obsluhú rôzne aspekty našej aplikácie. Zároveň predpokladáme rozrastanie sa aj samotnej funkcionality aplikácie, čo bude viesť k pridávaniu ďaľších mikroslužieb do systému. Napriek všetkej snahe o dodanie čo najkvalitnejších komponentov, musíme predpokladať, že počas prevádzky systému bude dochádzať k situáciam kedy sa správanie systému bude odchylovať od predpokladaného špecifikovaného správania. V takýchto situáciach je potrebné mať k dispozícii nástroje, ktoré nám umožnia zistiť, čo sa v systéme deje a kde sa nachádza problém. Zároveň potrebujeme mať k dispozícii informácie o tom, ako je súčasný systém využívaný a zaťažovaný aby sme prípadnym problémom dokázali včas predchádzať. V kontexte [DevOps](https://en.wikipedia.org/wiki/DevOps)cvývoja, sa tieto schopnosti a aktivity očakávajú od samotného vývojového tímu. V tejto a nasledujúcej časti si ukážeme ako takéto nástroje nasadiť do systému a ako sledovanie (monitorovanie) systému podporiť aj pri implementácii mikroslužieb.
+Náš systém sa postupne rozrastá o nové mikroslužby, ktoré obsluhú rôzne aspekty našej aplikácie. Zároveň predpokladáme rozrastanie sa aj samotnej funkcionality aplikácie, čo bude viesť k pridávaniu ďaľších mikroslužieb do systému. Napriek všetkej snahe o dodanie čo najkvalitnejších komponentov, musíme predpokladať, že počas prevádzky systému bude dochádzať k situáciam kedy sa správanie systému bude odchylovať od predpokladaného špecifikovaného správania. V takýchto situáciach je potrebné mať k dispozícii nástroje, ktoré nám umožnia zistiť, čo sa v systéme deje a kde sa nachádza problém. Zároveň potrebujeme mať k dispozícii informácie o tom, ako je súčasný systém využívaný a zaťažovaný aby sme prípadnym problémom dokázali včas predchádzať. V kontexte [DevOps](https://en.wikipedia.org/wiki/DevOps) vývoja, sa tieto schopnosti a aktivity očakávajú od samotného vývojového tímu. V tejto a nasledujúcej časti si ukážeme ako takéto nástroje nasadiť do systému a ako sledovanie (monitorovanie) systému podporiť aj pri implementácii mikroslužieb.
 
 Väčšina softverových riešení generuje nejakým spôsobom záznamy o činnosti - _log_, v ideálnom prípade ich zapisuje rovno do štandardného výstupu. V prvok kroku preto nasadíme do klastra nástroje na zber a analýzu logov. V našom prípade to budú [FluentBit] a [Opensearch].
 
@@ -51,40 +51,43 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/fluentbit/patches/fluent-bit-config.config-map.yaml` s nasledujúcim obsahom:
 
-   ```yaml
-   apiVersion: v1
-   kind: ConfigMap
-   metadata:
-     name: fluent-bit-config
-     namespace: logging
-     labels:
-       k8s-app: fluent-bit
-   data:
-     # Configuration files: server, input, filters and output
-     # ======================================================
-     fluent-bit.conf: |
-       [SERVICE]
-           Flush         1
-           Log_Level     info
-           Daemon        off
-           Parsers_File  parsers.conf
-           HTTP_Server   On
-           HTTP_Listen   0.0.0.0
-           HTTP_Port     202    
-       @INCLUDE input-kubernetes.conf
-       @INCLUDE filter-kubernetes.conf
-       @INCLUDE output-opensearch.con    
-     output-opensearch.conf: |  
-       [OUTPUT]
-           Name                opensearch
-           Match               *
-           Host                ${FLUENT_OPENSEARCH_HOST}
-           Port                ${FLUENT_OPENSEARCH_PORT}
-           Suppress_Type_Name  On
-           Replace_Dots        On
-           Retry_Limit             
-     output-elasticsearch.conf: null
-   ```
+```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: fluent-bit-config
+    namespace: logging
+    labels:
+      k8s-app: fluent-bit
+  data:
+    # Configuration files: server, input, filters and output
+    # ======================================================
+    fluent-bit.conf: |
+      [SERVICE]
+          Flush         1
+          Log_Level     info
+          Daemon        off
+          Parsers_File  parsers.conf
+          HTTP_Server   On
+          HTTP_Listen   0.0.0.0
+          HTTP_Port     2020
+
+      @INCLUDE input-kubernetes.conf
+      @INCLUDE filter-kubernetes.conf
+      @INCLUDE output-opensearch.conf
+
+    output-opensearch.conf: |  
+      [OUTPUT]
+          Name                opensearch
+          Match               *
+          Host                ${FLUENT_OPENSEARCH_HOST}
+          Port                ${FLUENT_OPENSEARCH_PORT}
+          Suppress_Type_Name  On
+          Replace_Dots        On
+          Retry_Limit         2
+
+    output-elasticsearch.conf: null
+```
 
    Pôvodná konfiguráciu využívala výstupný plugin pre [Elasticsearch](https://www.elastic.co/), ktorý sme nahradili pluginom pre [Opensearch](https://opensearch.org/). V konfigurácii je potrebné nastaviť adresu a port na ktorom bude [Opensearch] API dostupné.
 
@@ -103,80 +106,80 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
          - name: fluent-bit
            env:
            - name: FLUENT_OPENSEARCH_HOST
-             value: monitoring-opensearch-server.wac-hospital @_important_@
+             value: monitoring-opensearch.wac-hospital @_important_@
            - name: FLUENT_OPENSEARCH_PORT
              value: "9200"
    ```
 
-   Pri nastavení `FLUENT_OPENSEARCH_HOST` je nutné uviesť adresu servera aj s rozlíšením `namespace`, keďže túto službu budeme nasadzovať v namespace `wac-hospital`. V prípade, že by sme fluentbit nasadzovali do namespace-u `logging`, tak by sme mohli uviesť iba `monitoring-opensearch-server`.
+   Pri nastavení `FLUENT_OPENSEARCH_HOST` je nutné uviesť adresu servera aj s rozlíšením `namespace`, keďže túto službu budeme nasadzovať v namespace `wac-hospital`. V prípade, že by sme fluentbit nasadzovali do namespace-u `logging`, tak by sme mohli uviesť iba `monitoring-opensearch`.
 
 2. Pripravte konfiguráciu pre službu [OpenSearch]. Táto sa skladá z dvoch služieb - _backend_ služby poskytujúcej služby pre uloženie, indexovanie a vyhľadávanie údajov prostredníctvom REST API, a služby [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/), ktorá poskytuje používateľske rozhranie pre vyhľadávanie a vizualizáciu údajopv. Obsah a zmysel jednotlivých súborov by Vám už mal byť zrejmý.
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/monitoring-opensearch/server.deployment.yaml`
 
-   ```yaml
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: &PODNAME monitoring-opensearch-server
-   spec:
-     replicas: 1
-     strategy:
-        # recreate to avoid simultanopus locking of the data volume during updates
-        type: Recreate
-     selector:
-       matchLabels:
-         app.kubernetes.io/component: *PODNAME
-     template:
-       metadata:
-         labels:
-           app.kubernetes.io/component: *PODNAME
-       spec:
-         volumes:
-         - name: *PODNAME
-           persistentVolumeClaim:
-             claimName: *PODNAME
-         initContainers:
-          - name: fsgroup-volume
-            image: busybox:latest
-            imagePullPolicy: IfNotPresent
-            command: ['sh', '-c']
-            args:
-            # change data ownership to avoid "permision denied" errors
-            - 'chown -R 1000:1000 /usr/share/opensearch/data'
-            securityContext:
-            runAsUser: 0
-            resources:
-            requests:
-                cpu: 1m
-                memory: 32Mi
-            limits:
-                cpu: 10m
-                memory: 128Mi
-            volumeMounts:
-            - mountPath: /usr/share/opensearch/data
-                name: *PODNAME
-         containers:
-         - name: *PODNAME
-           image: opensearchproject/opensearch:latest
-           volumeMounts:
-             - mountPath: /usr/share/opensearch/data @_important_@
-               name: *PODNAME
-           env:
-             - name: discovery.type
-               value: single-node  @_important_@
-             - name: OPENSEARCH_JAVA_OPTS
-               value: -Xms512m -Xmx512m
-             - name: DISABLE_INSTALL_DEMO_CONFIG @_important_@
-               value: "true"
-             - name: DISABLE_SECURITY_PLUGIN @_important_@
-               value: "true"
-           ports: 
-             - name: api
-               containerPort: 9200 
-             - name: performance
-               containerPort: 9600
-   ```
+```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: &PODNAME monitoring-opensearch
+  spec:
+    replicas: 1
+    strategy:
+      # recreate to avoid simultanopus locking of the data volume during updates
+      type: Recreate
+    selector:
+      matchLabels:
+        app.kubernetes.io/component: *PODNAME
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/component: *PODNAME
+      spec:
+        volumes:
+        - name: *PODNAME
+          persistentVolumeClaim:
+            claimName: *PODNAME
+        initContainers:
+        - name: fsgroup-volume
+          image: busybox:latest
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c']
+          args:
+          # change data ownership to avoid "permision denied" errors
+          - 'chown -R 1000:1000 /usr/share/opensearch/data'
+          securityContext:
+          runAsUser: 0
+          resources:
+          requests:
+            cpu: 1m
+            memory: 32Mi
+          limits:
+            cpu: 10m
+            memory: 128Mi
+          volumeMounts:
+          - mountPath: /usr/share/opensearch/data
+            name: *PODNAME
+        containers:
+        - name: *PODNAME
+          image: opensearchproject/opensearch:latest
+          volumeMounts:
+            - mountPath: /usr/share/opensearch/data @_important_@
+              name: *PODNAME
+          env:
+            - name: discovery.type
+              value: single-node  @_important_@
+            - name: OPENSEARCH_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+            - name: DISABLE_INSTALL_DEMO_CONFIG @_important_@
+              value: "true"
+            - name: DISABLE_SECURITY_PLUGIN @_important_@
+              value: "true"
+          ports: 
+            - name: api
+              containerPort: 9200 
+            - name: performance
+              containerPort: 9600
+```
 
    Konfigurácia je účelne zjednodušená, predpokladá použitie bezpečnostných mechanizmov na úrovni klastra, a je nasadená v móde jedného uzla. V prípade potreby je možné túto konfiguráciu rozšíriť o ďaľšie parametre, ktoré sú dostupné v [dokumentácii](https://opensearch.org/docs/latest/install/index/), v produkcii je možné napríklad využiť [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) pre zabezpečenie vysokej dostupnosti.
 
@@ -186,7 +189,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    apiVersion: v1
    kind: Service
    metadata:
-     name: &PODNAME monitoring-opensearch-server
+     name: &PODNAME monitoring-opensearch
    spec: 
      selector:
        app.kubernetes.io/component: *PODNAME
@@ -205,7 +208,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    apiVersion: v1
    kind: PersistentVolumeClaim
    metadata:
-     name: monitoring-opensearch-server
+     name: monitoring-opensearch
    spec:
      accessModes:
        - ReadWriteOnce
@@ -288,8 +291,8 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    - server.deployment.yaml
    - server.service.yaml
    - pvc.yaml
-   - dashboards.deployment.yaml
-   - dashboards.service.yaml
+   - dashboard.deployment.yaml
+   - dashboard.service.yaml
    ```
 
 3. Vytvorte adresár  `${WAC_ROOT}/ambulance-gitops/apps/observability-webc` a v ňom súbor `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/monitoring-opensearch.webcomponent.yaml`:
@@ -317,7 +320,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    apiVersion: gateway.networking.k8s.io/v1
    kind: HTTPRoute
    metadata:
-     name: oauth2-proxy
+     name: monitoring-dashboards
    spec:
      parentRefs:
        - name: wac-hospital-gateway
@@ -346,7 +349,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    - monitoring-opensearch.http-route.yaml
    ```
 
-   Objekty _WebComponent_ a _HTTPRoute_ vytvárame ako súčasť aplikácii, aby sme sa vyhli kríťovej závislosti medzi týmito objektami a inštaláciou používateľských typov objektov - [_Custom Resource Definition_](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/). ALternatívou by bolo rozdeliť nasadenie infraštruktúry do ďalších na sebe závislých krokov napríklad `prepare-crd` a `prepare-instances`, kvôli zjednodušeniu sme ale zvolili umiestnenie integrácie s mikrofrontendom do sekcie _apps_, čo viac menej aj zodpovedá sémantike registrácie týchto mikro-frontend komponentov do našej aplikácie.
+   Objekty _WebComponent_ a _HTTPRoute_ vytvárame ako súčasť aplikácii, aby sme sa vyhli krížovej závislosti medzi týmito objektami a inštaláciou používateľských typov objektov - [_Custom Resource Definition_](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/). ALternatívou by bolo rozdeliť nasadenie infraštruktúry do ďalších na sebe závislých krokov napríklad `prepare-crd` a `prepare-instances`, kvôli zjednodušeniu sme ale zvolili umiestnenie integrácie s mikrofrontendom do sekcie _apps_, čo viac menej aj zodpovedá sémantike registrácie týchto mikro-frontend komponentov do našej aplikácie.
 
 4. Upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`
 
@@ -354,8 +357,8 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    ...
    resources:
    ...
-   - ../../infrastructure/fluentbit   @_add_@
-   - ../../infrastructure/monitoring-opensearch   @_add_@
+   - ../../../infrastructure/fluentbit   @_add_@
+   - ../../../infrastructure/monitoring-opensearch   @_add_@
    ```
 
    a súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/install/kustomization.yaml`:
@@ -390,6 +393,7 @@ Väčšina softverových riešení generuje nejakým spôsobom záznamy o činno
    kubectl get pods -n logging
    kubectl get pods -n wac-hospital
    ```
+  >info:> Ak sa pody nevedia naštartovať je možné že klaster nemá dostatok miesta na disku. Napríklad v pripade docker-desktop je potrebné zvýšiť limit pre disky v nastaveniach aplikácie.
 
 6. Prejdite na stránku [http://localhost/monitoring](http://localhost/monitoring) a overte, že je dostupná.  Pri úvodnom prístupe zvoľte voľbu _Explore on my own_, a zrušte prípadné popup okno. Otvorte bočný panel menu, vyberte položku _Index Management_, a následne vyberte položku _Indices_. V zozname indexov by ste mali vidieť index _fluent-bit_.
 
