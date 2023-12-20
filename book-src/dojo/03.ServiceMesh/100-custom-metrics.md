@@ -8,7 +8,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-100
 
 ---
 
-V predchádzajúcej sekcii sme nasadili do nášho systému služby [Prometheus] a [Grafana], čo nám umožnilo zbierať a zobrazovať rôzne operačné metriky nášho systému, prevažne získané sledovaním parametrov kubernetes systému. Nie vždy sú všek tieto metriky dostatočné, pretože nezahŕňajú metriky z našej aplikácie, ktoré sú pre nás dôležité. V tejto časti si ukážeme ako môžeme vytvoriť vlastné operačné metriky. Ktomuto účelu musíme upraviť náš zdrojový kód. V našom prípade budeme využívať knižnicu [OpenTelemetry], ktorá nám umožní vytvárať vlastné metriky a zároveň ich exportovať do formátu, ktorý dokáže sapracovať služba [Prometheus].
+V predchádzajúcej sekcii sme nasadili do nášho systému služby [Prometheus] a [Grafana], čo nám umožnilo zbierať a zobrazovať rôzne operačné metriky nášho systému, prevažne získané sledovaním parametrov kubernetes systému. Nie vždy sú však tieto metriky dostatočné, pretože nezahŕňajú metriky z našej aplikácie, ktoré sú pre nás dôležité. V tejto časti si ukážeme ako môžeme vytvoriť vlastné operačné metriky. K tomuto účelu musíme upraviť náš zdrojový kód. V našom prípade budeme využívať knižnicu [OpenTelemetry], ktorá nám umožní vytvárať vlastné metriky a zároveň ich exportovať do formátu, ktorý dokáže sapracovať služba [Prometheus].
 
 Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, ktoré sa zaoberajú monitorovaním aplikácií. Výsledkom je jednotná knižnica, ktorá umožňuje vytvárať metriky, distribuované trasovanie, generovanie záznamov - logov, vo všeobecnosti nazývanými [_Signals_](https://opentelemetry.io/docs/concepts/signals/metrics/). Tieto signály je potom možné exportovať do rôznych formátov. Formát a [špecifikácia OpenTelemetry](https://opentelemetry.io/docs/specs/) je podporovaná väčšinou známych knižníc a integrovateľná so službami rôznych poskytovateľov. SDK je implementované v rôznych programovacích jazykoch, v našom prípade budeme využívať implementáciu pre jazyk [Go](https://opentelemetry.io/docs/instrumentation/go/). V tejto časti sa budeme zaoberať len kate
 
@@ -53,15 +53,16 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
        @_add_@
      metricExporter, err := prometheus.New()   @_add_@
      if err != nil {   @_add_@
-      return er   @_add_@
+      return err   @_add_@
      }   @_add_@
        @_add_@
      metricProvider := metric.NewMeterProvider(metric.WithReader(metricExporter), metric.WithResource(res))   @_add_@
      otel.SetMeterProvider(metricProvider)   @_add_@
+     return nil @_add_@
    }   @_add_@
    ```
 
-   Funkcia `initTelemetry()` pripravuje globálnu inštanciu metrického poskytovateľa - [_metric provider_](https://opentelemetry.io/docs/concepts/signals/metrics/#meter-provider), ktorý bude zodpovedný za zber metrík a ich exportovanie. Všetky naše metriky (a neskôr [_traces_](https://opentelemetry.io/docs/concepts/signals/traces/) ) budú asociované s objektom, ktorý je opísaný inštanciou vytvorenou volaním funkcie `resource.New`, a ktorému priraďujeme atribuúty, pomocou ktorých tento objekt môžeme identifikovať.
+   Funkcia `initTelemetry()` pripravuje globálnu inštanciu metrického poskytovateľa - [_metric provider_](https://opentelemetry.io/docs/concepts/signals/metrics/#meter-provider), ktorý bude zodpovedný za zber metrík a ich exportovanie. Všetky naše metriky (a neskôr [_traces_](https://opentelemetry.io/docs/concepts/signals/traces/) ) budú asociované s objektom, ktorý je opísaný inštanciou vytvorenou volaním funkcie `resource.New`, a ktorému priraďujeme atribúty, pomocou ktorých tento objekt môžeme identifikovať.
 
    Zároveň sme vytorili inštanciu `metricExporter`, ktorá je zodpovedná za poskytnutie - [_export_](https://opentelemetry.io/docs/concepts/components/#exporters) metrík vo formáte, ktorý je schopná spracovať služba [Prometheus].
 
@@ -223,7 +224,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
                }, newGauge)    @_add_@
                 @_add_@
                if err != nil {    @_add_@
-                   log.Printf("Failed to register callback for waiting list length gauge for ambulance %v: %v", ambulanceId,     @_add_@err)    @_add_@
+                   log.Printf("Failed to register callback for waiting list length gauge for ambulance %v: %v", ambulanceId, err)    @_add_@
                }    @_add_@
            }@_add_@
             @_add_@
