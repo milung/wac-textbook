@@ -2,14 +2,14 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-090
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-090`
 
 ---
 
 Po úvodných krokoch, ktoré nám pomôžu automatizovať našu prácu počas ďalšieho vývoja, budeme
-teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tejto časti budeme riešiť, ako pridávať a navigovať sa medzi jednotlivými položkami.
+teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tejto časti budeme riešiť pridávanie nových položiek a navigáciu medzi jednotlivými položkami.
 
 ## Komponent pre editáciu záznamov
 
@@ -19,7 +19,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
      npm run generate
      ```
 
-    Ako meno elementu zvolte `<pfx>-ambulance-wl-editor` a pri ďalších otázkach zvoľte predvolené možnosti. V adresári `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor` máme teraz predpripravenú šablónu pre náš nový komponent.
+    Ako meno elementu zvoľte `<pfx>-ambulance-wl-editor` a pri ďalších otázkach zvoľte predvolené možnosti. V adresári `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor` máme teraz predpripravenú šablónu pre náš nový komponent.
 
 2. V súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` upravte metódu `render` do tvaru:
 
@@ -88,7 +88,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     }
    ```
 
-   a doplňte následujúci kód do triedy `<Pfx>AmbulanceWlEditor`:
+   a doplňte nasledujúci kód do triedy `<Pfx>AmbulanceWlEditor`:
 
    ```tsx
     import { Component, Host, Prop, State, h, EventEmitter, Event } from '@stencil/core'; @_add_@
@@ -107,9 +107,9 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     ...
     ```
 
-   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `CustomElement<string>`.
+   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. Ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `CustomElement<string>`.
 
-3. V kóde sme použili nové elementy z knižnice `@material/web`. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/global/app.ts` a doplňte načítanie príslušnych komponentov:
+3. V kóde sme použili nové elementy z knižnice `@material/web`. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/global/app.ts` a doplňte načítanie príslušných komponentov:
 
    ```ts
    import '@material/web/list/list'  
@@ -191,9 +191,9 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
 
 ## Navigácia medzi komponentami
 
-Momentálne zobrazujeme ako zoznam čakájúcich pacientav, tak aj editor pre jednotlivé záznamy na jednej stránke. Našim cieľom je dosiahnuť, aby sa zoznam zobrazoval na adrese [http://localhost:3333/list](http://localhost:3333/list) a editor na adrese [http://localhost:3333/entry/<id-položky>](http://localhost:3333/ambulance-wl/entry/0), aby mal používateľ možnosť navigácie medzi tímito prvkami, a zároveň aby bola zachovaná funkcia navigačných tlačidiel. Zároveň chceme aby bolo možné našu aplikáciu obslúžiť aj keď je umiestnená na inej ako koreňovej adrese servere, ako napríklad na adrese `http://wac-hospital.wac/<pfx>-ambulance/`. K tomu budeme potrebovať nový komponent, ktorého úlohou bude zobraziť jeden z našich komponentov v závislosti od aktuálnej adresy stránky a zároveň reagovať na zmeny v navigácii.
+Momentálne zobrazujeme zoznam čakajúcich pacientov a aj editor pre jednotlivé záznamy na jednej stránke. Našim cieľom je dosiahnuť, aby sa zoznam zobrazoval na adrese [http://localhost:3333/list](http://localhost:3333/list) a editor na adrese [http://localhost:3333/entry/<id-položky>](http://localhost:3333/ambulance-wl/entry/0). Dôvodom je možnosť navigácie medzi týmito prvkami pre používateľa a zároveň zachovanie funkcie navigačných tlačidiel. Zároveň chceme, aby bolo možné našu aplikáciu obslúžiť aj keď je umiestnená na inej ako koreňovej adrese servera, ako napríklad na adrese `http://wac-hospital.wac/<pfx>-ambulance/`. K tomu budeme potrebovať nový komponent, ktorého úlohou bude zobraziť jeden z našich komponentov v závislosti od aktuálnej adresy stránky a zároveň reagovať na zmeny v navigácii.
 
-Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je umožniť jednostránkovým aplikácia získať kontrolu nad požiadavkami k zmene stránky a podľa potreby zabrániť alebo povoliť načítanie novej stránky. Toto API ale momentálne _(august 2023)_ nie je k dispozícii pre všetky prehliadače. Pomôžeme si vytvorením zjednodušenej [polyfill](https://developer.mozilla.org/en-US/docs/Glossary/Polyfill) implementácie. Táto implementácia nie je síce plnohodnotná, pre naše potreby je ale dostatočná.
+Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je umožniť jednostránkovým aplikáciám získať kontrolu nad požiadavkami k zmene stránky a podľa potreby zabrániť alebo povoliť načítanie novej stránky. Toto API ale momentálne _(august 2023)_ nie je k dispozícii pre všetky prehliadače. Pomôžeme si vytvorením zjednodušenej [polyfill](https://developer.mozilla.org/en-US/docs/Glossary/Polyfill) implementácie. Táto implementácia nie je síce plnohodnotná, pre naše potreby je ale dostatočná.
 
 >info:> Zabezpečenie prepojenia adresy stránky - URL jednotlivých záznamov - s aktuálnym záznamom, je pri vývoji _Single  Page Web Application_ dôležitý koncept. Používateľovi to umožňuje vytváranie záložiek, ku ktorým sa môže neskôr vrátiť, alebo zdieľanie URL, ktorá ukazuje k špecifickému záznamu.
 
@@ -301,7 +301,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
    }
    ```
 
-   Táto funkcia najprv overí či prehliadač už podporuje [Navigation API]. Pokiaľ tomu tak nie je, tak preťaží metódu [`window.history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushStatevyužíva) - táto metóda je bežne využívana v SPA aplikáciach na dosiahnutie obdobného účelu ako _Navigation API_. Ďalej sa zaregistrujeme na udalosť [`popstate`], ktorá je generovaná pri stlačení navigácie "Späť" v prehliadači, a nakoniec zaregistrujeme [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver), ktorým budeme pozorovať zmeny hodnoty `href` na [Location](https://developer.mozilla.org/en-US/docs/Web/API/Location). Týmto sme obalili všetky spôsoby, ktoré môžu indikovať zmenu adresy pri činnosti našej aplikácii v prehliadači, a vo všetkých prípadoch generujeme udalosť `PolyNavigateEvent`, simulujúc tak funkcionalitu [Navigation API].
+   Táto funkcia najprv overí, či prehliadač už podporuje [Navigation API]. Pokiaľ tomu tak nie je, tak preťaží metódu [`window.history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushStatevyužíva) - táto metóda je bežne využívaná v SPA aplikáciách na dosiahnutie obdobného účelu ako _Navigation API_. Ďalej sa zaregistrujeme na udalosť [`popstate`], ktorá je generovaná pri stlačení navigácie "Späť" v prehliadači, a nakoniec zaregistrujeme [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver), ktorým budeme pozorovať zmeny hodnoty `href` na [Location](https://developer.mozilla.org/en-US/docs/Web/API/Location). Týmto sme obalili všetky spôsoby, ktoré môžu indikovať zmenu adresy pri činnosti našej aplikácie v prehliadači, a vo všetkých prípadoch generujeme udalosť `PolyNavigateEvent`, simulujúc tak funkcionalitu [Navigation API].
 
    Ďalej sme vytvorili funkciu [`navigate`](https://developer.mozilla.org/en-US/docs/Web/API/Navigation/navigate), ktorá umožňuje vyvolať navigáciu v našej aplikácii. Táto funkcia je však len obalom pre volanie `window.history.pushState` a generovanie udalosti `PolyNavigateEvent`. Ostatné metódy a udalosti [Navigation API] sme neimplementovali, pretože ich v našej aplikácii nepotrebujeme. Obdobným spôsobom je naimplementovaná aj funkcia [`back`](https://developer.mozilla.org/en-US/docs/Web/API/Navigation/back).
 
@@ -357,7 +357,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
 
     >info:> V zásade by sme pri zavretí editora mohli volať aj metódu `window.navigation.back()`, ktorá by nám umožnila vrátiť sa na predchádzajúcu stránku. To by ale viedlo k nekonzistentnému správaniu aplikácie, pretože by sme sa mohli dostať do stavu, kedy by sme sa mohli vrátiť na stránku, ktorá nie je zoznamom čakajúcich. Preto je lepšie použiť metódu `window.navigation.navigate()`, ktorá nám explicitne umožní navigáciu na zoznam čakajúcich.
 
-    Ďalej v tom istom súbore upravte triedu `<Pfx>AmbulanceWlApp`, tak aby obsahovala nasledujúci kód:
+    Ďalej v tom istom súbore upravte triedu `<Pfx>AmbulanceWlApp` tak, aby obsahovala nasledujúci kód:
 
    ```tsx
     import { Component, Host, Prop, State, h } from '@stencil/core'; @_important_@
@@ -396,11 +396,11 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
         ...
    ```
 
-   V metóde `componentWillLoad()` sme zaregistrovali obsluhu udalosti `navigate`, ktorá sa vyvolá pri navigácii v našej aplikácii. Volaním metódy `intercept()` sme prehliadaču dali vedieť, že zmenu URL obsulhujeme z našeho kódu. V tejto obsluhe sme potom získali cestu k aktuálnej stránke a uložili sme ju do vlastnosti `relativePath`. Táto vlastnosť bude slúžiť na rozhodnutie, ktorý z našich komponentov zobrazíme. Attribút elementu `base-path`, zároveň umožňuje aby sme našu aplikáciu mohli nasadiť aj na inej ako koreňovej adrese servera respektíve viac vnorenej ako je `baseUri` dokumentu.
+   V metóde `componentWillLoad()` sme zaregistrovali obsluhu udalosti `navigate`, ktorá sa vyvolá pri navigácii v našej aplikácii. Volaním metódy `intercept()` sme prehliadaču dali vedieť, že zmenu URL obsluhujeme z nášho kódu. V tejto obsluhe sme potom získali cestu k aktuálnej stránke a uložili sme ju do vlastnosti `relativePath`. Táto vlastnosť bude slúžiť na rozhodnutie, ktorý z našich komponentov zobrazíme. Atribút elementu `base-path` zároveň umožňuje, aby sme našu aplikáciu mohli nasadiť aj na inej ako koreňovej adrese servera, respektíve viac vnorenej ako je `baseUri` dokumentu.
 
-   >warning:> Nie vo všetkých aplikáciach budete chcieť volať `intercept()` pre akúkoľvek URL adresu, toto je špecifické pre naše cvičenie. V prípade, že by sme nevolali `intercept()`, tak by sa prehliadač pokúsil načítať stránku z web servera.
+   >warning:> Nie vo všetkých aplikáciách budete chcieť volať `intercept()` pre akúkoľvek URL adresu, toto je špecifické pre naše cvičenie. V prípade, že by sme nevolali `intercept()`, tak by sa prehliadač pokúsil načítať stránku z web servera.
 
-3. Dôležitým aspektom je práca s `document.baseURI`. Táto vlastnosť určuje, aká je bázova URL nášho dokumentu (rozumej stránky), voči ktorej sa potom určuje relatívna cesta. Za normálnych okolností je táto adresa zhodná s adresou z ktorej sme našu stránku načítali, teda adresa ktorú sme prvotne zadali do prehliadača. Pretože v prípade jednostránkových aplikácii môže byť táto adresa odlišná ako samotná adresa aplikácie - napríklad ak by sme v prehliadači zadali adresu [http://localhost:3333/editor/id](http://localhost:3333/editor/id), tak by náš kód nepracoval správne, respektíve by musel implicitne predpokladať, na akej ceste je vlastne táto aplikácia nasadená. Pre správnu funkčnosť je preto v prípade jednostránkových aplikácii nutné nastaviť `baseUri` dokumentu a prípadne umožniť aj konfiguráciu tejto hodnoty pomocou premennej prostredia, pokiaľ plánujeme naše komponenty dodávať aj ako samostatný HTTP server.
+3. Dôležitým aspektom je práca s `document.baseURI`. Táto vlastnosť určuje, aká je bázova URL nášho dokumentu (rozumej stránky), voči ktorej sa potom určuje relatívna cesta. Za normálnych okolností je táto adresa zhodná s adresou, z ktorej sme našu stránku načítali, teda adresa ktorú sme prvotne zadali do prehliadača. Pretože v prípade jednostránkových aplikácií môže byť táto adresa odlišná od samotnej adresy aplikácie - napríklad ak by sme v prehliadači zadali adresu [http://localhost:3333/editor/id](http://localhost:3333/editor/id), tak by náš kód nepracoval správne, respektíve by musel implicitne predpokladať, na akej ceste je vlastne táto aplikácia nasadená. Pre správnu funkčnosť je preto v prípade jednostránkových aplikácií nutné nastaviť `baseUri` dokumentu a prípadne umožniť aj konfiguráciu tejto hodnoty pomocou premennej prostredia, pokiaľ plánujeme naše komponenty dodávať aj ako samostatný HTTP server.
 
    Potrebnú zmenu vykonáme v súbore `${WAC_ROOT}/ambulance-ufe/src/index.html` tým, že do sekcie `<head>` pridáme elemet `<base>`:
 
@@ -424,9 +424,9 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
     </body>
    ```
 
-4. Pokiaľ nie je aktívny, tak naštartujte vývojový web server (`npm run start`) a v prehliadači prejdite na stránku  [http://localhost:3333/ambulance-wl](http://localhost:3333/ambulance-wl), kde uvidíte komponent so zoznamom čakajúcich. Následne prejdite na stránku  [http://localhost:3333/ambulance-wl/entry/0](http://localhost:3333/ambulance-wl/entry/0), kde uvidíte komponent editácie jednotlivých záznamov. Po stlačení na niektoré s tlačidiel sa dostanete späť na zoznam čakajúcich pacientov.
+4. Pokiaľ nie je aktívny, tak naštartujte vývojový web server (`npm run start`) a v prehliadači prejdite na stránku  [http://localhost:3333/ambulance-wl](http://localhost:3333/ambulance-wl), kde uvidíte komponent so zoznamom čakajúcich. Následne prejdite na stránku  [http://localhost:3333/ambulance-wl/entry/0](http://localhost:3333/ambulance-wl/entry/0), kde uvidíte komponent editácie jednotlivých záznamov. Po stlačení na niektoré z tlačidiel sa dostanete späť na zoznam čakajúcich pacientov.
 
-5. Aby bola naša interakcia úplna, upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/pfx-ambulance-wl-list.tsx` a doplnťe nasledujúce časti kódu:
+5. Aby bola naša interakcia úplná, upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/pfx-ambulance-wl-list.tsx` a doplňte nasledujúce časti kódu:
 
    ```tsx
    import { Component, Event, EventEmitter,  Host, h } from '@stencil/core'; @_impotant_@
@@ -463,7 +463,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
         ...
    ```
 
-   V aplikácii teraz môžete slačiť na položku v zozname, čo vytvorá navigáciu na stránku editora.
+   V aplikácii teraz môžete slačiť na položku v zozname, čo vyvolá navigáciu na stránku editora.
 
    >info:> Zámerne obsluhujeme navigáciu len v elemente `<pfx>-ambulance-wl-app.tsx`. Element zoznam čakajúcich možno takto použiť aj v iných kontextoch a stlačenie na položku môže vyvolať alternatívnu reakciu bez nutnosti ďalej upravovať samotný element zoznamu čakajúcich. Týmto sme dosiahli znovupoužiteľnosť elementu `<pfx>-ambulance-wl-list` v iných kontextoch. Podobne možno použiť v iných kontextoch aj element editora.
 
@@ -531,7 +531,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
    git push
    ```
 
-8. Poslednou zmenou je úprava web komponentu ktorý sa má zobraziť v micro Front-End applikácii. K tomu nám poztačí úprava konfigurácie. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` a v sekcii `navigation` zadajte nové meno elementu:
+8. Poslednou zmenou je úprava web komponentu ktorý sa má zobraziť v micro Front-End aplikácii. K tomu nám postačí úprava konfigurácie. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` a v sekcii `navigation` zadajte nové meno elementu:
 
    ```yaml
     navigation:
@@ -551,7 +551,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
 
    Pokiaľ nie je Váš [Docker Desktop] klaster aktívny, naštartujte ho. Po chvíli, keď operátor [Flux CD] obnoví všetky zmeny - obnovenie verzie obrazu, nasadenie zmien v konfigurácii, prejdite na stránku [http://localhost:30331](http://localhost:30331) a následne vyberte aplikáciu _Zoznam čakajúcich ..._. Mala by sa Vám zobraziť stránka s komponentom `<pfx>-ambulance-wl-list`. Po kliknutí na záznam by sa Vám mal zobraziť editor záznamu. Po stlačení na tlačidlo "Zrušiť" by ste sa mali vrátiť na zoznam čakajúcich. Hoci sme v súbore `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` explicitne nenastavili atribút `base-path`, tento je k elementu automaticky pridávaný službou `ufe-controller` na základe hodnoty atribútu `path` .
 
-   >build_circle:> V prípade problémov s nasadením zmien v konfigurácii, môžete overiť stav jednotlivých objektov v klustri príkazmi:
+   >build_circle:> V prípade problémov s nasadením zmien v konfigurácii môžete overiť stav jednotlivých objektov v klastri príkazmi:
    >
    > ```ps
    > kubectl -n wac-hospital get gitrepository 
@@ -561,4 +561,4 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
    > kubectl -n wac-hospital get imageupdateautomation
    > ```
    >
-   > Pripadne použité obdobné príkazy, len miesto `get` použite `describe` pre detailnejší výpis. Odporúčame mať nainštalovaný nástroj [OpenLens] a využívať ho na efektívnejšiu analýzu próblem v klastri.
+   > Prípadne použite obdobné príkazy, len miesto `get` použite `describe` pre detailnejší výpis. Odporúčame mať nainštalovaný nástroj [OpenLens] a využívať ho na efektívnejšiu analýzu problémov v klastri.
