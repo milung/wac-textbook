@@ -2,21 +2,22 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-081
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-081`
 
 ---
-V predchádzajúcem kapitole sme zrealizovali priebežné nasadenie podľa konfigurácii v našom repozitári. Táto konfigurácia pritom vždy nasadzuje poslednú - _latest_ - verziu obrazu nášho kontajnera ( a kontajnerov závislostí, ako napr. `ufe-controller`). V prípade, že pri ďalšom vydaní niektorého z kontajnerov dôjde k zmene API, môže to ovplyvniť funkcionalitu nášho riešenia. V praxi sa preto pri produkčnom nasadení určujú vždy len špecifické vydania softvérových kontajnerov alebo dokonca špecifické varianty kontajnerov - pomocou SHA podpisu, čo pomáha zachovať stabilitu a kybernetickú bezpečnosť produkčného nasadenia. Voľbu konkrétnych verzii pre dané nasadenie je možné realizovať napr. pomocou [_ImageTransformer-a](https://kubectl.docs.kubernetes.io/references/kustomize/builtins/#_imagetagtransformer_) v Kustomize konfigurácii nášho klastra.
 
-Na rozdiel od produkčného systému, chceme pri nasadení pre potreby vývojového tímu nasadzovať posledné verzie softvérových kontajnerov, ktoré úspešne prešli priebežnou integráciou. V tomto prípade nepostačuje použiť označenie `latest` (alebo iné), pretože kubernetes orchestrátor nevie, že v registry kontajnerov došlo k zmene obrazu s týmto označení. Uvádzanie špecifickej verzie obrazu, by síce bolo možné, ale v prípade, že by sme chceli nasadiť novšiu verziu, museli by sme zároveň zmeniť konfiguráciu v repozitári `ambulance-gitops`, pričom najmä pri väčších tímoch by asi dochádzalo k pozabudnutiu tohto kroku. Ideálne by bolo, keby sa zmena verzie obrazu v repozitári automaticky prejavila v klastri.  V tejto kapitole si ukážeme, ako to dosiahnuť pomocou Flux-u.
+V predchádzajúcej kapitole sme zrealizovali priebežné nasadenie podľa konfigurácie v našom repozitári. Táto konfigurácia pritom vždy nasadzuje poslednú - _latest_ - verziu obrazu nášho kontajnera (a kontajnerov závislostí, ako napr. `ufe-controller`). V prípade, že pri ďalšom vydaní niektorého z kontajnerov dôjde k zmene API, môže to ovplyvniť funkcionalitu nášho riešenia. V praxi sa preto pri produkčnom nasadení určujú vždy len špecifické vydania softvérových kontajnerov alebo dokonca špecifické varianty kontajnerov - pomocou SHA podpisu, čo pomáha zachovať stabilitu a kybernetickú bezpečnosť produkčného nasadenia. Voľbu konkrétnych verzií pre dané nasadenie je možné realizovať napr. pomocou [ImageTransformer-a](https://kubectl.docs.kubernetes.io/references/kustomize/builtins/#_imagetagtransformer_) v Kustomize konfigurácii nášho klastra.
+
+Na rozdiel od produkčného systému chceme pri nasadení pre potreby vývojového tímu nasadzovať posledné verzie softvérových kontajnerov, ktoré úspešne prešli priebežnou integráciou. V tomto prípade nepostačuje použiť označenie `latest` (alebo iné), pretože kubernetes orchestrátor nevie, že v registri kontajnerov došlo k zmene obrazu s týmto označením. Uvádzanie špecifickej verzie obrazu by síce bolo možné, ale v prípade, že by sme chceli nasadiť novšiu verziu, museli by sme zároveň manuálne zmeniť konfiguráciu v repozitári `ambulance-gitops`, pričom najmä pri väčších tímoch by asi dochádzalo k pozabudnutiu tohto kroku. Ideálne by bolo, keby sa zmena verzie obrazu v repozitári automaticky prejavila v klastri.  V tejto kapitole si ukážeme, ako to dosiahnuť pomocou Flux-u.
 
 Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml`). Keď vyrobíme novú verziu kontajnera, máme dve možnosti, ako ju automaticky nasadiť do klastra.
 
 * Kontajner označíme jednoznačným tagom (napr. buildversion) a v rámci priebežnej integrácie pridáme krok, ktorý zmení spomínaný `deployment.yaml` a nastaví v ňom danú verziu kontajnera. Integračný krok upravený súbor _commit_-ne do repozitára, [Flux] zmenu zaregistruje a urobí zmeny v kubernetes klastri.
-* Druhou možnosťou je, že nakonfigurujeme [Flux] tak, aby sledoval zmeny kontajnera na portáli [Docker Hub] a aby zobral novú verziu, ak je k dispozícii. [Flux] v tom prípade sám vykoná modifikáciu príslušného manifestu, nastaví v ňom poslednú vhodnú verziu kontajnera, a uloží zmenu do repozitára. Týmto spôsobom stále zostáva zachovaný  princíp GitOps, ktorý určuje, že _jediný objekt konfigurácie je git repozitár_. Až po zmene verzie docker obrazu v príslušnej vetve v git repozitári nastane aktualizácia v klastri.
+* Druhou možnosťou je, že nakonfigurujeme [Flux] tak, aby sledoval zmeny kontajnera na portáli [Docker Hub] a aby zobral novú verziu, ak je k dispozícii. [Flux] v tom prípade sám vykoná modifikáciu príslušného manifestu, nastaví v ňom poslednú vhodnú verziu kontajnera a uloží zmenu do repozitára. Týmto spôsobom stále zostáva zachovaný  princíp GitOps, ktorý určuje, že _jediný objekt konfigurácie je git repozitár_. Až po zmene verzie docker obrazu v príslušnej vetve v git repozitári nastane aktualizácia v klastri.
 
-1. V prvom kroku určíme, ktorý repozitár softvérového kontajnera má [Flux](https://fluxcd.io/flux/components/image/imagerepositories/) sledovať. Náš _ambulance-ufe_ docker obraz je verejne prístupný, tzn. že nie je treba riešiť autentifikáciu. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ambulance-ufe.image-repository.yaml` s obsahom:
+1. V prvom kroku určíme, ktorý [repozitár](https://fluxcd.io/flux/components/image/imagerepositories/) softvérového kontajnera má Flux sledovať. Náš _ambulance-ufe_ docker obraz je verejne prístupný, tzn. že nie je treba riešiť autentifikáciu. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ambulance-ufe.image-repository.yaml` s obsahom:
 
     ```yaml
     apiVersion: image.toolkit.fluxcd.io/v1beta2
@@ -31,7 +32,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
 
     >warning:> Zameňte \<docker-id\> !
 
-    Vytvote tiež súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ufe-controller.image-repository.yaml` s obsahom:
+    Vytvorte tiež súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ufe-controller.image-repository.yaml` s obsahom:
 
     ```yaml
     apiVersion: image.toolkit.fluxcd.io/v1beta2
@@ -44,7 +45,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
       interval: 15m0s
     ```
 
-2. Ďalší [Flux komponent _ImagePolicy_](https://fluxcd.io/flux/components/image/imagepolicies/) nastavuje kritérium, podľa ktorého sa vyberie príslušná verzia docker obrazu. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ambulance-ufe.image-policy.yaml` s obsahom:
+2. Ďalší Flux komponent [_ImagePolicy_](https://fluxcd.io/flux/components/image/imagepolicies/) nastavuje kritérium, podľa ktorého sa vyberie príslušná verzia docker obrazu. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/cluster/localhost/gitops/ambulance-ufe.image-policy.yaml` s obsahom:
 
    ```yaml
    apiVersion: image.toolkit.fluxcd.io/v1beta2
@@ -76,10 +77,10 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
        name: ufe-controller # referuje ImageRepository z predchádzajúceho kroku @_important_@
      policy:
        semver:
-         range: "^1.*.*" # vyberie poslednú verzie , ktoré začínajú na main- (napr. main-20240315.1200) @_important_@
+         range: "^1.*.*" @_important_@
    ```
 
-3. Upravíme všetky súbory, kde chceme aby Flux aktualizoval verziu docker obrazu. To sa realizuje pridaním špeciálneho markeru `_# {"$imagepolicy": "POLICY_NAMESPACE:POLICY_NAME"}_` na riadok, ktorý sa má upravovať. V našom prípade by sme mohli upraviť súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml` a upraviť konfiguráciu v priečinku `${WAC_ROOT}/ambulance-gitops/infrastructure/ufe-controller`. Výhodnejšie je v tomto prípade ale mať všetky verzie kontajnerov na jednom mieste a zároveň mať možnosť riadiť verzie kontajnerov pre jednotlivé vydania nášho systému. K tomu využijeme takzvané [_Kustomize components_](https://kubectl.docs.kubernetes.io/guides/config_management/components/), ktoré umožňujú kombinovať jednotlivé varianty konfigurácie.
+3. Upravíme všetky súbory, kde chceme, aby Flux aktualizoval verziu docker obrazu. To sa realizuje pridaním špeciálneho markeru `# {"$imagepolicy": "POLICY_NAMESPACE:POLICY_NAME"}` na riadok, ktorý sa má upravovať. V našom prípade by sme mohli upraviť súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/deployment.yaml` a upraviť konfiguráciu v priečinku `${WAC_ROOT}/ambulance-gitops/infrastructure/ufe-controller`. Výhodnejšie je v tomto prípade ale mať všetky verzie kontajnerov na jednom mieste a zároveň mať možnosť riadiť verzie kontajnerov pre jednotlivé vydania nášho systému. K tomu využijeme takzvané [_Kustomize components_](https://kubectl.docs.kubernetes.io/guides/config_management/components/), ktoré umožňujú kombinovať jednotlivé varianty konfigurácie.
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/components/version-developers/kustomization.yaml` s obsahom:
 
@@ -97,7 +98,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
      newTag: latest # {"$imagepolicy": "wac-hospital:ufe-controller:tag"} @_important_@
    ```
 
-   Všimnite si markre v komentároch - je dôležité aby referovali správne názvy _image police_, vytvorených v predchádzajúcom kroku.
+   Všimnite si markre v komentároch - je dôležité, aby referovali správne názvy _image police_, vytvorených v predchádzajúcom kroku.
 
    Teraz upravte súbory `${WAC_ROOT}/ambulance-gitops/clusters/localhost/install/kustomization.yaml` a `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml`. Do oboch pridajte nasledujúcu sekciu:
 
@@ -155,7 +156,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
 
     Tento objekt bude v rámci git repozitára `gitops-repo` vo vetve `main` a priečinku `/components/version-developers` aktualizovať všetky súbory, v ktorých nájde spomínaný marker. Súbory potom archivuje. Nová verzia repozitára bude obsahovať komentár špecifikovaný v časti `commit`.
 
-    >info:> Teoreticky by mohol byť `ImageUpdateAutomation` objekt nasadený vo viacerých klastroch, mohlo by to ale vyvolať konflikty, preto je lepšie aby príslušnú konfiguráciu - v našom prípade `components/version-developers` upravoval len jeden z nasadených klastroch. V našom prípade to je lokálne nasadenie, v praxi by to bol napr. vývojový klastr, ktorý by bol používaný vývojármi a testermi pre získanie rýchlej odozvy na vykonané zmeny.
+    >info:> Teoreticky by mohol byť `ImageUpdateAutomation` objekt nasadený vo viacerých klastroch, mohlo by to ale vyvolať konflikty. Je preto lepšie, aby príslušnú konfiguráciu - v našom prípade `components/version-developers` - upravoval len jeden z nasadených klastrov. V našom prípade to je lokálne nasadenie, v praxi by to bol napr. vývojový klaster, ktorý by bol používaný vývojármi a testermi pre získanie rýchlej odozvy na vykonané zmeny.
 
 5. Nakoniec upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/kustomization.yaml` a v časti `resources` uveďte novo vytvorené súbory:
   
@@ -163,14 +164,14 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
    ...
    resources: 
    ...
-   - ambulance-ufe.image-repository.yaml @_add_@
-   - ambulance-ufe.image-policy.yaml @_add_@
-   - ufe-controller.image-repository.yaml @_add_@
-   - ufe-controller.image-policy.yaml @_add_@
-   - image-update-automation.yaml @_add_@
+    - ambulance-ufe.image-repository.yaml @_add_@
+    - ambulance-ufe.image-policy.yaml @_add_@
+    - ufe-controller.image-repository.yaml @_add_@
+    - ufe-controller.image-policy.yaml @_add_@
+    - image-update-automation.yaml @_add_@
    ```
   
-6. Uložte všetky súbory, a overte správnosť Vašich konfigurácii, v priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte príkazy:
+6. Uložte všetky súbory, a overte správnosť Vašich konfigurácii. V priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte príkazy:
   
    ```ps
    kubectl kustomize clusters/localhost/install
@@ -186,7 +187,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
     git push
     ```
 
-    Týmto spôsobom sme naši zmeny zároveň aplikovali do klastra. Po chvíli sa v klastri automaticky zmeni verzia kontajnera na verziu `main-YYYYMMDD.HHMM` a v repozitári môžete vidiť nový komit, ktorého autorom je `fluxcd_bot`.
+    Týmto spôsobom sme naše zmeny zároveň aplikovali do klastra. Po chvíli sa v klastri automaticky zmení verzia kontajnera na verziu `main-YYYYMMDD.HHMM` a v repozitári môžete vidieť nový komit, ktorého autorom je `fluxcd_bot`.
 
    ![Zmena verzie kontajnera](./img/082-01-FluxBotCommit.png)
 
@@ -202,7 +203,7 @@ Teraz máme nasadenú `latest` verziu kontajnera (viď súbor `${WAC_ROOT}/ambul
 
 ---
 
->build_circle:> V prípade zlyhania Vášho klastra, napríklad pri reinštalácii počítača, môžete nasadenie obnoviť pomocou konfigurácie v repozitári. Vytvorte si lokálnu kópi repozitára. V adresári  `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets` vytvorte súbor `repository-pat.yaml` ako bolo uvedené v predchádzajúcej kapitole a potom postupujte podľa pokynov uvedených v predchádzajúcej kapitole v časti _Bootstrapping Flux_. Ostatné zmeny našej konfigurácie je už postačujúce vykonávať výhradne v git repozitári, nezabudnite ale naďalej priebežne sledovať stav jednotliových objektov, čo patrí k štandardnej praxi pri vývoji softvéru pomocou DevOps. Môžete tiež využiť objekty [_Flux CD Notification Controller_-a](https://fluxcd.io/flux/components/notification/), ktoré umožňujú sledovať stav jednotlivých objektov a v prípade zmeny zaslať notifikáciu na príslušný komunikačný kanál tímu.
+>build_circle:> V prípade zlyhania Vášho klastra, napríklad pri reinštalácii počítača, môžete nasadenie obnoviť pomocou konfigurácie v repozitári. Vytvorte si lokálnu kópiu repozitára. V adresári  `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets` vytvorte súbor `repository-pat.yaml` ako bolo uvedené v predchádzajúcej kapitole a potom postupujte podľa pokynov uvedených v predchádzajúcej kapitole v časti _Bootstrapping Flux_. Ostatné zmeny našej konfigurácie je už postačujúce vykonávať výhradne v git repozitári, nezabudnite ale naďalej priebežne sledovať stav jednotlivých objektov, čo patrí k štandardnej praxi pri vývoji softvéru pomocou DevOps. Môžete tiež využiť objekty [_Flux CD Notification Controller_-a](https://fluxcd.io/flux/components/notification/), ktoré umožňujú sledovať stav jednotlivých objektov a v prípade zmeny zaslať notifikáciu na príslušný komunikačný kanál tímu.
 
 ---
 
