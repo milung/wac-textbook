@@ -2,13 +2,13 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-101
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-101`
 
 ---
 
-V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zobrazuje prázdny a zmeny sa nedajú uložiť. Síce by sme mohli upravovať záznamy priamo v pamäti, z praktického hľadiska bude však výhodnejšie, keď začneme pracovať s údajmi, ktoré budeme získavať a ukladať pomocou [RESTfull Web API][REST API]. Momentálne ale žiadnu službu poskytujúcu potrebné API nemáme. Máme dve možnosti ako postupovať - vytvorit službu, poskytujúcu potrebné REST API a následne toto API implementovať v našej jednostránkovej aplikácii, alebo zadefinovať ako by dané API malo vyzerať pomocou [OpenAPI] špecifikácie a následne vygenerovať potrebnú implementáciu pomocou [nástrojov OpenAPI][openapi-generator]. Prednosťou druhého spôsobu je, že môžeme ďalej pokračovať vo vývoji našej aplikácie, definovať API podľa reálnych požiadaviek klienta, a zároveň automatizovať generovanie implementácie služby ako na strane klienta, tak aj na strane servera. Táto technika sa vo všeobecnosti nazýva [_API First Design_][api-first]. Pre lepšie pochopenie princípu, budeme toto API vytvárať postupne a priebežne upravovať našu aplikáciu na použitie so vzniknutým API.
+V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zobrazuje prázdny a zmeny sa nedajú uložiť. Síce by sme mohli upravovať záznamy priamo v pamäti, z praktického hľadiska bude však výhodnejšie, keď začneme pracovať s údajmi, ktoré budeme získavať a ukladať pomocou [RESTfull Web API][REST API]. Momentálne ale žiadnu službu poskytujúcu potrebné API nemáme. Máme dve možnosti ako postupovať - vytvoriť službu poskytujúcu potrebné REST API a následne toto API implementovať v našej jednostránkovej aplikácii alebo zadefinovať, ako by dané API malo vyzerať pomocou [OpenAPI] špecifikácie a následne vygenerovať potrebnú implementáciu pomocou [nástrojov OpenAPI][openapi-generator]. Prednosťou druhého spôsobu je, že môžeme ďalej pokračovať vo vývoji našej aplikácie, definovať API podľa reálnych požiadaviek klienta a zároveň automatizovať generovanie implementácie služby ako na strane klienta, tak aj na strane servera. Táto technika sa vo všeobecnosti nazýva [_API First Design_][api-first]. Pre lepšie pochopenie princípu budeme toto API vytvárať postupne a priebežne upravovať našu aplikáciu na použitie so vzniknutým API.
 
 >info:> Pre prácu s [openapi] súbormi odporúčame nainštalovať do prostredia Visual Studio Code rozšírenia [openapi-lint](https://marketplace.visualstudio.com/items?itemName=mermade.openapi-lint) a [openapi-designer](https://marketplace.visualstudio.com/items?itemName=philosowaffle.openapi-designer).
 
@@ -33,7 +33,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
       description: Ambulance Waiting List API
    ```
 
-   V tomto kroku sme zadefinovali základnú štruktúru [openapi] súboru. V sekcii `servers` sme zadefinovali kde bude naša služba dostupná - túto hodnotu môžeme neskôr v implementácii zmeniť, tu uvedená bude použitá ako štandardná hodnota. V sekcii `info` sme zadefinovali základné informácie o našej službe. V sekcii `tags` sme zadefinovali zoznam tagov, ktoré budeme používať na kategorizáciu jednotlivých endpointov. Tagy sú dôležité pri generovaní kódu, zvyčajne sa pre každý tag vygeneruje samostatná trieda, obsahujúca všetky cesty a metódy, ktoré sú danému tagu priradené.
+   V tomto kroku sme zadefinovali základnú štruktúru [openapi] súboru. V sekcii `servers` sme zadefinovali, kde bude naša služba dostupná - túto hodnotu môžeme neskôr v implementácii zmeniť, tu uvedená bude použitá ako štandardná hodnota. V sekcii `info` sme zadefinovali základné informácie o našej službe. V sekcii `tags` sme zadefinovali zoznam tagov, ktoré budeme používať na kategorizáciu jednotlivých endpointov. Tagy sú dôležité pri generovaní kódu, zvyčajne sa pre každý tag vygeneruje samostatná trieda obsahujúca všetky cesty a metódy, ktoré sú danému tagu priradené.
 
 2. Ďalej do súboru doplníme špecifikácu pre cestu `/waiting-list/{ambulance-id}`:
 
@@ -69,7 +69,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
             description: Ambulance with such ID does not exists
    ```
 
-   Táto špecifikácia určuje, že na ceste `/waiting-list/{ambulanceId}/entries`, kde `{ambulanceId}` je premenná hodnota typu string, môžeme vyvolať požiadavku typu [HTTP GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET), ktorej odozva môže nadobudnúť hodnotu [200](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200) alebo [404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404), pričom v prvom prípade bude obsahovať pole objektov typu `WaitingListEntry`. Tiež sme určili, meno operácie `getWaitingListEntries`. Toto meno určuje názov metód a funkcií, pri generovaní kódu. Názov `operationId` musí byť v rámci špecifikácie jedinečný. Všimnite si tiež, že sme použili refrencie na sekciu `components`. Vložme teraz do súboru [JSON schému][jsonschema] pre objekt `WaitingListEntry` a pre objekty na ktorých je závislý:
+   Táto špecifikácia určuje, že na ceste `/waiting-list/{ambulanceId}/entries`, kde `{ambulanceId}` je premenná hodnota typu string, môžeme vyvolať požiadavku typu [HTTP GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET), ktorej odozva môže nadobudnúť hodnotu [200](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200) alebo [404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404), pričom v prvom prípade bude obsahovať pole objektov typu `WaitingListEntry`. Tiež sme určili meno operácie `getWaitingListEntries`. Toto meno určuje názov metód a funkcií pri generovaní kódu. Názov `operationId` musí byť v rámci špecifikácie jedinečný. Všimnite si tiež, že sme použili referencie na sekciu `components`. Vložme teraz do súboru [JSON schému][jsonschema] pre objekt `WaitingListEntry` a pre objekty, na ktorých je závislý:
 
    ```yaml
    components:
@@ -137,7 +137,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
     V tejto špecifikácii sme zadefinovali objekt `WaitingListEntry`, ktorý obsahuje všetky potrebné informácie o zozname čakajúcich pacientov a opis zdravotného problému pacienta definovaný typom `Condition`. Technicky by sme mohli schému vnoreného typu `Condition` definovať priamo v objekte `WaitingListEntry`. Pre účely generovania kódu a pre prehľadnosť ale odporúčame vždy používať referencie na samostatne definované typy. Dôležitým aspektom špecifikácie je uvádzanie povinných polí pomocou kľúčového slova `required`. Toto kľúčové slovo je dôležité pre generovanie kódu, ktorý bude validovať vstupné dáta. V prípade, že vstupné dáta nebudú obsahovať povinné polia, tak požiadavka bude typicky odmietnutá so stavovým kódom [400 - Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400).
 
-    V špecifikácii konzistente uvádzame príklady s použitím kľúčového slova `example`. Tieto príklady sú dôležité pre generovanie dokumentácie a sú tiež dôležité pre vytvorenie experimentálnej služby (_mock_), ktorú budeme používať pri lokálnom vývoji. Doplňte do súboru nasledujúce príklady do sekcie `components.example`:
+    V špecifikácii konzistentne uvádzame príklady s použitím kľúčového slova `example`. Tieto príklady sú dôležité pre generovanie dokumentácie a sú tiež dôležité pre vytvorenie experimentálnej služby (_mock_), ktorú budeme používať pri lokálnom vývoji. Doplňte do súboru nasledujúce príklady do sekcie `components.example`:
 
     ```yaml
     components: 
@@ -198,7 +198,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    >info:> Naše API `getWaitingListEntries` vracia priamo pole záznamov, čo je v prípade WebAPI považované za chybu návrhu. Naše API by malo byť pripravené aj pre väčší rozsah dát a podporovať získanie len ich [čiastočného rozsahu](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design#filter-and-paginate-data). Pre zjednodušenie ale tento aspekt nebudeme v našej aplikácii riešiť, pri návrhu konkrétneho API v praxi sa ale najprv zoznámte so [zásadami návrhu RESTfull API](https://book.restfulnode.com/).
 
-3. V prvom kroku si pripravíme experimentálny - _mock_ - server poskytujúcu špecifikované API na základe príkladov v špecifikácii. Nainštalujte do projektu nové závislosti potrebné pre vývoj aplikácie:
+3. V prvom kroku si pripravíme experimentálny - _mock_ - server poskytujúci špecifikované API na základe príkladov v špecifikácii. Nainštalujte do projektu nové závislosti potrebné pre vývoj aplikácie:
 
    ```ps
    npm install --save-dev js-yaml open-api-mocker npm-run-all 
@@ -219,9 +219,9 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
       ...
    ```
 
-   >$apple:> Na niektorých Mac zariadeniach môže na porte 5000 bežať airplay server. V takomto prípade zmente port mock serveru na iný voľný port.
+   >$apple:> Na niektorých Mac zariadeniach môže na porte 5000 bežať airplay server. V takomto prípade zmeňte port mock serveru na iný voľný port.
 
-   Skript `convert-openapi` premení špecifikáciu vo formáte YAML na JSON - `open-api-mocker` vyžaduje špecifikáciu vo formáte JSON. Skript `mock-api` spustí mock server, ktorý bude poskytovať API podľa špecifikácie. Skript `start:mock` spustí obe predchádzajúce príkazy sekvenčne. Skript `start:app` obshuje príkaz, pôvodne použitý v skripte `start`, teda skompiluje našu aplikáciu a naštartuje vývojový server. Skript `start` sme upravili aby paralelne spustil náš mock API server a vývojový server našej aplikáciu. Tieto úpravy nám umožnie lokálny vývoj aplikácie bez nutnosti pripojenia na skutočný API server.
+   Skript `convert-openapi` premení špecifikáciu vo formáte YAML na JSON - `open-api-mocker` vyžaduje špecifikáciu vo formáte JSON. Skript `mock-api` spustí mock server, ktorý bude poskytovať API podľa špecifikácie. Skript `start:mock` spustí obe predchádzajúce príkazy sekvenčne. Skript `start:app` obsahuje príkaz, pôvodne použitý v skripte `start`, teda skompiluje našu aplikáciu a naštartuje vývojový server. Skript `start` sme upravili, aby paralelne spustil náš mock API server a vývojový server našej aplikácie. Tieto úpravy nám umožnia lokálny vývoj aplikácie bez nutnosti pripojenia na skutočný API server.
 
    Upravte súbor `${WAC_ROOT}/ambulance-ufe/.gitignore` a pridajte riadok `.openapi.json`.
 
@@ -230,21 +230,21 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    .openapi.json @_add_@
    ```
 
-   V priečinku `${WAC_ROOT}/ambulance-ufe` vykonajte nasledujúci prikaz:
+   V priečinku `${WAC_ROOT}/ambulance-ufe` vykonajte nasledujúci príkaz:
 
    ```ps
     npm run start:mock
     ```
 
-    Otvorte nový príkazový riadok a zadajte nasledujúci prikaz:
+    Otvorte nový príkazový riadok a zadajte nasledujúci príkaz:
 
     ```ps
     curl http://localhost:5000/api/waiting-list/bobulova/entries
     ```
 
-    Na výstupe sa objeví výpis vo formáte JSON obsahujúci zoznam čakajúcich pacientov v ambulancii. Tento výpis je generovaný na základe príkladu v špecifikácii. Teraz máme k dispozícii službu, ktorá je schopná simulovať naše REST API. Zastavte spustené mock API (_CTRL+C_).
+    Na výstupe sa objaví výpis vo formáte JSON obsahujúci zoznam čakajúcich pacientov v ambulancii. Tento výpis je generovaný na základe príkladu v špecifikácii. Teraz máme k dispozícii službu, ktorá je schopná simulovať naše REST API. Zastavte spustené mock API (_CTRL+C_).
 
-4. V ďaľšom kroku prejdeme k vygenerovaniu kódu pre klienta. K tomu využijeme nástroj [openapi-generator]. Nainštalujte si tento nástroj do projektu:
+4. V ďalšom kroku prejdeme k vygenerovaniu kódu pre klienta. K tomu využijeme nástroj [openapi-generator]. Nainštalujte si tento nástroj do projektu:
 
    ```ps
    npm install --save-dev @openapitools/openapi-generator-cli
@@ -274,7 +274,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    }
    ```
 
-   Tento súbor konfiguruje beh generátoru kódu. Budeme používať Docker verziu generátora, preto je nutné pri generovaní kódu mať aktívny docker démon, napríklad [Docker for Desktop][docker-desktop]. Alternatívne riešenie vyžaduje mať nainštalovaný systém JAVA SDK. Okrem iných parametrom určuje cestu k našej špecifikácii - `glob` - a tiež cestu - `output` - kde sa bude generovať klient typu `typescript-axios`. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl/.openapi-generator-ignore` a vložte do neho nasledujúci obsah:
+   Tento súbor konfiguruje beh generátoru kódu. Budeme používať Docker verziu generátora, preto je nutné pri generovaní kódu mať aktívny docker démon, napríklad [Docker for Desktop][docker-desktop]. Alternatívne riešenie vyžaduje mať nainštalovaný systém JAVA SDK. Okrem iných parametrov určuje cestu k našej špecifikácii - `glob` - a tiež cestu - `output` - kde sa bude generovať klient typu `typescript-axios`. Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl/.openapi-generator-ignore` a vložte do neho nasledujúci obsah:
 
    ```text
    .npmignore
@@ -300,13 +300,13 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    npm run openapi
    ```
 
-   V priečinku `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl` teraz nájdete nový kód ktorý obsahuje implementáciu klienta pre nami špecifikované API v programovacom jazyku [TypeScript] s využitím knižnice [Axios].
+   V priečinku `${WAC_ROOT}/ambulance-ufe/src/api/ambulance-wl` teraz nájdete nový kód, ktorý obsahuje implementáciu klienta pre nami špecifikované API v programovacom jazyku [TypeScript] s využitím knižnice [Axios].
 
-   >info:> V našom prípade generujeme klientský kód ako súčasť našej aplikácie. Často sa ale generuje klientský kód vo forme knižníc, aby sa API dalo používať medzi rôznymi aplikáciami, najmä ak naše API je všeobecne použiteľné. V takom prípade by sme vytvorli samostatný projekt, ktorého obsah by bol generovaný zo špecifikácie, napríklad z odkazu na URL tejto špecifikácie, a tento projekt by sme publikovali do [npmjs.com]. Vhodnou automatizáciou by sme boli schopný automaticky vytvárať rôzne knižnice v rôznych jazykoch pre tú istú špecifikáciu.
+   >info:> V našom prípade generujeme klientský kód ako súčasť našej aplikácie. Často sa ale generuje klientský kód vo forme knižníc, aby sa API dalo používať medzi rôznymi aplikáciami, najmä ak naše API je všeobecne použiteľné. V takom prípade by sme vytvorili samostatný projekt, ktorého obsah by bol generovaný zo špecifikácie, napríklad z odkazu na URL tejto špecifikácie, a tento projekt by sme publikovali do [npmjs.com]. Vhodnou automatizáciou by sme boli schopní automaticky vytvárať rôzne knižnice v rôznych jazykoch pre tú istú špecifikáciu.
 
    &nbsp;
 
-   >info:> Bolo by vhodné upraviť aj skript `build` tak aby sa zakaždým pred spustením kompilácie aplikácie vygeneroval kód klienta. Túto úpravu ponecháme na Vašu samostatnú prácu.
+   >info:> Bolo by vhodné upraviť aj skript `build` tak, aby sa zakaždým pred spustením kompilácie aplikácie vygeneroval kód klienta. Túto úpravu ponecháme na Vašu samostatnú prácu.
 
 5. Vygenerované API použijeme v našej aplikácii. Najprv doinštalujeme knižnicu [Axios], ktorú využíva  vygenerovaný klientský kód:
 
@@ -434,7 +434,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    zobrazí sa Vám vo výpise chyba _SyntaxError: Cannot use import statement outside a module_ odkazujúca na kód z knižnice [axios]. Táto chyba je obdobná ako v prípade použitia
    knižnice [@material/web][md-webc], spôsobená rôznymi predpokladmi o používanej verzii jazyka ECMScript a podpore najnovších spôsobov načítavania modulov medzi týmito knižnicami a testovacou knižnicou [Jest]. Knižnicu [Jest] môžme nakonfigurovať pomocou použitia tzv. [Transformerov kódu - _Code Transformers_](https://jestjs.io/docs/code-transformation).
 
-   Najpr si doinštalujeme potrebné balíčky. V adresári `${WAC_ROOT}/ambulance-ufe` vykonajte nasledujúci príkaz:
+   Najprv si doinštalujeme potrebné balíčky. V adresári `${WAC_ROOT}/ambulance-ufe` vykonajte nasledujúci príkaz:
 
    ```ps
    npm install --save-dev @babel/preset-env babel-jest
@@ -450,7 +450,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    [Babel] je [transpilátor](https://en.wikipedia.org/wiki/Source-to-source_compiler) jazyka JavaScript, umožňuje preložiť kód ECMAScript do rôznych cieľových verzií jazyka, používa sa napríklad v prípadoch, keď počas vývoja chceme využívať najmodernejšie vlastnosti jazyka a zároveň chceme podporovať staršie verzie jazyka - napríklad staršie, ešte nezmodernizované prehliadače.
 
-   Ďalej upravte súbor `${WAC_ROOT}/ambulance-ufe/stencil.config.ts` a do sekcie `testing` doplňte nové pravidla transformovania kódu:
+   Ďalej upravte súbor `${WAC_ROOT}/ambulance-ufe/stencil.config.ts` a do sekcie `testing` doplňte nové pravidlá transformovania kódu:
 
    ```js
    ...
@@ -467,7 +467,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Opäť vykonajte príkaz `npm run test` a tentokrát by testy mali prebehnúť úspešne.
 
-9. Pokiaľ si prezrieme test v súbore `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/test/pfx-ambulance-wl-list.spec.tsx`, pochopíme, že náš test je úspešný len z dôvodu, že pri neúspešnom pripojení sa k serveru je zoznam pacientov prázdny. Bolo by preto vhodnejšie, keby sme boli schopný simulovať spojenie s API serverom. Na to použijeme knižnicu [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter). Nainštalujte si túto knižnicu do projektu:
+9. Pokiaľ si prezrieme test v súbore `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/test/pfx-ambulance-wl-list.spec.tsx`, pochopíme, že náš test je úspešný len z dôvodu, že pri neúspešnom pripojení sa k serveru je zoznam pacientov prázdny. Bolo by preto vhodnejšie, keby sme boli schopní simulovať spojenie s API serverom. Na to použijeme knižnicu [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter). Nainštalujte si túto knižnicu do projektu:
 
    ```ps
    npm install --save-dev axios-mock-adapter
@@ -524,9 +524,9 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
     ...
     ```
 
-    V tomto kroku sme upravili test tak, aby sme mohli simulovať odpoveď z API serveru. Vytvorili sme si zoznam pacientov, ktorý použijeme ako očakávaný výsledok. V teste sme použili metódu `reply` na simuláciu odpovede z API serveru. V teste sme tiež upravili očakávaný výsledok tak aby očakával počet elementov `md-list-item` rovný počtu pacientov v simulovanom zozname odpovede `sampleEntries`.
+    V tomto kroku sme upravili test tak, aby sme mohli simulovať odpoveď z API serveru. Vytvorili sme si zoznam pacientov, ktorý použijeme ako očakávaný výsledok. V teste sme použili metódu `reply` na simuláciu odpovede z API serveru. V teste sme tiež upravili očakávaný výsledok tak, aby očakával počet elementov `md-list-item` rovný počtu pacientov v simulovanom zozname odpovede `sampleEntries`.
 
-    Test rozšírime aby overil aj reakciu komponentu v prípade chybovej odpovede. V tom istom súbore doplňte nový test:
+    Test rozšírime tak, aby overil aj reakciu komponentu v prípade chybovej odpovede. V tom istom súbore doplňte nový test:
 
     ```tsx
     ...
@@ -558,9 +558,9 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Všimnite si ako simulujeme chybovú odpoveď z API serveru pomocou metódy `networkError`. V teste očakávame, že sa zobrazí chybové hlásenie a že sa nezobrazí žiadny záznam v zozname pacientov.
 
-   >info:> Testovaniu negatívný scénarov - takzvaných _rainy days use cases_ - je v praxi potrebné venovať náležitú pozernosť. Vývoj častokrát prebieha v umelých prostrediach, za ideálnych podmienok sieťového pripojenia a pri dostatku systémových objektov. Obmedzenia v reálnych prostrediach môžu mať za dôsledok oneskorenie dodania produktu, alebo úplne odmietnutie produktu zo strany používateľov. Ako bolo uvedené, v tomto cvičení sa testovaniu venujeme len okrajovo, rozsah tu uvedených testov by bol v praxi nedostatočný.
+   >info:> Testovaniu negatívnych scenárov - takzvaných _rainy days use cases_ - je v praxi potrebné venovať náležitú pozornosť. Vývoj častokrát prebieha v umelých prostrediach, za ideálnych podmienok sieťového pripojenia a pri dostatku systémových objektov. Obmedzenia v reálnych prostrediach môžu mať za dôsledok oneskorenie dodania produktu alebo úplné odmietnutie produktu zo strany používateľov. Ako bolo uvedené, v tomto cvičení sa testovaniu venujeme len okrajovo, rozsah tu uvedených testov by bol v praxi nedostatočný.
 
-10. (_Voliteľné_) Pokiaľ chcete využívať testovacie prostredie [Jest] priamo, napríklad chcete využiť niektoré z popúlárnych rozšírení ako napríklad [vscode-jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest), doplňte do projektu konfiguráciu pre správny beh [jest cli](https://jestjs.io/docs/cli) nástrojov. Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/jest.config.js` s nasledujúcim obsahom:
+10. (_Voliteľné_) Pokiaľ chcete využívať testovacie prostredie [Jest] priamo, napríklad chcete využiť niektoré z populárnych rozšírení ako napríklad [vscode-jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest), doplňte do projektu konfiguráciu pre správny beh [jest cli](https://jestjs.io/docs/cli) nástrojov. Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/jest.config.js` s nasledujúcim obsahom:
 
     ```js
     export default {
@@ -628,4 +628,4 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
     git push
    ```
 
-   Po aplikovaní zmien bude funkčnosť Vášho zoznamu závisieť od prítomnosti Vášho mock API - z pohľadu prehliadače je `localhost` adresa Vášho počítača.
+   Po aplikovaní zmien bude funkčnosť Vášho zoznamu závisieť od prítomnosti Vášho mock API - z pohľadu prehliadača je `localhost` adresa Vášho počítača.
