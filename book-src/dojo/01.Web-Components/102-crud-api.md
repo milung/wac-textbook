@@ -2,13 +2,13 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-101
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-101`
 
 ---
 
-V tejto časti budeme pokračovať v definícii API špecifikácia a úprave komponentu na editáciu záznamov, čím umožnime našim používateľom pracovať s dátami v aplikácii. Stále budeme používať len experimentálnu simuláciu WEB api.
+V tejto časti budeme pokračovať v definícii API špecifikácie a úprave komponentu na editáciu záznamov, čím umožníme našim používateľom pracovať s dátami v aplikácii. Stále budeme používať len experimentálnu simuláciu WEB api.
 
 1. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml` a do sekcie `paths` doplňte ďalšie operácie:
 
@@ -182,7 +182,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
       ...
    ```
 
-   Funkcionalita je obdobná ako v prípade metódy `getWaitingListAsync` v komponente `<pfx>-ambulance-wl-list`. V tomto prípade však načítame iba jeden záznam a to ten, ktorý chceme upraviť. Všimnite si, že metóda `componentWillLoad()` nepoužíva _async/await_. Dôsledkom je, že sa komponent najprv vyrenderuje - prázdny -  a polia sa vyplnia až po získaní údajov z API. Z toho dôvodu sme označili aj pole `entry` dekorátorom `@State()`. Správanie pri načítavaní zoznamu a editora tak bude mierne odlišné, v prvom prípade je UI blokované až kým sa nezískajú údaje, v druhom prípade sa UI vykreslí bez údajov a až neskôr sa doplnia údaje z API. Ani jedno riešenie nie je ideálne, náš kód by mal byť doplnený o stav `dataLoading` a počas tohto stavu by sme mali zobraziť zodpovedajúci indikátor napríklad text "Načítavam údaje...". Túto zmenu ponechamé na Vašu samostatnú prácu.
+   Funkcionalita je obdobná ako v prípade metódy `getWaitingListAsync` v komponente `<pfx>-ambulance-wl-list`. V tomto prípade však načítame iba jeden záznam a to ten, ktorý chceme upraviť. Všimnite si, že metóda `componentWillLoad()` nepoužíva _async/await_. Dôsledkom je, že sa komponent najprv vyrenderuje - prázdny -  a polia sa vyplnia až po získaní údajov z API. Z toho dôvodu sme označili aj pole `entry` dekorátorom `@State()`. Správanie pri načítavaní zoznamu a editora tak bude mierne odlišné, v prvom prípade je UI blokované až kým sa nezískajú údaje, v druhom prípade sa UI vykreslí bez údajov a až neskôr sa doplnia údaje z API. Ani jedno riešenie nie je ideálne, náš kód by mal byť doplnený o stav `dataLoading` a počas tohto stavu by sme mali zobraziť zodpovedajúci indikátor napríklad text "Načítavam údaje...". Túto zmenu ponecháme na Vašu samostatnú prácu.
 
    Ďalej v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` upravíme funkciu `render()`:
 
@@ -280,7 +280,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
    }  
    ```
 
-   Pri tejto zmene sme nastavili hodnoty jednotlivých vstupných polí a upravili reakcie na zmenu hodnôt. Tlačídlá `Zmazať` a `Uložiť` sú aktívne iba vtedy, ak je záznam načítaný a je platný. Všimnite si ako sme pomocou atribútu `ref` získali referenciu na element `form`. Doplníme teraz metódy pre obsluhu udalostí, ktoré sme použili v metóde `render()`:
+   Pri tejto zmene sme nastavili hodnoty jednotlivých vstupných polí a upravili reakcie na zmenu hodnôt. Tlačidlá `Zmazať` a `Uložiť` sú aktívne iba vtedy, ak je záznam načítaný a je platný. Všimnite si, ako sme pomocou atribútu `ref` získali referenciu na element `form`. Doplníme teraz metódy pre obsluhu udalostí, ktoré sme použili v metóde `render()`:
 
    ```tsx
    ...
@@ -386,7 +386,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
    }
    ```
 
-5. Poslednú úpravu vykonáme v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx` a to, že nastavíme sprábne id pri výbere položky zoznamu:
+5. Poslednú úpravu vykonáme v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx` a to takú, že nastavíme správne id pri výbere položky zoznamu:
 
    ```tsx
    ...
@@ -407,7 +407,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
    npm run start
    ```
 
-   a v prehliadači prejdite na stránku [http://localhost:3333](http://localhost:3333) a overte funkcionality. Stále používame len simulované údaje, preto sa naše údaje po obnove nemenia, a pri výbere položky vidíme len ukážkový záznam. V prehliadači otvorte _Nastroje pre vývojarov_/_Developer tools_ (_F12_) a prejdite do záložky _Sieť_/_Network_ a sledujte komunikáciu s API serverom.
+   a v prehliadači prejdite na stránku [http://localhost:3333](http://localhost:3333) a overte funkcionalitu. Stále používame len simulované údaje, preto sa naše údaje po obnove nemenia a pri výbere položky vidíme len ukážkový záznam. V prehliadači otvorte _Nástroje pre vývojárov_/_Developer tools_ (_F12_) a prejdite do záložky _Sieť_/_Network_ a sledujte komunikáciu s API serverom.
 
 7. Zostáva nám ešte vyriešiť načítanie zoznamu možných problémov - `conditions` pre rozbaľovací zoznam a vytvorenie nového záznamu. Opäť začneme úpravou API špecifikácie v súbore `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml`. Do sekcie `tags` doplňte nasledujúci záznam:
 
@@ -583,9 +583,9 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
       ...
    ```
 
-   V tejto verzii pokiaľ zistíme, že `entryId` parameter je nastavený na hodnotu `@new`, tak namiesto načítania  `entry` z API vytvoríme nový záznam, a pri uklaadaní záznamu použijeme zodpovedajúcu metódu nášho API klienta. Tlačidlo `delete` bude zakázané pre scénar vytvárania nového záznamu.
+   V tejto verzii pokiaľ zistíme, že `entryId` parameter je nastavený na hodnotu `@new`, tak namiesto načítania  `entry` z API vytvoríme nový záznam a pri ukladaní záznamu použijeme zodpovedajúcu metódu nášho API klienta. Tlačidlo `delete` bude zakázané pre scenár vytvárania nového záznamu.
 
-   Teraz upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx`, a doplňte do neho ovládací prvok pre vytvorenie nového záznamu:
+   Teraz upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx` a doplňte do neho ovládací prvok pre vytvorenie nového záznamu:
 
    ```tsx
    ...
@@ -635,13 +635,13 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
   }  @_add_@
   ```
 
-   Tlačidlo _+_ je umiestnené na spodu vpravo nášho elementu. Pretože používame pozíciu `absolute`, musíme nastaviť aj `position` na `relative` pre element `<pfx>-ambulance-wl-list`, ináč by sa pozícia tlačidla upravovala vzhľadom k pozícii a veľkosti stránky, alebo vzhľadom k pozícii najbližšieho iného predka, ktorého pozícia by bola relatívna.
+   Tlačidlo _+_ je umiestnené naspodku vpravo nášho elementu. Pretože používame pozíciu `absolute`, musíme nastaviť aj `position` na `relative` pre element `<pfx>-ambulance-wl-list`, ináč by sa pozícia tlačidla upravovala vzhľadom k pozícii a veľkosti stránky alebo vzhľadom k pozícii najbližšieho iného predka, ktorého pozícia by bola relatívna.
 
    Funkcionalitu môžete overiť, mali by ste vidieť zoznam s tlačidlom _+_ a po kliknutí na tlačidlo by sa mal zobraziť editor pre vytvorenie nového záznamu.
 
    ![Zoznam s tlačidlom pridania nového záznamu](./img/102-01-AddEntry.png)
 
-10. Zoznam príčin návštevy je zatiaľ statický, pričom chceme dosiahnuť aby sme mali špecifický zoznam pre každú ambulanciu: `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` a upravte ho:
+10. Zoznam príčin návštevy je zatiaľ statický, pričom chceme dosiahnuť, aby sme mali špecifický zoznam pre každú ambulanciu. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` a upravte ho:
 
     ```tsx
     import { AmbulanceConditionsApiFactory, AmbulanceWaitingListApiFactory, Condition, WaitingListEntry } from '../../api/ambulance-wl'; @_important_@
@@ -679,7 +679,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
       }  
     ```
 
-    Doplnili sme načítanie zoznamu príčin návštevy ambulancie. V prípade, že sa nám načítanie nepodarí, použijeme fallback hodnotu, ktorá je bežné fungovanie ambulanice stále dostačujúca. Upravíme teraz spôsob zobrazenia zoznamu príčin návštevy v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx`:
+    Doplnili sme načítanie zoznamu príčin návštevy ambulancie. V prípade, že sa nám načítanie nepodarí, použijeme fallback hodnotu, ktorá je pre bežné fungovanie ambulanice stále dostačujúca. Upravíme teraz spôsob zobrazenia zoznamu príčin návštevy v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx`:
 
     ```tsx
     ...
@@ -743,7 +743,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
     }  @_add_@
     ```
 
-    Vykreslovanie a ovládanie zoznamu príčin návštevy sme presunuli do samostatnej metódy. V metóde `renderConditions()` sme najprv zistili, či máme v zozname príčin návštevy aj príčinu návštevy aktuálneho záznamu. Ak nie, pridáme ju na začiatok zoznamu. Potom vykreslíme zoznam príčin návštevy a nastavíme aktuálnu hodnotu záznamu ako vybratú. V metóde `handleCondition()` sme zabezpečili aby sa pri výbere špecifickej príčiny aj náležite upravila hodnota predpokladaného trvania návštevy. Túto dobu potom môže používateľ ďalej upravovať. Navyše, sme umožnili používateľovi aby sa pred samotnou návštevou oboznámil s opisom príčiny návštevy. Preto sme pridali ikonku `open_in_new` ktorá otvorí nové okno s popisom príčiny návštevy.  Efektom tohto prvku môže byť napríklad to, že pacient pri vstupe bude už predbežne poučený o tom čo môže očakávať a celé vešetrenie môže prebehnúť efektívnejšie.
+    Vykreslovanie a ovládanie zoznamu príčin návštevy sme presunuli do samostatnej metódy. V metóde `renderConditions()` sme najprv zistili, či máme v zozname príčin návštevy aj príčinu návštevy aktuálneho záznamu. Ak nie, pridáme ju na začiatok zoznamu. Potom vykreslíme zoznam príčin návštevy a nastavíme aktuálnu hodnotu záznamu ako vybratú. V metóde `handleCondition()` sme zabezpečili, aby sa pri výbere špecifickej príčiny aj náležite upravila hodnota predpokladaného trvania návštevy. Túto dobu potom môže používateľ ďalej upravovať. Navyše sme umožnili používateľovi, aby sa pred samotnou návštevou oboznámil s opisom príčiny návštevy. Preto sme pridali ikonku `open_in_new`, ktorá otvorí nové okno s popisom príčiny návštevy.  Efektom tohto prvku môže byť napríklad to, že pacient pri vstupe bude už predbežne poučený o tom, čo môže očakávať a celé vyšetrenie môže prebehnúť efektívnejšie.
 
 11. Overte funkcionalitu. Pokiaľ Váš vývojový server nebeží, vykonajte v priečinku `${WAC_ROOT}/ambulance-ufe` príkaz 
 
@@ -837,7 +837,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
     });
     ```
 
-    V tomto prípade simulujeme odozvy z dvoch rôznych _endpoint_-ov, preto pri volaní metódy `onGet()` používame regulárny výraz aby sme jednotlivé požiadavky odlíšili. Taktiež v tomto prípade musíme predpokladať, že pri úvodnom vykreslení po zavolaní funkcie `newSpecPage` ešte nebolo ukončené asynchrónne načítanie údajov. Volaním `await delay(300)` unmožníme aby sa asynchrónne volanie zrealizovalo a spracovalo, následne volaním `await page.waitForChanges()` zabezpečíme, že sa vykonajú všetky potrebné aktualizácie elementov, a následne overíme výsledný stav. Obdobne ako v predchádzajúcich prípadoch uvádzae iba príklad testu, vypracovanie ďaľších testov ponecháme na Vašu samostatnú prácu.
+    V tomto prípade simulujeme odozvy z dvoch rôznych _endpoint_-ov, preto pri volaní metódy `onGet()` používame regulárny výraz aby sme jednotlivé požiadavky odlíšili. Taktiež v tomto prípade musíme predpokladať, že pri úvodnom vykreslení po zavolaní funkcie `newSpecPage` ešte nebolo ukončené asynchrónne načítanie údajov. Volaním `await delay(300)` umožníme, aby sa asynchrónne volanie zrealizovalo a spracovalo, následne volaním `await page.waitForChanges()` zabezpečíme, že sa vykonajú všetky potrebné aktualizácie elementov a následne overíme výsledný stav. Obdobne ako v predchádzajúcich prípadoch uvádzame iba príklad testu, vypracovanie ďalších testov ponecháme na Vašu samostatnú prácu.
 
     Overte funkčnosť testov vykonaním príkazu:
 
