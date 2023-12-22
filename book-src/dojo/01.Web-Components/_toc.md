@@ -15,7 +15,7 @@
 [api> Návrh API špecifikácie](./101-openapi.md)
 [api> API pre úpravu záznamov](./102-crud-api.md)
 [deployed-code-update> Nasadenie aplikácie na produkčný kubernetes klaster](./111-production-deployment.md)
-[deployed-code-update> Nasadenia tímového projektu na lokálnom klastri](./112-team-projekt-lokalne.md)
+[deployed-code-update> Nasadenie tímového projektu na lokálnom klastri](./112-team-projekt-lokalne.md)
 [pest-control> Ladenie aplikácie v Nástrojoch vývojára](./120-debugging.md)
 [summarize> Zhrnutie](./990-zaver.md)
 

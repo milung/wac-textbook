@@ -2,9 +2,9 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-ufe-120
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-ufe-120`
 
 ---
 
@@ -12,7 +12,7 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
 
 1. Ladenie aplikácie si odskúšame v rámci pridávania nového pacienta. V súbore
    `${WAC_ROOT}/ambulance-ufe/src/components/ambulance-wl-editor/ambulance-wl-editor.tsx`
-   Upravte funkciu `getWaitingEntryAsync` nasledovne:
+   upravte funkciu `getWaitingEntryAsync` nasledovne:
 
    ```tsx
    private async getWaitingEntryAsync(): Promise<WaitingListEntry> {
@@ -80,7 +80,7 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
    `npm run start` a prejdite na stránku [http://localhost:3333/ambulance-wl](http://localhost:3333/ambulance-wl). Stlačte na tlačidlo _'+'_.
    Na obrazovke vidíte upravený editor.
 
-2. V súbore `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml` uviedli v príklade `WaitingListEntriesExample` časy v budúcnosti, predpokladaný čas vstupu očakávame o 11:15 svetového času (UTC). Po započítaní časového pásma by to malo byť `12:15`.Všimnite si, že predpokladaný čas vstupu je ale (takmer) rovnaký ako čas príchodu pacienta.
+2. V súbore `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml` sme uviedli v príklade `WaitingListEntriesExample` časy v budúcnosti, predpokladaný čas vstupu očakávame o 11:15 svetového času (UTC). Po započítaní časového pásma by to malo byť `12:15`.Všimnite si, že predpokladaný čas vstupu je ale (takmer) rovnaký ako čas príchodu pacienta.
 
    Pravdepodobne už viete v čom spočíva problém, ale teraz si ukážeme prístup, ako problém odhaliť pomocou ladiacich nástrojov.
 
@@ -90,13 +90,13 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
    Vyhľadajte funkciu `assumedEntryDateAsync` a kliknutím na číslo druhého riadku funkcie nastavte bod prerušenia. Implicitne predpokladáme,
    že výpočet doby vstupu musí byť nesprávny, keďže zobrazovaná hodnota nezodpovedá realite.
 
-3. Opätovne načítajte stránku stlačením klávesy _F5_. Prehliadač zastane na bode prerušenia, ktorý sme nastavili v predchádzajúcom bode a v pravom paneli sa zobrazia informácie o stavu výpočtu v tomto bode. Postupným stláčaním tlačidla _F10_ odkrokujte program až na posledný riadok bloku `try` v tejto funkcii. Všímajte si, ako sa menia hodnoty v pravom paneli v záložke _Rozsah_ (_Scope_). Pridajte nový výraz sledovania v pravom paneli - stlačte ikonu '+' v riadku _Sledovanie_ (_Watch_): a zadajte výraz `new Date(Date.now()).toISOString()` a následne výraz `new Date(lastPatientOut).toISOString()`. Tieto výrazy reprezentujú hodnoty v čase, keď sa zastavil program na bode prerušenia. Výsledok by mal vyzerať nasledovne: 
+3. Opätovne načítajte stránku stlačením klávesy _F5_. Prehliadač zastane na bode prerušenia, ktorý sme nastavili v predchádzajúcom bode a v pravom paneli sa zobrazia informácie o stave výpočtu v tomto bode. Postupným stláčaním tlačidla _F10_ odkrokujte program až na posledný riadok bloku `try` v tejto funkcii. Všímajte si, ako sa menia hodnoty v pravom paneli v záložke _Rozsah_ (_Scope_). Pridajte nový výraz sledovania v pravom paneli - stlačte ikonu '+' v riadku _Sledovanie_ (_Watch_): a zadajte výraz `new Date(Date.now()).toISOString()` a následne výraz `new Date(lastPatientOut).toISOString()`. Tieto výrazy reprezentujú hodnoty v čase, keď sa zastavil program na bode prerušenia. Výsledok by mal vyzerať nasledovne: 
 
    ![Nastavenie bodu prerušenia](./img/120-01-Debugging.png)
 
    Porovnajte časy uvedené v zadaných výrazoch - čas v premennej `lastPatientOut` zodpovedá nášmu očakávaniu, chyba musí byť teda inde. Po preskúmaní výrazu `Math.min(Date.Now(), lastPatientOut)` zistíme, že sme omylom použili operátor `min` namiesto operátora `max`.
 
-   Preskúmajte aj ďalšie prvky rozhrania pre ladenie programu. Na vrchu nástroja sú ovládacie prvky pre krokovanie programu. V okne si môžme prezrieť hodnoty jednotlivých premenných, viditeľných v rozsahu bodu prerušenia programu. Tiež vidíme zásobník volaní, pomocou ktorého môžme vyhodnotiť hodnoty premenných v rozsahu nadradenom súčasnému rozsahu.
+   Preskúmajte aj ďalšie prvky rozhrania pre ladenie programu. Navrchu nástroja sú ovládacie prvky pre krokovanie programu. V okne si môžme prezrieť hodnoty jednotlivých premenných, viditeľných v rozsahu bodu prerušenia programu. Tiež vidíme zásobník volaní, pomocou ktorého môžme vyhodnotiť hodnoty premenných v rozsahu nadradenom súčasnému rozsahu.
 
 4. Opravte chybu v súbore `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-editor/<pfx>-ambulance-wl-editor.tsx` - nahraďte operátor `min` operátorom `max` a znovu načítajte stránku. Odstráňte bod prerušenia z programu a overte, že vypočítaná hodnota zodpovedá očakávaniu.
 
@@ -108,13 +108,13 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
       ...
     ```
   
-   Súbor uložte. Prejdite do prehliadača, v nástrojoch vývojára zvoľte záložku _Konzola_ a v rozbalovacom zozname predvolených úrovní zvoľte aj možnosť _Podrobnosti_ - _Debug_. Znovu načítajte stránku. Na výstupe konzoly vidíte výpis funkcie `console.debug()`.
+   Súbor uložte. Prejdite do prehliadača, v Nástrojoch vývojára zvoľte záložku _Konzola_ a v rozbaľovacom zozname predvolených úrovní zvoľte aj možnosť _Podrobnosti_ - _Debug_. Znovu načítajte stránku. Na výstupe konzoly vidíte výpis funkcie `console.debug()`.
 
    ![Výpis programu do konzoly](./img/120-02-ConsoleLog.png)
 
-   K dispozícii máme ešte funkcie `console.log()`, `console.information()`, `console.warning()`, a `console.error()`, prípadne môžme použiť niektorú z mnohých knižníc venujúcim sa vytváraniu záznamov z vykonávania programu. V každom prípade treba tieto metódy vhodne používať - príliš časté volanie týchto metód môže zbytočne zneprehľadniť výpis v konzole, použitie logov bez príslušnej informácie o stave programu môžu byť neužitočné pre pochopenie príčin zlyhania, posielanie záznamov na server zasa môže zbytočne zaťažiť prenosové pásmo, ktoré má používateľ k dispozícii.
+   K dispozícii máme ešte funkcie `console.log()`, `console.information()`, `console.warning()`, a `console.error()`, prípadne môžme použiť niektorú z mnohých knižníc venujúcich sa vytváraniu záznamov z vykonávania programu. V každom prípade treba tieto metódy vhodne používať - príliš časté volanie týchto metód môže zbytočne zneprehľadniť výpis v konzole, použitie logov bez príslušnej informácie o stave programu môže byť neužitočné pre pochopenie príčin zlyhania, posielanie záznamov na server zasa môže zbytočne zaťažiť prenosové pásmo, ktoré má používateľ k dispozícii.
 
-6. Archivujte vaše zmeny do vzdialeného repozitára.
+6. Archivujte Vaše zmeny do vzdialeného repozitára.
 
    ```ps
    git add .
