@@ -107,7 +107,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     ...
     ```
 
-   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. Ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `EventEmitter<string>`.
+   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. Názvy vlastností sú automaticky preklopené do HTML atribútov vo formáte `lower-case` (detaily pozrite [tu](https://stenciljs.com/docs/properties#attribute-name-attribute)). Ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `EventEmitter<string>`.
 
 3. V kóde sme použili nové elementy z knižnice `@material/web`. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/global/app.ts` a doplňte načítanie príslušných komponentov:
 

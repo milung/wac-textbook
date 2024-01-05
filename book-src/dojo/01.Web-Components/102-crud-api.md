@@ -17,111 +17,111 @@ V tejto časti budeme pokračovať v definícii API špecifikácie a úprave kom
   paths:
     "/waiting-list/{ambulanceId}/entries":
     ...
-    "/waiting-list/{ambulanceId}/entries/{entryId}":
-      get: 
-        tags:
-          - ambulanceWaitingList
-        summary: Provides details about waiting list entry
-        operationId: getWaitingListEntry
-        description: >-
-          By using ambulanceId and entryId you can details of particular entry
-          item ambulance.
-        parameters:
-          - in: path
-            name: ambulanceId
-            description: pass the id of the particular ambulance
-            required: true
-            schema:
-              type: string
-          - in: path
-            name: entryId
-            description: pass the id of the particular entry in the waiting list
-            required: true
-            schema:
-              type: string
-        responses:
-          "200":
-            description: value of the waiting list entries
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/WaitingListEntry"
-                examples:
-                  response:
-                    $ref: "#/components/examples/WaitingListEntryExample"
-          "404":
-            description: Ambulance or Entry with such ID does not exists
-      put:
-        tags:
-          - ambulanceWaitingList
-        summary: Updates specific entry
-        operationId: updateWaitingListEntry
-        description: Use this method to update content of the waiting list entry.
-        parameters:
-          - in: path
-            name: ambulanceId
-            description: pass the id of the particular ambulance
-            required: true
-            schema:
-              type: string
-          - in: path
-            name: entryId
-            description: pass the id of the particular entry in the waiting list
-            required: true
-            schema:
-              type: string
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WaitingListEntry"
-              examples:
-                request:
-                  $ref: "#/components/examples/WaitingListEntryExample"
-          description: Waiting list entry to update
-          required: true
-        responses:
-          "200":
-            description: >-
-              value of the waiting list entry with re-computed estimated time of
-              ambulance entry
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/WaitingListEntry"
-                examples:
-                  response:
-                    $ref: "#/components/examples/WaitingListEntryExample"
-          "403":
-            description: >-
-              Value of the entryID and the data id is mismatching. Details are
-              provided in the response body.
-          "404":
-            description: Ambulance or Entry with such ID does not exists
-      delete:
-        tags:
-          - ambulanceWaitingList
-        summary: Deletes specific entry
-        operationId: deleteWaitingListEntry
-        description: Use this method to delete the specific entry from the waiting list.
-        parameters:
-          - in: path
-            name: ambulanceId
-            description: pass the id of the particular ambulance
-            required: true
-            schema:
-              type: string
-          - in: path
-            name: entryId
-            description: pass the id of the particular entry in the waiting list
-            required: true
-            schema:
-              type: string
-        responses:
-          "204":
-            description: Item deleted
-          "404":
-            description: Ambulance or Entry with such ID does not exists
+    "/waiting-list/{ambulanceId}/entries/{entryId}":       @_add_@
+      get:        @_add_@
+        tags:       @_add_@
+          - ambulanceWaitingList       @_add_@
+        summary: Provides details about waiting list entry       @_add_@
+        operationId: getWaitingListEntry       @_add_@
+        description: >-       @_add_@
+          By using ambulanceId and entryId you can details of particular entry       @_add_@
+          item ambulance.       @_add_@
+        parameters:       @_add_@
+          - in: path       @_add_@
+            name: ambulanceId       @_add_@
+            description: pass the id of the particular ambulance       @_add_@
+            required: true       @_add_@
+            schema:       @_add_@
+              type: string       @_add_@
+          - in: path       @_add_@
+            name: entryId       @_add_@
+            description: pass the id of the particular entry in the waiting list       @_add_@
+            required: true       @_add_@
+            schema:       @_add_@
+              type: string       @_add_@
+        responses:       @_add_@
+          "200":       @_add_@
+            description: value of the waiting list entries       @_add_@
+            content:       @_add_@
+              application/json:       @_add_@
+                schema:       @_add_@
+                  $ref: "#/components/schemas/WaitingListEntry"       @_add_@
+                examples:       @_add_@
+                  response:       @_add_@
+                    $ref: "#/components/examples/WaitingListEntryExample"       @_add_@
+          "404":       @_add_@
+            description: Ambulance or Entry with such ID does not exists       @_add_@
+      put:       @_add_@
+        tags:       @_add_@
+          - ambulanceWaitingList       @_add_@
+        summary: Updates specific entry       @_add_@
+        operationId: updateWaitingListEntry       @_add_@
+        description: Use this method to update content of the waiting list entry.       @_add_@
+        parameters:       @_add_@
+          - in: path       @_add_@
+            name: ambulanceId       @_add_@
+            description: pass the id of the particular ambulance       @_add_@
+            required: true       @_add_@
+            schema:       @_add_@
+              type: string       @_add_@
+          - in: path       @_add_@
+            name: entryId       @_add_@
+            description: pass the id of the particular entry in the waiting list       @_add_@
+            required: true       @_add_@
+            schema:       @_add_@
+              type: string       @_add_@
+        requestBody:       @_add_@
+          content:       @_add_@
+            application/json:       @_add_@
+              schema:       @_add_@
+                $ref: "#/components/schemas/WaitingListEntry"       @_add_@
+              examples:       @_add_@
+                request:       @_add_@
+                  $ref: "#/components/examples/WaitingListEntryExample"       @_add_@
+          description: Waiting list entry to update       @_add_@
+          required: true       @_add_@
+        responses:       @_add_@
+          "200":       @_add_@
+            description: >-       @_add_@
+              value of the waiting list entry with re-computed estimated time of       @_add_@
+              ambulance entry       @_add_@
+            content:       @_add_@
+              application/json:       @_add_@
+                schema:       @_add_@
+                  $ref: "#/components/schemas/WaitingListEntry"       @_add_@
+                examples:       @_add_@
+                  response:       @_add_@
+                    $ref: "#/components/examples/WaitingListEntryExample"       @_add_@
+          "403":       @_add_@
+            description: >-       @_add_@
+              Value of the entryID and the data id is mismatching. Details are       @_add_@
+              provided in the response body.       @_add_@
+          "404":       @_add_@
+            description: Ambulance or Entry with such ID does not exists       @_add_@
+      delete:       @_add_@
+        tags:       @_add_@
+          - ambulanceWaitingList       @_add_@
+        summary: Deletes specific entry       @_add_@
+        operationId: deleteWaitingListEntry       @_add_@
+        description: Use this method to delete the specific entry from the waiting list.       @_add_@
+        parameters:       @_add_@
+          - in: path       @_add_@
+            name: ambulanceId       @_add_@
+            description: pass the id of the particular ambulance       @_add_@
+            required: true       @_add_@
+            schema:       @_add_@
+              type: string       @_add_@
+          - in: path       @_add_@
+            name: entryId       @_add_@
+            description: pass the id of the particular entry in the waiting list       @_add_@
+            required: true       @_add_@
+            schema:       @_add_@
+              type: string       @_add_@
+        responses:       @_add_@
+          "204":       @_add_@
+            description: Item deleted       @_add_@
+          "404":       @_add_@
+            description: Ambulance or Entry with such ID does not exists       @_add_@
   ```
 
 Pridali sme nový _endpoint_ `/waiting-list/{ambulanceId}/entries/{entryId}` pre získanie detailu záznamu, jeho aktualizáciu a vymazanie a zodpovedajúco k tomu sme nazvali aj operácie a adaptovali odozvy.  V prípade metódy `PUT` sme pridali aj `requestBody`, ktoré bude obsahovať aktualizovanú verziu záznamu, ktorý chceme aktualizovať.
@@ -175,9 +175,9 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
          return undefined;   @_add_@
       }   @_add_@
 
-      async componentWillLoad() {  @_and_@
-         this.getWaitingEntryAsync();  @_and_@
-      }  @_and_@
+      async componentWillLoad() {  @_add_@
+         this.getWaitingEntryAsync();  @_add_@
+      }  @_add_@
 
       ...
    ```
@@ -343,7 +343,12 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
       --_wl-editor_gap: var(--wl-gap, 0.5rem);
       width: 100%;  @_add_@
       height: 100%;  @_add_@
-   }  @_add_@
+
+      display: flex;  @_remove_@
+      flex-direction: column;  @_remove_@
+      gap: var(--_wl-editor_gap);  @_remove_@
+      padding: var(--_wl_editor_gap);  @_remove_@
+   }
 
    form{  @_add_@
       display: flex;  @_add_@
@@ -409,19 +414,19 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
 
    a v prehliadači prejdite na stránku [http://localhost:3333](http://localhost:3333) a overte funkcionalitu. Stále používame len simulované údaje, preto sa naše údaje po obnove nemenia a pri výbere položky vidíme len ukážkový záznam. V prehliadači otvorte _Nástroje pre vývojárov_/_Developer tools_ (_F12_) a prejdite do záložky _Sieť_/_Network_ a sledujte komunikáciu s API serverom.
 
-7. Zostáva nám ešte vyriešiť načítanie zoznamu možných problémov - `conditions` pre rozbaľovací zoznam a vytvorenie nového záznamu. Opäť začneme úpravou API špecifikácie v súbore `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml`. Do sekcie `tags` doplňte nasledujúci záznam:
+7. Zostáva nám ešte vyriešiť načítanie zoznamu možných problémov - `conditions` pre rozbaľovací zoznam a vytvorenie nového záznamu. Opäť začneme úpravou API špecifikácie v súbore `${WAC_ROOT}/ambulance-ufe/api/ambulance-wl.openapi.yaml`. Do hlavnej sekcie `tags` doplňte nasledujúci záznam:
 
   ```yaml
   ...
   tags:
     - name: ambulanceWaitingList
-      description: Ambulance waiting list
+      description: Ambulance Waiting List API
     - name: ambulanceConditions @_add_@
-      description: Patient conditions and synptoms handled in the ambulance @_add_@
+      description: Patient conditions and symptoms handled in the ambulance @_add_@
   ...
   ```
 
-  a v sekcie `paths` doplňte nasledujúce operácie:
+  a v sekcii `paths` doplňte nasledujúce operácie:
 
   ```yaml
   ...
@@ -512,28 +517,28 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
     ...
     examples:
       ...
-      ConditionsListExample:
-        summary: Sample of GP ambulance conditions
-        description: |
-          Example list of possible conditions, symptoms, and visit reasons
-        value:
-          - value: Teploty
-            code: subfebrilia
-            reference: "https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/"
-            typicalDurationMinutes: 20
-          - value: Nevoľnosť
-            code: nausea
-            reference: "https://zdravoteka.sk/priznaky/nevolnost/"
-            typicalDurationMinutes: 45
-          - value: Kontrola
-            code: followup
-            typicalDurationMinutes: 15
-          - value: Administratívny úkon
-            code: administration
-            typicalDurationMinutes: 10
-          - value: Odber krvy
-            code: blood-test
-            typicalDurationMinutes: 10
+      ConditionsListExample:  @_add_@
+        summary: Sample of GP ambulance conditions  @_add_@
+        description: |  @_add_@
+          Example list of possible conditions, symptoms, and visit reasons  @_add_@
+        value:  @_add_@
+          - value: Teploty  @_add_@
+            code: subfebrilia  @_add_@
+            reference: "https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/"  @_add_@
+            typicalDurationMinutes: 20  @_add_@
+          - value: Nevoľnosť  @_add_@
+            code: nausea  @_add_@
+            reference: "https://zdravoteka.sk/priznaky/nevolnost/"  @_add_@
+            typicalDurationMinutes: 45  @_add_@
+          - value: Kontrola  @_add_@
+            code: followup  @_add_@
+            typicalDurationMinutes: 15  @_add_@
+          - value: Administratívny úkon  @_add_@
+            code: administration  @_add_@
+            typicalDurationMinutes: 10  @_add_@
+          - value: Odber krvi  @_add_@
+            code: blood-test  @_add_@
+            typicalDurationMinutes: 10  @_add_@
   ```
 
 8. Uložte zmeny a v priečinku  `${WAC_ROOT}/ambulance-ufe` vykonajte príkaz:
@@ -554,7 +559,7 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
             this.entry = {  @_add_@
               id: "@new",  @_add_@
               patientId: "",  @_add_@
-              waitingSince: null,  @_add_@
+              waitingSince: "",  @_add_@
               estimatedDurationMinutes: 15  @_add_@
             };  @_add_@
             return this.entry;  @_add_@
@@ -850,4 +855,5 @@ Teraz v priečinku `${WAC_ROOT}/ambulance-ufe` spustite príkaz na generovanie k
     ```ps
     git add .
     git commit -m "Ambulance waiting list CRUD operations"
+    git push
     ```
