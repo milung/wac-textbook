@@ -107,7 +107,7 @@ teraz pokračovať v implementácii funkcionality našej mikro aplikácie. V tej
     ...
     ```
 
-   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. Ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `CustomElement<string>`.
+   V kóde si všimnite premennú `duration` a spôsob, akým pri zmene hodnoty `md-slider` elementu túto vlastnosť nastavíme na aktuálnu hodnotu. Označenie premennej dekorátorom `@Prop` alebo `@State` zabezpečí, že sa pri zmene ich hodnoty znovu vykreslí náš element s aktuálnymi hodnotami. `@Prop() entryId` deklaruje, že náš element bude obsahovať atribút s menom `entry-id`, ktorý bude určovať identifikátor záznamu, ktorý chceme upraviť. Ďalej deklarujeme, že náš element bude generovať udalosti `editor-closed` typu `EventEmitter<string>`.
 
 3. V kóde sme použili nové elementy z knižnice `@material/web`. Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/global/app.ts` a doplňte načítanie príslušných komponentov:
 
@@ -342,10 +342,10 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
       return (
         <Host>
           { element === "editor" 
-          ? <pfx-ambulance-wl-editor entry-id={entryId}
+          ? <<pfx>-ambulance-wl-editor entry-id={entryId}
               oneditor-closed={ () => navigate("./list")} >
-            </pfx-ambulance-wl-editor>
-          : <pfx-ambulance-wl-list></pfx-ambulance-wl-list>
+            </<pfx>-ambulance-wl-editor>
+          : <<pfx>-ambulance-wl-list></<pfx>-ambulance-wl-list>
           }
           
         </Host>
@@ -429,7 +429,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
 5. Aby bola naša interakcia úplná, upravte súbor `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/pfx-ambulance-wl-list.tsx` a doplňte nasledujúce časti kódu:
 
    ```tsx
-   import { Component, Event, EventEmitter,  Host, h } from '@stencil/core'; @_impotant_@
+   import { Component, Event, EventEmitter,  Host, h } from '@stencil/core'; @_important_@
    ...
    export class PfxAmbulanceWlList { 
 
@@ -440,7 +440,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
       <Host>
         <md-list>   
           {this.waitingPatients.map((patient, index) =>   @_important_@
-            <md-list-item onClick={ () => this.entryClicked.emit(index.toStr ())}> @_add_@
+            <md-list-item onClick={ () => this.entryClicked.emit(index.toString())}> @_add_@
                 <div slot="headline">{patient.name}</div>
                 <div slot="supporting-text">{"Predpokladaný vstup: " + this.isoDateToLocale(patient.estimatedStart)}</div>
                 <md-icon slot="start">person</md-icon>
@@ -457,9 +457,9 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
 
       return (
        ...
-          : <pfx-ambulance-wl-list 
+          : <<pfx>-ambulance-wl-list 
               onentry-clicked={ (ev: CustomEvent<string>)=> navigate("./entry/" + ev.detail) } > @_add_@
-            </pfx-ambulance-wl-list>
+            </<pfx>-ambulance-wl-list>
         ...
    ```
 
@@ -531,7 +531,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
    git push
    ```
 
-8. Poslednou zmenou je úprava web komponentu ktorý sa má zobraziť v micro Front-End aplikácii. K tomu nám postačí úprava konfigurácie. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` a v sekcii `navigation` zadajte nové meno elementu:
+8. Poslednou zmenou je úprava web komponentu ktorý sa má zobraziť v micro Front-End aplikácii. K tomu nám postačí úprava konfigurácie. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a v sekcii `navigation` zadajte nové meno elementu:
 
    ```yaml
     navigation:
@@ -549,7 +549,7 @@ Pre účely navigácie budeme využívať [Navigation API], ktorého cieľom je 
     git push
    ```
 
-   Pokiaľ nie je Váš [Docker Desktop] klaster aktívny, naštartujte ho. Po chvíli, keď operátor [Flux CD] obnoví všetky zmeny - obnovenie verzie obrazu, nasadenie zmien v konfigurácii, prejdite na stránku [http://localhost:30331](http://localhost:30331) a následne vyberte aplikáciu _Zoznam čakajúcich ..._. Mala by sa Vám zobraziť stránka s komponentom `<pfx>-ambulance-wl-list`. Po kliknutí na záznam by sa Vám mal zobraziť editor záznamu. Po stlačení na tlačidlo "Zrušiť" by ste sa mali vrátiť na zoznam čakajúcich. Hoci sme v súbore `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` explicitne nenastavili atribút `base-path`, tento je k elementu automaticky pridávaný službou `ufe-controller` na základe hodnoty atribútu `path` .
+   Pokiaľ nie je Váš [Docker Desktop] klaster aktívny, naštartujte ho. Po chvíli, keď operátor [Flux CD] obnoví všetky zmeny - obnovenie verzie obrazu, nasadenie zmien v konfigurácii, prejdite na stránku [http://localhost:30331](http://localhost:30331) a následne vyberte aplikáciu _Zoznam čakajúcich ..._. Mala by sa Vám zobraziť stránka s komponentom `<pfx>-ambulance-wl-list`. Po kliknutí na záznam by sa Vám mal zobraziť editor záznamu. Po stlačení na tlačidlo "Zrušiť" by ste sa mali vrátiť na zoznam čakajúcich. Hoci sme v súbore `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` explicitne nenastavili atribút `base-path`, tento je k elementu automaticky pridávaný službou `ufe-controller` na základe hodnoty atribútu `path` .
 
    >build_circle:> V prípade problémov s nasadením zmien v konfigurácii môžete overiť stav jednotlivých objektov v klastri príkazmi:
    >

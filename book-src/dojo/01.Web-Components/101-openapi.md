@@ -28,7 +28,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
      license:
        name: CC BY 4.0
        url: "https://creativecommons.org/licenses/by/4.0/"
-    tags:
+   tags:
     - name: ambulanceWaitingList  @_important_@
       description: Ambulance Waiting List API
    ```
@@ -45,7 +45,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
           - ambulanceWaitingList @_important_@
         summary: Provides the ambulance waiting list
         operationId: getWaitingListEntries  @_important_@
-        description: By using ambulanceId you get list of entries in ambulance    witing  list
+        description: By using ambulanceId you get list of entries in ambulance waiting list
         parameters:
           - in: path @_important_@
             name: ambulanceId @_important_@
@@ -66,7 +66,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
                   response:
                     $ref: "#/components/examples/WaitingListEntriesExample" @_important_@
           "404":
-            description: Ambulance with such ID does not exists
+            description: Ambulance with such ID does not exist
    ```
 
    Táto špecifikácia určuje, že na ceste `/waiting-list/{ambulanceId}/entries`, kde `{ambulanceId}` je premenná hodnota typu string, môžeme vyvolať požiadavku typu [HTTP GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET), ktorej odozva môže nadobudnúť hodnotu [200](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200) alebo [404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404), pričom v prvom prípade bude obsahovať pole objektov typu `WaitingListEntry`. Tiež sme určili meno operácie `getWaitingListEntries`. Toto meno určuje názov metód a funkcií pri generovaní kódu. Názov `operationId` musí byť v rámci špecifikácie jedinečný. Všimnite si tiež, že sme použili referencie na sekciu `components`. Vložme teraz do súboru [JSON schému][jsonschema] pre objekt `WaitingListEntry` a pre objekty, na ktorých je závislý:
@@ -137,7 +137,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
     V tejto špecifikácii sme zadefinovali objekt `WaitingListEntry`, ktorý obsahuje všetky potrebné informácie o zozname čakajúcich pacientov a opis zdravotného problému pacienta definovaný typom `Condition`. Technicky by sme mohli schému vnoreného typu `Condition` definovať priamo v objekte `WaitingListEntry`. Pre účely generovania kódu a pre prehľadnosť ale odporúčame vždy používať referencie na samostatne definované typy. Dôležitým aspektom špecifikácie je uvádzanie povinných polí pomocou kľúčového slova `required`. Toto kľúčové slovo je dôležité pre generovanie kódu, ktorý bude validovať vstupné dáta. V prípade, že vstupné dáta nebudú obsahovať povinné polia, tak požiadavka bude typicky odmietnutá so stavovým kódom [400 - Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400).
 
-    V špecifikácii konzistentne uvádzame príklady s použitím kľúčového slova `example`. Tieto príklady sú dôležité pre generovanie dokumentácie a sú tiež dôležité pre vytvorenie experimentálnej služby (_mock_), ktorú budeme používať pri lokálnom vývoji. Doplňte do súboru nasledujúce príklady do sekcie `components.example`:
+    V špecifikácii konzistentne uvádzame príklady s použitím kľúčového slova `example`. Tieto príklady sú dôležité pre generovanie dokumentácie a sú tiež dôležité pre vytvorenie experimentálnej služby (_mock_), ktorú budeme používať pri lokálnom vývoji. Doplňte do súboru nasledujúce príklady do sekcie `components.examples`:
 
     ```yaml
     components: 
@@ -198,7 +198,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    >info:> Naše API `getWaitingListEntries` vracia priamo pole záznamov, čo je v prípade WebAPI považované za chybu návrhu. Naše API by malo byť pripravené aj pre väčší rozsah dát a podporovať získanie len ich [čiastočného rozsahu](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design#filter-and-paginate-data). Pre zjednodušenie ale tento aspekt nebudeme v našej aplikácii riešiť, pri návrhu konkrétneho API v praxi sa ale najprv zoznámte so [zásadami návrhu RESTfull API](https://book.restfulnode.com/).
 
-3. V prvom kroku si pripravíme experimentálny - _mock_ - server poskytujúci špecifikované API na základe príkladov v špecifikácii. Nainštalujte do projektu nové závislosti potrebné pre vývoj aplikácie:
+3. V prvom kroku si pripravíme experimentálny - _mock_ - server poskytujúci špecifikované API na základe príkladov v špecifikácii. Nainštalujte do projektu nové závislosti potrebné pre vývoj aplikácie spustením nasledovného príkazu v priečinku `${WAC_ROOT}/ambulance-ufe`:
 
    ```ps
    npm install --save-dev js-yaml open-api-mocker npm-run-all 
@@ -221,7 +221,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    >$apple:> Na niektorých Mac zariadeniach môže na porte 5000 bežať airplay server. V takomto prípade zmeňte port mock serveru na iný voľný port.
 
-   Skript `convert-openapi` premení špecifikáciu vo formáte YAML na JSON - `open-api-mocker` vyžaduje špecifikáciu vo formáte JSON. Skript `mock-api` spustí mock server, ktorý bude poskytovať API podľa špecifikácie. Skript `start:mock` spustí obe predchádzajúce príkazy sekvenčne. Skript `start:app` obsahuje príkaz, pôvodne použitý v skripte `start`, teda skompiluje našu aplikáciu a naštartuje vývojový server. Skript `start` sme upravili, aby paralelne spustil náš mock API server a vývojový server našej aplikácie. Tieto úpravy nám umožnia lokálny vývoj aplikácie bez nutnosti pripojenia na skutočný API server.
+   Skript `convert-openapi` premení špecifikáciu vo formáte YAML na JSON - `open-api-mocker` vyžaduje špecifikáciu vo formáte JSON. Skript `mock-api` spustí mock server, ktorý bude poskytovať API podľa špecifikácie. Skript `start:mock` spustí oba predchádzajúce príkazy sekvenčne. Skript `start:app` obsahuje príkaz, pôvodne použitý v skripte `start`, teda skompiluje našu aplikáciu a naštartuje vývojový server. Skript `start` sme upravili, aby paralelne spustil náš mock API server a vývojový server našej aplikácie. Tieto úpravy nám umožnia lokálny vývoj aplikácie bez nutnosti pripojenia na skutočný API server.
 
    Upravte súbor `${WAC_ROOT}/ambulance-ufe/.gitignore` a pridajte riadok `.openapi.json`.
 
@@ -311,13 +311,13 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 5. Vygenerované API použijeme v našej aplikácii. Najprv doinštalujeme knižnicu [Axios], ktorú využíva  vygenerovaný klientský kód:
 
    ```ps
-   npm install --save axios
+   npm install --save axios@1.6.0
    ```
 
    Otvorte súbor `${WAC_ROOT}/ambulance-ufe/src/components/<pfx>-ambulance-wl-list/<pfx>-ambulance-wl-list.tsx` a upravte kód:
 
    ```tsx
-   import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core'; 
+   import { Component, Event, EventEmitter, Host, Prop, State, h } from '@stencil/core';  @_important_@
    import { AmbulanceWaitingListApiFactory, WaitingListEntry } from '../../api/ambulance-wl'; @_add_@
    ...
    export class <Pfx>AmbulanceWlList { 
@@ -467,7 +467,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 
    Opäť vykonajte príkaz `npm run test` a tentokrát by testy mali prebehnúť úspešne.
 
-9. Pokiaľ si prezrieme test v súbore `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/test/pfx-ambulance-wl-list.spec.tsx`, pochopíme, že náš test je úspešný len z dôvodu, že pri neúspešnom pripojení sa k serveru je zoznam pacientov prázdny. Bolo by preto vhodnejšie, keby sme boli schopní simulovať spojenie s API serverom. Na to použijeme knižnicu [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter). Nainštalujte si túto knižnicu do projektu:
+9. Pokiaľ si prezrieme test v súbore `${WAC_ROOT}/ambulance-ufe/src/components/pfx-ambulance-wl-list/test/pfx-ambulance-wl-list.spec.tsx`, pochopíme, že náš test bude úspešný aj pri neúspešnom pripojení sa k serveru, kedy je zoznam pacientov prázdny. Bolo by preto vhodnejšie, keby sme boli schopní simulovať spojenie s API serverom. Na to použijeme knižnicu [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter). Nainštalujte si túto knižnicu do projektu:
 
    ```ps
    npm install --save-dev axios-mock-adapter
@@ -563,7 +563,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
 10. (_Voliteľné_) Pokiaľ chcete využívať testovacie prostredie [Jest] priamo, napríklad chcete využiť niektoré z populárnych rozšírení ako napríklad [vscode-jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest), doplňte do projektu konfiguráciu pre správny beh [jest cli](https://jestjs.io/docs/cli) nástrojov. Vytvorte súbor `${WAC_ROOT}/ambulance-ufe/jest.config.js` s nasledujúcim obsahom:
 
     ```js
-    export default {
+    module.exports = {
        "roots": [
            "<rootDir>/src"
        ],
@@ -603,7 +603,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
    git push
    ```
 
-   Po vytvorení novej verzie obrazu sa táto nasadí na server. Pokiaľ máte klaster naštartovaný, môžete overiť funkcionalitu na stránke [http://localhost:3031](http://localhost:3031). V tomto prípade ale ešte nemáme nastavené správne atribúty pre našu aplikáciu. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/milung-ambulance-ufe/webcomponent.yaml` a pridajte atribúty `api-base` a `ambulance-id`:
+   Po vytvorení novej verzie obrazu sa táto nasadí na server. Pokiaľ máte klaster naštartovaný, môžete overiť funkcionalitu na stránke [http://localhost:30331](http://localhost:30331). V tomto prípade ale ešte nemáme nastavené správne atribúty pre našu aplikáciu. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a pridajte atribúty `api-base` a `ambulance-id`:
 
    ```yaml
     ...
@@ -618,7 +618,7 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
         hash-suffix: v1alpha2 @_important_@
    ```
 
-   >$apple:> Nezabudnite nastaviť správny port.
+   >$apple:> Ak ste predtým zmenili číslo portu, nezabudnite aj tu nastaviť správny port.
 
    Následne v priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte komit a push:
 
@@ -628,4 +628,6 @@ V predchádzajúcej sekcii ste si určite všimli, že náš editor sa vždy zob
     git push
    ```
 
-   Po aplikovaní zmien bude funkčnosť Vášho zoznamu závisieť od prítomnosti Vášho mock API - z pohľadu prehliadača je `localhost` adresa Vášho počítača.
+   Po uplynutí času nutného na aplikovanie zmien do klastra overte funkcionalitu na stránke [http://localhost:30331](http://localhost:30331). Na obrazovke vidíte chybové hlásenie. Dôvodom je, že neprechádza volanie na server. Presvedčte sa o tom skontrolovaním záložky `Sieť` v paneli `Nástroj pre vývojárov`, kde môžte vidieť neúspešné volanie API `http://localhost:5000/api/waiting-list/bobulova/entries`. Volanie zlyhá z dôvodu porušenia CSP pravidiel (vysvetlíme a vyriešime v ďalších kapitolách).
+
+   Avšak aj v prípade, ak by sme vyriešili CSP problém, volanie na server nebude funkčné. Dôvodom je, že na adrese `localhost:5000` nie je spustený server. Môžeme ho simulovať spustením príkazu `npm run start:mock`.
