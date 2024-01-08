@@ -8,9 +8,9 @@
 
 ---
 
-Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster privátny, zmeny v ňom môže robiť iba gitops team. Má podobnú štruktúru ako náš `ambulance-gitops` repozitár. Na rozdiel od lokálneho klastra, zabezpečuje prítomnosť infraštruktúry v tomto klastri externý Gitops team (cvičiaci). Študenti majú k dispozícii konfiguráciu ku klastru, pomocou ktorej môžu ku klastru pristúpiť a nasadiť svoje aplikácie do namespace `wac-hospital`. V tomto kroku si pripravíme konfiguráciu pre nasadenie do klastra. Predpokladáme, že repozitár Vašej konfigurácie, ako aj obrazy softvérových kontajnerov sú verejne prístupné a nie je nutné použiť autentifikáciu. Pokiaľ tomu tak nie je musíte do konfigurácie doplniť aj príslušné autentifikačné údaje vo forme kubernetes objektov _Secret_.
+Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster privátny, zmeny v ňom môže robiť iba gitops team. Má podobnú štruktúru ako náš `ambulance-gitops` repozitár. Na rozdiel od lokálneho klastra, zabezpečuje prítomnosť infraštruktúry v tomto klastri externý Gitops team (cvičiaci). Študenti majú k dispozícii konfiguráciu ku klastru, pomocou ktorej môžu ku klastru pristúpiť a nasadiť svoje aplikácie do namespace `wac-hospital`. V tomto kroku si pripravíme konfiguráciu pre nasadenie do klastra. Predpokladáme, že repozitár Vašej konfigurácie, ako aj obrazy softvérových kontajnerov sú verejne prístupné a nie je nutné použiť autentifikáciu. Pokiaľ tomu tak nie je, musíte do konfigurácie doplniť aj príslušné autentifikačné údaje vo forme kubernetes objektov _Secret_.
 
-1. V tejto konfigurácii predpokladáme, že chcete explicitne kontrolovať, ktoré verzie softvérových kontajnerov budú do spoločného klastra nasadzované - predpokladajme, že je to _produkčný_ klaster. Ďalej predpokladajme, že naša aplikácia je v stave pripravenom na produkčné nasadenie. Ako prvý krok preto vytvoríme nové vydanie - _release_ - našej aplikácie. Na stránke [GitHub] prejdite do repozitára `ambulance-ufe` a v sekcii _Code_ stlačte na odkaz `0 tags` a následne na tlačidlo _Create a new releases_. V rozbaľovacom zozname _Choose a tag_ zadajte  text `v1.0.0`. Do poľa _Release title_ zadajte text `v1.0.0` a v poli _Describe this release_ zadajte text `Initial release of the waiting list application with CRUD operations`. Stlačte tlačidlo _Publish release_.
+1. V tejto konfigurácii predpokladáme, že chcete explicitne kontrolovať, ktoré verzie softvérových kontajnerov budú do spoločného klastra nasadzované - predpokladajme, že je to _produkčný_ klaster. Ďalej predpokladajme, že naša aplikácia je v stave pripravenom na produkčné nasadenie. Ako prvý krok preto vytvoríme nové vydanie - _release_ - našej aplikácie. Na stránke [GitHub] prejdite do repozitára `ambulance-ufe` a v sekcii _Code_ stlačte na odkaz `0 tags` a následne na tlačidlo _Create a new release_. V rozbaľovacom zozname _Choose a tag_ zadajte  text `v1.0.0` a kliknite na tlačidlo _+ Create new tag: v1.0.0 on publish_. Do poľa _Release title_ zadajte text `v1.0.0` a v poli _Describe this release_ zadajte text `Initial release of the waiting list application with CRUD operations`. Stlačte tlačidlo _Publish release_.
 
    ![Vytvorenie nového vydania](./img/111-01-CreateRelease.png)
 
@@ -49,7 +49,7 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
     - ../../../components/version-release @_important_@
    ```
 
-   Náš spoločný klaster sme tu nazvali `wac-aks`, čo referuje na nasadenie do klastra služby [Azure Kubernetes Services](https://azure.microsoft.com/en-us/products/kubernetes-service). Obsah je obdobný s obsahom z klastra `localhost`, avšak zmenili sme komponent v sekcii `components`. Navyše sme použili [_Replacement Transformer_](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/replacements/) pomocou ktorého skopírujeme verziu docker obrazu z nášho deploymentu do definície webkomponentu za účelom vyprázdnenia vyrovnávacej pamäte, tzv. [_Cache busting_](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#cache_busting). Vždy, keď zmeníme tag verzie docker obrazu, zmení sa aj hash v definícii webkomponentu a hash výsledného javaskript súboru ponúkaného službou `ufe-controller`. Následkom je, že pri ďalšom načítaní stránky sa používateľovi v prehliadači obnoví verzia nášho komponentu.
+   Náš spoločný klaster sme tu nazvali `wac-aks`, čo referuje na nasadenie do klastra služby [Azure Kubernetes Services](https://azure.microsoft.com/en-us/products/kubernetes-service). Obsah je obdobný s obsahom z klastra `localhost`, avšak zmenili sme komponent v sekcii `components`.
 
 3. Vytvorte súbor `${WAC_ROOT}\ambulance-gitops/components/version-release/kustomization.yaml` s obsahom:
 
@@ -57,9 +57,9 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
    apiVersion: kustomize.config.k8s.io/v1alpha1
    kind: Component
    images:
-   - name: <pfx>/ambulance-ufe
-   newName: <pfx>/ambulance-ufe 
-   newTag: 1.0.0  #aktuálna verzia docker obrazu, ktorú chcete aby používatelia - cvičiaci - videli nasadenú
+   - name: <docker-id>/ambulance-ufe
+     newName: <docker-id>/ambulance-ufe 
+     newTag: 1.0.0  #aktuálna verzia docker obrazu, ktorú chcete aby používatelia - cvičiaci - videli nasadenú
 
    replacements: 
     - targets:
@@ -74,14 +74,15 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
         version: v1
         kind: Deployment
         name:  <pfx>-ambulance-ufe-deployment  
-        namespace: wac-hospital
         fieldPath: spec.template.spec.containers.0.image @_important_@
         options: 
             delimiter: ':'
             index: 1
    ```
 
-   V tomto klastri nebudeme používať [_Image Update Automation_](https://fluxcd.io/flux/guides/image-update/) [Flux CD] operátora, ale chceme mať explicitnú kontrolu nad verziou docker obrazov, ktoré budú nasadzované. Preto sme vytvorili nový komponent `version-release`, ktorý obsahuje konfiguráciu špecifickú pre oficiálne vydanie nášho softvéru.
+   V tomto klastri nebudeme používať [_Image Update Automation_](https://fluxcd.io/flux/guides/image-update/) [Flux CD] operátor, ale chceme mať explicitnú kontrolu nad verziou docker obrazov, ktoré budú nasadzované. Preto sme vytvorili nový komponent `version-release`, ktorý obsahuje konfiguráciu špecifickú pre oficiálne vydanie nášho softvéru.
+
+   Navyše sme použili [_Replacement Transformer_](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/replacements/) pomocou ktorého skopírujeme verziu docker obrazu z nášho deploymentu do definície webkomponentu za účelom vyprázdnenia vyrovnávacej pamäte, tzv. [_Cache busting_](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching#cache_busting). Vždy, keď zmeníme tag verzie docker obrazu, zmení sa aj hash v definícii webkomponentu a hash výsledného javaskript súboru ponúkaného službou `ufe-controller`. Následkom je, že pri ďalšom načítaní stránky sa používateľovi v prehliadači obnoví verzia nášho komponentu.
 
    >info:> Mohli by sme použiť aj sémantické verzionovanie a pre každú verziu definovať komponent podľa vydania celého systému, napríklad `version-1.0.3` a v komponente `version-release` len vytvoriť referenciu na komponent aktuálneho vydania. V cvičení tento postup vynecháme za účelom zjednodušenia.
 
@@ -98,7 +99,7 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
     ref:
         branch: main
     timeout: 1m0s
-    url: https://github.com/<pfx>/ambulance-gitops @_important_@
+    url: https://github.com/<your-account>/ambulance-gitops @_important_@
 
    # ak používate privátny repozitár nezabudnite doplniť autentifikačné údaje
    # secretRef:
@@ -129,29 +130,29 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
 
    ```yaml
    apiVersion: kustomize.toolkit.fluxcd.io/v1
-    kind: Kustomization
-    metadata:
-        name: <pfx>-cd # v spoločnom klastri je nasadených viacero takýchto objektov @_important_@
-        namespace: wac-hospital
-    spec:
-        wait: true
-        interval: 42s
-        path: clusters/wac-aks
-        prune: true
-        sourceRef:
-            kind: GitRepository
-            name: <pfx>-gitops-repo @_important_@
+   kind: Kustomization
+   metadata:
+       name: <pfx>-cd # v spoločnom klastri je nasadených viacero takýchto objektov @_important_@
+       namespace: wac-hospital
+   spec:
+       wait: true
+       interval: 42s
+       path: clusters/wac-aks
+       prune: true
+       sourceRef:
+           kind: GitRepository
+           name: <pfx>-gitops-repo @_important_@
    ```
 
    Pridajte súbor `${WAC_ROOT}/ambulance-gitops/clusters/wac-aks/gitops/kustomization.yaml` :
 
    ```yaml
    apiVersion: kustomize.config.k8s.io/v1beta1
-    kind: Kustomization
+   kind: Kustomization
 
    commonLabels:
         app.kubernetes.io/part-of: wac-hospital
-        app.kubernetes.io/name: pfx-ambulance-wl
+        app.kubernetes.io/name: <pfx>-ambulance-wl
 
    namespace: wac-hospital
 
