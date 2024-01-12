@@ -64,14 +64,16 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
         return (
           <Host>
            ...
-            <mwc-textfield icon="watch_later" disabled
+            <md-filled-text-field disabled
                            label="Čakáte od" 
-                           value={new Date(this.entry?.waitingSince || Date.now()).toLocaleTimeString()}> @_add_@
-            </mwc-textfield>
-            <mwc-textfield icon="login" disabled @_add_@
+                           value={new Date(this.entry?.waitingSince || Date.now()).toLocaleTimeString()}> @_important_@
+                           <md-icon slot="leading-icon">watch_later</md-icon>
+            </md-filled-text-field>
+            <md-filled-text-field disabled @_add_@
                            label="Predpokladaný čas vyšetrenia"  @_add_@
                            value={new Date(this.entry?.estimatedStart || Date.now()).toLocaleTimeString()}> @_add_@
-            </mwc-textfield> @_add_@
+                           <md-icon slot="leading-icon">login</md-icon>  @_add_@
+            </md-filled-text-field> @_add_@
            ...
       }
     ```
