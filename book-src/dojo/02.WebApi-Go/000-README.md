@@ -51,7 +51,7 @@ Technické ohraničenia:
 ## <a name="priprava"></a>Príprava na cvičenie
 
 * Vytvorená aplikácia podľa pokynov v cvičení
-  [_Web aplikácia pomocou knižnice Stencil JS_](../01.Web-Components/dojo/000-README.md)
+  [_Web aplikácia pomocou knižnice Stencil JS_](../01.Web-Components/000-README.md)
 * Nainštalovaný programovací jazyk [Go](https://go.dev/doc/install)
 * Nainštalovanú aplikáciu [Postman]
 * Zoznámenie sa s jazykom Go, napr. [GOLANGBOT.COM](https://golangbot.com/learn-golang-series/)
