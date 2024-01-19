@@ -2,15 +2,15 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-api-020
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-api-020`
 
 ---
 
-Podobne ako pri generovaní kódu klienta v predchadzajúcom cvičení, aj pri generovaní kostry obslužného kódu API využijeme nástroje OpenAPI. Rozdiel v tomto prípade spočíva najmä v tom, že v prípade servera generátor nevie určiť požadovanú aplikačnú logiku a preto vygeneruje len základný skeleton, ktorého aktuálnu funkcionalitu musíme doimplementovať.
+Podobne ako pri generovaní kódu klienta v predchádzajúcom cvičení, aj pri generovaní kostry obslužného kódu API využijeme nástroje OpenAPI. Rozdiel v tomto prípade spočíva najmä v tom, že v prípade servera generátor nevie určiť požadovanú aplikačnú logiku a preto vygeneruje len základný skeleton, ktorého aktuálnu funkcionalitu musíme doimplementovať.
 
-Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-generator.tech/docs/generators/go-gin-server). Hoci by bola funkcionalita generovaná týmto generátor pre potreby cvičenia postačujúca, ukážeme si ako upraviť šablóny generátora, tak aby generoval abstraktné typy a aby sme dosiahli opakované generovanie kódu pri prípadnej zmene API špecifikácie bez nutnosti prepisovania už existujúceho kódu.
+Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-generator.tech/docs/generators/go-gin-server). Hoci by bola funkcionalita generovaná týmto generátorom pre potreby cvičenia postačujúca, ukážeme si ako upraviť šablóny generátora tak, aby generoval abstraktné typy a aby sme dosiahli opakované generovanie kódu pri prípadnej zmene API špecifikácie bez nutnosti manuálneho prepisovania už existujúceho kódu.
 
 1. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/scripts/run.ps1` s nasledujúcim obsahom:
 
@@ -33,7 +33,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
             go run ${ProjectRoot}/cmd/ambulance-api-service
         }
         "openapi" {
-            docker run --rm -ti  -v ${ProjectRoot}:/local openapitools/openapi-generator-cli generate -c /local/scripts/generator-cfg.yaml 
+            docker run --rm -ti -v ${ProjectRoot}:/local openapitools/openapi-generator-cli generate -c /local/scripts/generator-cfg.yaml 
         }
         default {
             throw "Unknown command: $command"
@@ -63,7 +63,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    api/openapi.yaml
    ```
 
-   Týmto predpisom zakážeme generovanie súborov, ktoré nechceme použiť.
+   Týmto predpisom zakážeme generovanie súborov, ktoré nechceme vygenerovať.
 
 2. Uložte súbory a v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz
 
@@ -71,7 +71,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    ./scripts/run.ps1 openapi
    ```
 
-   Po jeho ukončení sa v priečinku `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl` objavia súbory ktoré obsahujú obslužné rutiny pre spracovanie požiadaviek prichádzajúcich na API. Napríklad v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/api_ambulance_waiting_list.go` sa nachádzajú funkcie ako
+   Po jeho ukončení sa v priečinku `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl` objavia súbory, ktoré obsahujú obslužné rutiny pre spracovanie požiadaviek prichádzajúcich na API. Napríklad v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/api_ambulance_waiting_list.go` sa nachádzajú funkcie ako
 
    ```go
    ...
@@ -82,17 +82,17 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    ...
    ```
 
-   >info:> Adresár z menom `internal` zabraňuje prístupu k definíciam v ňom obsiahnutých typov z iných modulov.  _Package_, ktorého implementácia je v priečinku, ktorého ľubovoľný nadradený priečinok sa volá internal, poskytuje svoje zverejnené typy len v rámci modulu, v ktorom je implementovaný.
+   >info:> Adresár s menom `internal` zabraňuje prístupu k definíciám v ňom obsiahnutých typov z iných modulov.  _Package_, ktorého implementácia je v priečinku, ktorého ľubovoľný nadradený priečinok sa volá internal, poskytuje svoje zverejnené typy len v rámci modulu, v ktorom je implementovaný.
 
-3. Vyššie uvedené funkcie by sme mohli upraviť a použiť ich potom v súbore `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go`, respektíve by sme mohli použiť hodnotu premennej `routes` zo súboru `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/routers.go`. Avšak v prípade úpravy špecifikácie, by sme pri opätovnom generovaní kostry buď prepísali zmenené súbory, alebo by sme museli zmeny prepísať do existujúcich súborov ručne. Aby sme tomu predišli, vytvoríme si vlastné šablóny pre generovanie kódu.
+3. Vyššie uvedené funkcie by sme mohli upraviť a použiť ich potom v súbore `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go`, respektíve by sme mohli použiť hodnotu premennej `routes` zo súboru `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/routers.go`. Avšak v prípade úpravy špecifikácie by sme pri opätovnom generovaní kostry buď prepísali zmenené súbory, alebo by sme museli zmeny prepísať do existujúcich súborov ručne. Aby sme tomu predišli, vytvoríme si vlastné šablóny pre generovanie kódu.
 
-   Na príkazov riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
+   Na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 
    ```ps
-   docker run --rm -ti  -v ${PWD}:/local openapitools/openapi-generator-cli author template --generator-name go-gin-server --output /local/scripts/templates
+   docker run --rm -ti -v ${PWD}:/local openapitools/openapi-generator-cli author template --generator-name go-gin-server --output /local/scripts/templates
    ```
 
-   Tento príkaz vytvorí kópie interných šablón generátora - [mustache] súborov - v priečinku `${WAC_ROOT}/ambulance-webapi/scripts/templates`. V tomto priečinku vymažte všetky súbory okrem:
+   Tento príkaz vytvorí kópie interných šablón generátora - [mustache][mustache] súborov - v priečinku `${WAC_ROOT}/ambulance-webapi/scripts/templates`. V tomto priečinku vymažte všetky súbory okrem:
 
     * `controller-api.mustache`
     * `routers.mustache`
@@ -105,7 +105,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
     ...
     ```
 
-4. Súbor `${WAC_ROOT}/ambulance-webapi/scripts/templates/controller-api.mustache` slúži ako predloha pre generovanie kódu pre jednolivé _radiče_ - v praxi je to jeden súbor alebo jedna trieda pre každý _tag_ v [OpenAPI špecifikácii][openapi-spec]. Vymažte obsah tohto súboru a vložte nasledujúci text:
+4. Súbor `${WAC_ROOT}/ambulance-webapi/scripts/templates/controller-api.mustache` slúži ako predloha pre generovanie kódu pre jednotlivé _radiče_ - v praxi je to jeden súbor alebo jedna trieda pre každý _tag_ v [OpenAPI špecifikácii][openapi-spec]. Vymažte obsah tohto súboru a vložte nasledujúci text:
 
    ```mustache
    {{>partial_header}}
@@ -134,9 +134,9 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    {{/operations}}
    ```
 
-   V tejto šablóne definujeme rozhranie, ktoré bude reprezentovať príslušnú časť - _tag_ - našej špecifikácie a v ňom deklarujeme metódy, zodpovedajúce jednotlivým operáciam z našej špecifikácie.
+   V tejto šablóne definujeme rozhranie, ktoré bude reprezentovať príslušnú časť - _tag_ - našej špecifikácie a v ňom deklarujeme metódy zodpovedajúce jednotlivým operáciám z našej špecifikácie.
 
-   Ďalej do toho istého súboru vložtešablónu pre implementáciu tohto rozhrania. Implementácia pritom nie je kompletná, metódy pre jednotlivé operácie chýbajú, a očakáva sa, že budú implementované mimo generovaný kód:
+   Ďalej do toho istého súboru vložte šablónu pre implementáciu tohto rozhrania. Implementácia pritom nie je kompletná, metódy pre jednotlivé operácie chýbajú a očakáva sa, že budú implementované mimo generovaný kód:
 
     ```mustache
     ...
@@ -161,10 +161,10 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
       {{/operation}}    @_add_@
     }    @_add_@
 
-    {{#operation}}
+    {{#operations}}
     ```
 
-   Nakoniec, do súboru `${WAC_ROOT}/ambulance-webapi/scripts/templates/controller-api.mustache` vložte kód ktorý vygeneruje (zakomentovanú) ukážku implementácie metód pre jednotlivé operácie:
+   Nakoniec do súboru `${WAC_ROOT}/ambulance-webapi/scripts/templates/controller-api.mustache` vložte kód, ktorý vygeneruje (zakomentovanú) ukážku implementácie metód pre jednotlivé operácie:
 
     ```mustache
     ...
@@ -172,7 +172,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
       ...
     }
 
-    // Copy following section to separate file, uncomment, and implemented as needed    @_add_@
+    // Copy following section to separate file, uncomment, and implement accordingly    @_add_@
     {{#operation}}    @_add_@
     // // {{nickname}} - {{{summary}}}{{#isDeprecated}}    @_add_@
     // // Deprecated{{/isDeprecated}}    @_add_@
@@ -180,7 +180,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
     //  	ctx.AbortWithStatus(http.StatusNotImplemented)    @_add_@
     // }    @_add_@
     //    @_add_@
-    {{/operation}}
+    {{/operation}}    @_add_@
     ```
 
 5. Súbor `${WAC_ROOT}/ambulance-webapi/scripts/templates/routers.mustache` integruje jednotlivé _radiče_ generované predchádzajúcou šablónou. Vymažte pôvodný obsah tohto súboru a nahraďte ho týmto kódom:
@@ -223,7 +223,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
       "github.com/gin-gonic/gin"
     )
 
-    // Nasledujúci kód je kópiou vygenerovaného a zakomentovaného kódu zo súboru impl_ambulance_conditions.go
+    // Nasledujúci kód je kópiou vygenerovaného a zakomentovaného kódu zo súboru api_ambulance_conditions.go
     func (this *implAmbulanceConditionsAPI) GetConditions(ctx *gin.Context) {
       ctx.AbortWithStatus(http.StatusNotImplemented)
     }
@@ -240,7 +240,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
         "github.com/gin-gonic/gin"
       )
   
-      // Nasledujúci kód je kópiou vygenerovaného a zakomentovaného kódu zo súboru impl_ambulance_waiting_list.go
+      // Nasledujúci kód je kópiou vygenerovaného a zakomentovaného kódu zo súboru api_ambulance_waiting_list.go
 
       // CreateWaitingListEntry - Saves new entry into waiting list
       func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context) {
@@ -275,7 +275,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
 
     import (
        ...
-      "github.com/milung/ambulance-webapi/internal/ambulance_wl" @_add_@
+      "github.com/<github_id>/ambulance-webapi/internal/ambulance_wl" @_add_@
     )
 
     func main() {
@@ -293,7 +293,13 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    go run cmd/ambulance-api-service/main.go
    ```
 
-   a potom v druhom terminály vykonajte príkaz `curl -v http://localhost:8080/api/waiting-list/bobulova/condition`. Výsledok by mal byť podobný tomuto:
+   a potom v druhom termináli vykonajte príkaz
+
+   ```ps
+   curl -v http://localhost:8080/api/waiting-list/bobulova/condition
+   ```
+
+   Výsledok by mal byť podobný tomuto:
 
    ```text
    *   Trying 127.0.0.1:8080...
@@ -311,9 +317,9 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
    * Connection #0 to host localhost left intact
    ```
 
-   Náš server síce vracia len chybové hlásenie `501 Not Implemented`, ale to je v poriadku, pretože sme vytvorili len kostru servera, ktorý ešte nie je implementovaný. V nasledujúcich krokoch sa budeme venovať implementácii servera. Môžeme ale bez problémov doplniť špecifikáciu a nanovo vygenerovať kostru servera, bez toho aby sme si prepisovali existujúci kód. Navyše, kód nebude kompilovateľný pokiaľ nebudeme mať implementované všetky operácie nášho API.
+   Náš server síce vracia len chybové hlásenie `501 Not Implemented`, ale to je v poriadku, pretože sme vytvorili len kostru servera, ktorý ešte nie je implementovaný. V nasledujúcich krokoch sa budeme venovať implementácii servera. Môžeme ale bez problémov doplniť špecifikáciu a nanovo vygenerovať kostru servera bez toho, aby sme si prepisovali existujúci kód. Navyše, kód nebude kompilovateľný pokiaľ nebudeme mať implementované všetky operácie nášho API.
 
-   >info:> Šablóny by sa dali ešte ďalej rozvíjať, napríklad sme mohli poskytnúť parametre ako vstupné argumenty do metód, ktoré musíme implementovať, čo by zredukovalo opakujúce sa bloky kódu v jednotlivých metódach. Kvôli prehľadnosti a ľahšiemu pochopeniu ďaľšieho postupu sme sa ale rozhodli pre jednoduchšiu ale funkčnú implementáciu šablón. Rôzne aj pokročilejšie techniky pre hgenerovanie kódu nájdete v [repozitári generátorov pre openapi-generator-cli](https://github.com/OpenAPITools/openapi-generator/tree/v7.0.0-beta/modules/openapi-generator/src/main/resources).
+   >info:> Šablóny by sa dali ešte ďalej rozvíjať, napríklad sme mohli poskytnúť parametre ako vstupné argumenty do metód, ktoré musíme implementovať, čo by zredukovalo opakujúce sa bloky kódu v jednotlivých metódach. Kvôli prehľadnosti a ľahšiemu pochopeniu ďalšieho postupu sme sa ale rozhodli pre jednoduchšiu ale funkčnú implementáciu šablón. Rôzne (aj pokročilejšie techniky) pre generovanie kódu nájdete v [repozitári generátorov pre openapi-generator-cli](https://github.com/OpenAPITools/openapi-generator/tree/v7.0.0-beta/modules/openapi-generator/src/main/resources).
 
 9. Archivujte zmeny v git repozitári. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkazy:
 

@@ -67,6 +67,7 @@
 [micro-fe]:https://martinfowler.com/articles/micro-frontends.html
 [mongodb]:https://www.mongodb.com/
 [mongoexpress]:https://github.com/mongo-express/mongo-express
+[mustache]:https://mustache.github.io/
 [navigation api]:https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API
 [nginx]:https://www.nginx.com/
 [nodejs]:https://nodejs.org/en/
