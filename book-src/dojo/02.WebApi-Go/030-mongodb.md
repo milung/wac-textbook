@@ -2,19 +2,19 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-api-030
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-api-030`
 
 ---
 
 Údaje, ktoré bude naše WEB API spravovať potrebuje mať niekde trvalo uložené. V tomto cvičení si ukážeme ako ich ukladať v [dokumentovej databáze](https://en.wikipedia.org/wiki/Document-oriented_database), konkrétne v [MongoDB]. Súčasne budeme používať aplikáciu [MongoExpress], ktorá nám umožňuje spravovať pripojenú [MongoDB] z používateľského rozhrania. Databázu zabezpečíme heslom, čo zodpovedá jej reálnemu použitiu.
 
-Okrem dokumentovej databázy, sme mohli zvoliť [relačnú databázu](https://en.wikipedia.org/wiki/Relational_database), alebo [grafovo orientovanú databázu](https://en.wikipedia.org/wiki/Graph_database), prípadne [databázu orientovanú na prácu s čosovými dátami](https://en.wikipedia.org/wiki/Time_series_database). Výber databázy závisí od konkrétneho použitia a požiadaviek na aplikáciu. V našom prípade sme zvolili dokumentovú databázu, pretože nám vyhovuje jej jednoduchosť a flexibilita.
+Okrem dokumentovej databázy sme mohli zvoliť [relačnú databázu](https://en.wikipedia.org/wiki/Relational_database), alebo [grafovo orientovanú databázu](https://en.wikipedia.org/wiki/Graph_database), prípadne [databázu orientovanú na prácu s časovými dátami](https://en.wikipedia.org/wiki/Time_series_database). Výber databázy závisí od konkrétneho použitia a požiadaviek na aplikáciu. V našom prípade sme zvolili dokumentovú databázu, pretože nám vyhovuje jej jednoduchosť a flexibilita.
 
 ## Lokálne použitie MongoDB
 
-Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu nainštalovať priamo na lokálny počítač, alebo použiť kontajnerovú technológiu. Prípadne môžeme MongoDB nasadiť do nášho lokálneho klastru a pristúpiť k databáze prostredníctvom príkazu `kubectl proxy-forward`. Predtým si ale ukážeme ako naštartovať niekoľko kontajnerizovaných aplikácii pre lokálny vývvoj s využitím nástroja [Docker Compose]. Našim cieľom je pripraviť konfiguráciu, ktorú potom môžeme jednoduchým spôsobom naštartovať v lokálnom prostredí, v ktorom je k dispozícii subsystém docker.
+Pri použití MongoDB máme niekoľko možností. Môžme napríklad aplikáciu nainštalovať priamo na lokálny počítač alebo použiť kontajnerovú technológiu. Prípadne môžeme MongoDB nasadiť do nášho lokálneho klastra a pristúpiť k databáze prostredníctvom príkazu `kubectl proxy-forward`. Predtým si ale ukážeme ako naštartovať niekoľko kontajnerizovaných aplikácií pre lokálny vývoj s využitím nástroja [Docker Compose]. Našim cieľom je pripraviť konfiguráciu, ktorú potom môžeme jednoduchým spôsobom naštartovať v lokálnom prostredí, v ktorom je k dispozícii subsystém docker.
 
 1. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/docker-compose/compose.yaml` s nasledujúcim obsahom: 
 
@@ -38,7 +38,7 @@ Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu 
             ports:
             - 8081:8081
             environment:
-                ME_CONFIG_MONGODB_ADMINUSERNAME:  ${AMBULANCE_API_MONGODB_USERNAME}
+                ME_CONFIG_MONGODB_ADMINUSERNAME: ${AMBULANCE_API_MONGODB_USERNAME}
                 ME_CONFIG_MONGODB_ADMINPASSWORD: ${AMBULANCE_API_MONGODB_PASSWORD}
                 ME_CONFIG_MONGODB_SERVER: mongo_db
                 ME_CONFIG_BASICAUTH_USERNAME: mexpress
@@ -49,7 +49,7 @@ Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu 
         db_data: {} @_important_@
     ```
 
-    V tomto predpise uvádzame, že chceme naštartovať dve služby - `mongo-db` a `mongo-express`. Služba [MongoExpress] nám bude poskytovať používateľské prostredie pomocou ktoreého si overíme funkcionalitu našej aplikácie. V sekcii `volumes` sme uviedli názov trvalého úložiska tzv. [_persistent docker volume_](https://docs.docker.com/storage/volumes/), v ktorom budú uložené údaje našej databázy. Prístupové údaje k fatabáze budú uložené v premenných prostredia.
+    V tomto predpise uvádzame, že chceme naštartovať dve služby - `mongo-db` a `mongo-express`. Služba [MongoExpress] nám bude poskytovať používateľské prostredie pomocou ktorého si overíme funkcionalitu našej aplikácie. V sekcii `volumes` sme uviedli názov trvalého úložiska tzv. [_persistent docker volume_](https://docs.docker.com/storage/volumes/), v ktorom budú uložené údaje našej databázy. Prístupové údaje k databáze budú uložené v premenných prostredia.
 
     Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/docker-compose/.env` s nasledujúcim obsahom:
 
@@ -68,9 +68,9 @@ Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu 
 
     ![Používateľské rozhranie Mongo Express](./img/003-01.MongoExpress.png)
 
-    >info:> [Docker Compose] umožňuje vytvárať aj komplikovanejšie konfigurácie, poskytujúce rôzne ďaľšie parametre prostredia. V našom prípade sme sa rozhodli použiť jednoduchú konfiguráciu, ktorá nám postačuje na lokálny vývoj a zároveň je dostatočná pre zachytie hlavnej idei pri používaní docker compose.
+    >info:> [Docker Compose] umožňuje vytvárať aj komplikovanejšie konfigurácie poskytujúce rôzne ďalšie parametre prostredia. V našom prípade sme sa rozhodli použiť jednoduchú konfiguráciu, ktorá nám postačuje na lokálny vývoj a zároveň je dostatočná pre zachytenie hlavnej myšlienky pri používaní docker compose.
 
-2. V používateľskom rozhraní MongoExpress vytvorte novú databázu s názvom `<pfx>-ambulance-wl`. DO poľa _Database Name_ zadajte text `<pfx>-ambulance-wl` a stlačte tlačidlo _+ Create Database_. Následne stlačte na tlačidlo _View_ vedľa názvu `<pfx>-ambulance-wl`. Do poľa _Collection name_ zadajte hodnotu `ambulances` a stlačte tlačidlo `Create collection`. Tým máme našu databázu pripravenú pre ďaľší vývoj.
+2. V používateľskom rozhraní MongoExpress vytvorte novú databázu s názvom `<pfx>-ambulance-wl`. Do poľa _Database Name_ zadajte text `<pfx>-ambulance-wl` a stlačte tlačidlo _+ Create Database_. Následne stlačte na tlačidlo _View_ vedľa názvu `<pfx>-ambulance-wl`. Do poľa _Collection name_ zadajte hodnotu `ambulances` a stlačte tlačidlo `Create collection`. Tým máme našu databázu pripravenú pre ďalší vývoj.
 
 3. Upravíme spôsob naštartovania našej aplikácie. Otvorte súbor `${WAC_ROOT}\ambulance-webapi\scripts\run.ps1` a upravte ho:
 
@@ -105,9 +105,9 @@ Pri použití MongoDB máme niekoľko možností, môžme napríklad aplikáciu 
     }
     ```
 
-    Prikaz `scripts/run.ps1 start` teraz štartuje našu aplikáciu a databázu. Prikaz `scripts/run.ps1 mongo` štartuje len databázu.
+    Príkaz `scripts/run.ps1 start` teraz štartuje našu aplikáciu a databázu. Príkaz `scripts/run.ps1 mongo` štartuje len databázu.
 
-4. Zastavte bežiaci proces, v ktorom beží mongo a zavolajte príkaz `docker compose --file ./deployments/docker-compose/compose.yaml down`. Tento príkaz spravý presný opak variantu up. Všetky kontajnery, ktoré boli vytvorené príkazom `up` budú zastavené a odstránené. Všetky sieťové rozhrania, ktoré boli vytvorené príkazom `up` budú odstránené.
+4. Zastavte bežiaci proces, v ktorom beží mongo a zavolajte príkaz `docker compose --file ./deployments/docker-compose/compose.yaml down`. Tento príkaz spraví presný opak variantu up. Všetky kontajnery, ktoré boli vytvorené príkazom `up` budú zastavené a odstránené. Všetky sieťové rozhrania, ktoré boli vytvorené príkazom `up` budú odstránené.
 
 5. Zmeny uložte a archivujte ich do git repozitára. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkazy:
 
