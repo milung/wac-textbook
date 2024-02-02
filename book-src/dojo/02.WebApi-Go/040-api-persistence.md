@@ -2,15 +2,15 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-api-040
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-api-040`
 
 ---
 
-Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zoradené do kolekcií a tie potom do databáz. . Dokumenty sú vlastne JSON objekty, ktoré môžu obsahovať ľubovoľnú štruktúru. V našom prípade budeme ukladať objekty typu `Ambulance` do kolekcie `ambulances`. Tieto objekty budú obsahovať jednak údaje o danej ambulancii pre potreby našej aplikácie, ako aj údaje o zozname čakajúcich pacientov a o zozname symptómov, z ktorého si pacienti vyberajú položku pri registrácii sa do zoznamu čakajúcich. Všetky požiadavky na naše WEB API potom budú pracovať s príslušným dokumentom, ktorý zodpovedá vybranej ambulancii.
+Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zoradené do kolekcií a tie potom do databáz. Dokumenty sú vlastne JSON objekty, ktoré môžu obsahovať ľubovoľnú štruktúru. V našom prípade budeme ukladať objekty typu `Ambulance` do kolekcie `ambulances`. Tieto objekty budú obsahovať jednak údaje o danej ambulancii pre potreby našej aplikácie, ako aj údaje o zozname čakajúcich pacientov a o zozname symptómov, z ktorého si pacienti vyberajú položku pri registrácii sa do zoznamu čakajúcich. Všetky požiadavky na naše WEB API potom budú pracovať s príslušným dokumentom, ktorý zodpovedá vybranej ambulancii.
 
-1. V prvom kroku upravíme naše API tak aby obsahovalo definíciu príslušneho objektu a umožnilo vytvoriť alebo odstrániť záznam o príslušnej ambulancii. Otvorte súbor `${WAC_ROOT}/ambulance-webapi/api/ambulance-wl.openapi.yaml` a do sekcie `components/schemas` doplňte nový typ `Ambulance`
+1. V prvom kroku upravíme naše API tak, aby obsahovalo definíciu príslušného objektu a umožnilo vytvoriť alebo odstrániť záznam o príslušnej ambulancii. Otvorte súbor `${WAC_ROOT}/ambulance-webapi/api/ambulance-wl.openapi.yaml` a do sekcie `components/schemas` doplňte nový typ `Ambulance`
 
     ```yaml
     ...
@@ -49,26 +49,26 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
       ...
     ```
 
-    Ďalej do sekcie `components/examples` doplňte príklad pre typ `Ambulance`
+    Ďalej do sekcie `examples` doplňte príklad pre typ `Ambulance`
 
     ```yaml
     ...
     components: 
     ....
-    example: 
+    examples: 
         ...
         WaitingListEntriesExample:
         ...
         AmbulanceExample:           @_add_@
-        summary: Sample GP ambulance          @_add_@
-        description: |            @_add_@
+          summary: Sample GP ambulance          @_add_@
+          description: |            @_add_@
             Example of GP ambulance with waiting list and predefined conditions         @_add_@
-        value:            @_add_@
+          value:            @_add_@
             id: gp-warenova         @_add_@
             name: Ambulancia všeobecného lekárstva Dr. Warenová         @_add_@
             roomNumber: 356 - 3.posch           @_add_@
             waitingList:            @_add_@
-            - id: x321ab3         @_add_@
+              - id: x321ab3         @_add_@
                 name: Jožko Púčik           @_add_@
                 patientId: 460527-jozef-pucik           @_add_@
                 waitingSince: "2038-12-24T10:05:00.000Z"            @_add_@
@@ -78,7 +78,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 value: Teploty            @_add_@
                 code: subfebrilia         @_add_@
                 reference: "https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/"          @_add_@
-            - id: x321ab4         @_add_@
+              - id: x321ab4         @_add_@
                 name: Ferdinand Trety           @_add_@
                 patientId: 780907-ferdinand-tre         @_add_@
                 waitingSince: "2038-12-24T10:25:00.000Z"            @_add_@
@@ -89,21 +89,21 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
                 code: nausea          @_add_@
                 reference: "https://zdravoteka.sk/priznaky/nevolnost/"            @_add_@
             predefinedConditions:           @_add_@
-            - value: Teploty          @_add_@
+              - value: Teploty          @_add_@
                 code: subfebrilia           @_add_@
                 reference: "https://zdravoteka.sk/priznaky/zvysena-telesna-teplota/"            @_add_@
                 typicalDurationMinutes: 20          @_add_@
-            - value: Nevoľnosť            @_add_@
+              - value: Nevoľnosť            @_add_@
                 code: nausea            @_add_@
                 reference: "https://zdravoteka.sk/priznaky/nevolnost/"          @_add_@
                 typicalDurationMinutes: 45          @_add_@
-            - value: Kontrola         @_add_@
+              - value: Kontrola         @_add_@
                 code: followup          @_add_@
                 typicalDurationMinutes: 15          @_add_@
-            - value: Administratívny úkon         @_add_@
+              - value: Administratívny úkon         @_add_@
                 code: administration            @_add_@
                 typicalDurationMinutes: 10          @_add_@
-            - value: Odber krvy           @_add_@
+              - value: Odber krvi           @_add_@
                 code: blood-test            @_add_@
                 typicalDurationMinutes: 10          @_add_@
     ```
@@ -114,11 +114,11 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     ...
     tags:
     - name: ambulanceWaitingList
-    description: Ambulance Waiting List API
+      description: Ambulance Waiting List API
     - name: ambulanceConditions
-    description: Patient conditions and synptoms handled in the ambulance
+      description: Patient conditions and synptoms handled in the ambulance
     - name: ambulances @_add_@
-    description: Ambulance details   @_add_@
+      description: Ambulance details   @_add_@
     ```
 
     a do sekcie `paths` doplňte novú cesty a operácie:
@@ -127,59 +127,59 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     ...
     paths:
     ...
-    "/waiting-list/{ambulanceId}/condition":
+      "/waiting-list/{ambulanceId}/condition":
         ...
-    "/ambulance":     @_add_@
+      "/ambulance":     @_add_@
         post:     @_add_@
-        tags:     @_add_@
+          tags:     @_add_@
             - ambulances     @_add_@
-        summary: Saves new ambulance definition     @_add_@
-        operationId: createAmbulance     @_add_@
-        description: Use this method to initialize new ambulance in the system     @_add_@
-        requestBody:     @_add_@
+          summary: Saves new ambulance definition     @_add_@
+          operationId: createAmbulance     @_add_@
+          description: Use this method to initialize new ambulance in the system     @_add_@
+          requestBody:     @_add_@
             content:     @_add_@
-            application/json:     @_add_@
+              application/json:     @_add_@
                 schema:     @_add_@
-                $ref: "#/components/schemas/Ambulance"     @_add_@
+                  $ref: "#/components/schemas/Ambulance"     @_add_@
                 examples:     @_add_@
-                    request-sample:      @_add_@
+                  request-sample:      @_add_@
                     $ref: "#/components/examples/AmbulanceExample"     @_add_@
             description: Ambulance details to store     @_add_@
             required: true     @_add_@
-        responses:     @_add_@
+          responses:     @_add_@
             "200":     @_add_@
-            description: >-     @_add_@
+              description: >-     @_add_@
                 Value of stored ambulance     @_add_@
-            content:     @_add_@
+              content:     @_add_@
                 application/json:     @_add_@
-                schema:     @_add_@
+                  schema:     @_add_@
                     $ref: "#/components/schemas/Ambulance"     @_add_@
-                examples:     @_add_@
+                  examples:     @_add_@
                     updated-response:      @_add_@
-                    $ref: "#/components/examples/AmbulanceExample"     @_add_@
+                      $ref: "#/components/examples/AmbulanceExample"     @_add_@
             "400":     @_add_@
-            description: Missing mandatory properties of input object.     @_add_@
+              description: Missing mandatory properties of input object.     @_add_@
             "409":     @_add_@
-            description: Entry with the specified id already exists     @_add_@
-    "/ambulance/{ambulanceId}":     @_add_@
+              description: Entry with the specified id already exists     @_add_@
+      "/ambulance/{ambulanceId}":     @_add_@
         delete:     @_add_@
-        tags:     @_add_@
+          tags:     @_add_@
             - ambulances     @_add_@
-        summary: Deletes specific ambulance     @_add_@
-        operationId: deleteAmbulance     @_add_@
-        description: Use this method to delete the specific ambulance from the system.     @_add_@
-        parameters:     @_add_@
+          summary: Deletes specific ambulance     @_add_@
+          operationId: deleteAmbulance     @_add_@
+          description: Use this method to delete the specific ambulance from the system.     @_add_@
+          parameters:     @_add_@
             - in: path     @_add_@
-            name: ambulanceId     @_add_@
-            description: pass the id of the particular ambulance     @_add_@
-            required: true     @_add_@
-            schema:     @_add_@
+              name: ambulanceId     @_add_@
+              description: pass the id of the particular ambulance     @_add_@
+              required: true     @_add_@
+              schema:     @_add_@
                 type: string     @_add_@
-        responses:     @_add_@
+          responses:     @_add_@
             "204":     @_add_@
-            description: Item deleted     @_add_@
+              description: Item deleted     @_add_@
             "404":     @_add_@
-            description: Ambulance with such ID does not exists     @_add_@
+              description: Ambulance with such ID does not exist     @_add_@
     ```
 
 2. Vygenerujte novú verziu skeletonu pre serverovú časť nášho WEB API. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte nasledujúci príkaz:
@@ -213,7 +213,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
    Táto implementácia je dočasná, pred jej dokončením pripravíme pomocnú triedu, ktorá bude zodpovedná za prístup k databáze.
 
-3. Za účelom prístupu k dokumentom a práce s nimi vytvoríme nové triedy v samostatnom  _package_ `db_service`. Pretože programovací jazyk [Go] nedovoľuje vytvárať cyklické závislosti medzi jednotlivými balíčkami, bude táto implementácia používať šablóny typov - [_generics_], to znamená, že nebude používať žiadne typy z balíčka `ambulance_wl`. K serializácii objektov pritom bude využívať anotácie vygenerované openapi generátorom kódu. Napríklad typ `Condition` v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/model_condition.go` je definovaný takto
+3. Za účelom prístupu k dokumentom a práce s nimi vytvoríme nové triedy v samostatnom  _package_ `db_service`. K serializácii objektov bude využívať anotácie vygenerované openapi generátorom kódu. Napríklad typ `Condition` v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/model_condition.go` je definovaný takto
 
    ```go
    type Condition struct {
@@ -230,6 +230,8 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
    ```
 
    Anotácia `json:"value"` určuje, že vlastnosť `Value` sa bude do JSON objektu serializovať pod kľúčom `value`. Knižnica mongo podporuje `json` aj `bson` (binary JSON) anotácie. Vďaka tomu bude možné použiť túto triedu priamo na serializáciu a deserializáciu objektov z databázy.
+
+   > Pretože programovací jazyk [Go] nedovoľuje vytvárať cyklické závislosti medzi jednotlivými balíčkami, bude implementácia `db_service` používať šablóny typov - [generics], to znamená, že nebude používať žiadne typy z balíčka `ambulance_wl`.
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` s obsahom:
 
@@ -279,16 +281,14 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
-   Rozhranie DbService je generickým rozhraním, konkrétny typ inštancie bude určený pri jej vytváraní naviazaním na typ `DocType`. Vo zvyšku našej implementácie budeme predpokladať, že pracujeme s [dokumentovou databázou](https://en.wikipedia.org/wiki/Document-oriented_database) ale nebude zavádzať explicitné závislosti na konkrétnej implementácii. V našom prípade bude konkrétnou implementáciou trieda `mongoSvc`, ktorá bude využívať knižnicu [mongo-go-driver](https://github.com/mongodb/mongo-go-driver). Všimnite si, že tento typ nie je mimo package `db_service` viditeľný (začína malým písmenom), čo znamená, že ho budeme môcť použiť iba v rámci tohto balíčka.
+   Rozhranie DbService je generickým rozhraním, konkrétny typ inštancie bude určený pri jej vytváraní naviazaním na typ `DocType`. Vo zvyšku našej implementácie budeme predpokladať, že pracujeme s [dokumentovou databázou](https://en.wikipedia.org/wiki/Document-oriented_database), ale nebudeme zavádzať explicitné závislosti na konkrétnej implementácii. V našom prípade bude konkrétnou implementáciou trieda `mongoSvc`, ktorá bude využívať knižnicu [mongo-go-driver](https://github.com/mongodb/mongo-go-driver). Všimnite si, že tento typ nie je mimo package `db_service` viditeľný (začína malým písmenom), čo znamená, že ho budeme môcť použiť iba v rámci tohto balíčka.
 
 4. Typ `mongoSvc` bude zdieľaný medzi jednotlivými požiadavkami prichádzajúcimi na náš server. Preto bude obsahovať aj synchronizačný mechanizmus, ktorý zabezpečí, že v jednom okamihu bude existovať iba jedna inštancia triedy `mongo.Client`. Kód triedy `mongo.Client` je reentrantný, prístup k metódam tejto triedy preto nie je potrebné synchronizovať.
 
    Pri vytváraní novej inštancie použijeme buď explicitne dodané parametre v type `MongoServiceConfig` alebo, ak nie sú poskytnuté, pokúsime sa ich načítať z premenných prostredia alebo použijeme predvolené hodnoty. Doplňte na koniec súboru `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` nasledujúci kód:
 
    ```go
-   func NewMongoService[DocType interface{}](
-        config MongoServiceConfig,
-    ) DbService[DocType] {
+   func NewMongoService[DocType interface{}](config MongoServiceConfig) DbService[DocType] {
         enviro := func(name string, defaultValue string) string {
             if value, ok := os.LookupEnv(name); ok {
                 return value
@@ -351,9 +351,9 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
    ```
 
-   >info:> Odporúčame Vám zoznámiť sa s knižnicou [viper], ktorá poskytuje flexibilnejšie spôsoby konfigurácie aplikácie v cieľovom prostredí
+   >info:> Odporúčame Vám zoznámiť sa s knižnicou [viper], ktorá poskytuje flexibilnejšie spôsoby konfigurácie aplikácie v cieľovom prostredí.
 
-5. Ďalej do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplňte pomocné funkcie na pripojenie sa a odpojenie sa od databázy. Všimnite si akým spôsobom zabezpečuje synchronizáciu prístupu k inštancii triedy `mongo.Client`. Hoci by sme mohli univerzálne používať mutex `clientLock`, prístup k nemu by mohol vyvolať prerušenie daného vlákna výpočtu, čo by z hľadiska celkového výkonu bolo neefektívne. Preto používame [atomic pointer](https://pkg.go.dev/sync/atomic#Pointer) ktorý umožňuje atomické načítanie a zápis hodnoty, a len v prípade kedy musíme vytvoriť novú inštanciu klienta, alebo ju odstrániť, vstúpime do kritickej sekcie riadenej mutexom. Pretože priebeh vypočtu môže byť ukončený náhlou výnimkou, používame konštrukt `defer`, ktorý zabezpečí, že sa uvedený výraz vykoná vždy keď opustíme danú funkciu.
+5. Ďalej do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplňte pomocné funkcie na pripojenie sa a odpojenie sa od databázy. Všimnite si akým spôsobom zabezpečuje synchronizáciu prístupu k inštancii triedy `mongo.Client`. Hoci by sme mohli univerzálne používať mutex `clientLock`, prístup k nemu by mohol vyvolať prerušenie daného vlákna výpočtu, čo by z hľadiska celkového výkonu bolo neefektívne. Preto používame [atomic pointer](https://pkg.go.dev/sync/atomic#Pointer), ktorý umožňuje atomické načítanie a zápis hodnoty, a len v prípade kedy musíme vytvoriť novú inštanciu klienta, alebo ju odstrániť, vstúpime do kritickej sekcie riadenej mutexom. Pretože priebeh výpočtu môže byť ukončený náhlou výnimkou, používame konštrukt `defer`, ktorý zabezpečí, že sa uvedený výraz vykoná vždy, keď opustíme danú funkciu.
 
     ```go
     func (this *mongoSvc[DocType]) connect(ctx context.Context) (*mongo.Client, error) {
@@ -408,11 +408,11 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
-6. Následne do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplníme implementáciu rozhrania `DbService` nad typom `mongoSvc`. Vo všetkých metódach sa pokúsime načítať dokument (ambulanciu) s príslušným id a pokiaľ sa v databáze nenachádza vrátime preddefinovanú inštanciu typu `error` `ErrNotFoundE`, respektíve v prípade vytvárania dokumentu vrátime chybu `ErrConflict` ak taký dokument už existuje.
+6. Následne do súboru  `${WAC_ROOT}/ambulance-webapi/internal/db_service/mongo_svc.go` doplníme implementáciu rozhrania `DbService` nad typom `mongoSvc`. Vo všetkých metódach sa pokúsime načítať dokument (ambulanciu) s príslušným id a pokiaľ sa v databáze nenachádza, vrátime preddefinovanú inštanciu typu `error` `ErrNotFoundE`, respektíve v prípade vytvárania dokumentu vrátime chybu `ErrConflict` ak taký dokument už existuje.
 
-   Všimnite si používanie typu [`context.Context`](https://pkg.go.dev/context). Tento typ je štandarnde použitý ako prvý parameter funkcií, ktoré využívajú asynchrónne spracovanie údajov alebo implementujú dlhotrvajúci výpočet. `Context` umožňuje propagovať žiadosť o predčasné ukončenie výpočtu do svojich podriadených kontextov, vytvorených jeho metódami `With....`. Tiež umožňuje predávať medzi vláknami údaje, ktoré sú spoločné pre celý výpočet. V našom prípade používame `Context` na to aby sme časovo ohraničili dobu počas ktorej sa má klient pokúšať získať odpoveď z pripojenej databázy.
+   Všimnite si používanie typu [`context.Context`](https://pkg.go.dev/context). Tento typ je štandardne použitý ako prvý parameter funkcií, ktoré využívajú asynchrónne spracovanie údajov alebo implementujú dlhotrvajúci výpočet. `Context` umožňuje propagovať žiadosť o predčasné ukončenie výpočtu do svojich podriadených kontextov, vytvorených jeho metódami `With...`. Tiež umožňuje predávať medzi vláknami údaje, ktoré sú spoločné pre celý výpočet. V našom prípade používame `Context` na to, aby sme časovo ohraničili dobu, počas ktorej sa má klient pokúšať získať odpoveď z pripojenej databázy.
 
-   Volanie `context.Cancel()` nastaví _context_ do stavu `Done`, čo môžeme použiť, ak by sme čakali na dokončenie výpočtu asynchrónnym spôsobom alebo ak by sme chceli _context_ - teda výpočet riadený týmto _context_-om - predčasne ukončiť z iného vlákna. Túto možnosť tu ale nevyužívame. Nezabudnitne, že novovytvorene inštancie typu `context.Context` sú vždy v stave `Done` a preto je potrebné ich vytvárať pomocou metód `context.With...`, a na konci ich životného cyklu je potrebné zavolať funkciu `context.Cancel()`. V našom prípade to robíme pomocou konštruktu `defer` a volaním poskytnutej funkcie `contextCancel()`, ktorá interne prevolá spomenutú metódu `context.Cancel()`.
+   Volanie `context.Cancel()` nastaví _context_ do stavu `Done`, čo môžeme použiť, ak by sme čakali na dokončenie výpočtu asynchrónnym spôsobom alebo ak by sme chceli _context_ - teda výpočet riadený týmto _context_-om - predčasne ukončiť z iného vlákna. Túto možnosť tu ale nevyužívame. Nezabudnite, že novovytvorené inštancie typu `context.Context` sú vždy v stave `Done` a preto je potrebné ich vytvárať pomocou metód `context.With...`, a na konci ich životného cyklu je potrebné zavolať funkciu `context.Cancel()`. V našom prípade to robíme pomocou konštruktu `defer` a volaním poskytnutej funkcie `contextCancel()`, ktorá interne prevolá spomenutú metódu `context.Cancel()`.
 
     ```go
     func (this *mongoSvc[DocType]) CreateDocument(ctx context.Context, id string, document *DocType) error {
@@ -516,7 +516,10 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     
     import (
         ...
-        "github.com/<pfx>/ambulance-webapi/internal/db_service" @_add_@
+        "github.com/<github_id>/ambulance-webapi/internal/db_service" @_add_@
+        "context" @_add_@
+        "time" @_add_@
+        "github.com/gin-contrib/cors" @_add_@
     )
     
     func main() {
@@ -524,16 +527,15 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         engine := gin.New()
         engine.Use(gin.Recovery())
 
-        corsConfig := cors.Config{  @_add_@
-            Origins:         "*",  @_add_@
-            Methods:         "GET, PUT, POST, DELETE, PATCH",  @_add_@
-            RequestHeaders:  "Origin, Authorization, Content-Type",  @_add_@
-            ExposedHeaders:  "", @_add_@
-            MaxAge:          12 * time.Hour, @_add_@
-            Credentials:     false, @_add_@
-            ValidateHeaders: false, @_add_@
-        }
-        engine.Use(cors.Middleware(corsConfig)) @_add_@
+        corsMiddleware := cors.New(cors.Config{     @_add_@
+            AllowOrigins:     []string{"*"},     @_add_@
+            AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "PATCH"},     @_add_@
+            AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},     @_add_@
+            ExposeHeaders:    []string{""},     @_add_@
+            AllowCredentials: false,     @_add_@
+            MaxAge: 12 * time.Hour,     @_add_@
+        })     @_add_@
+        engine.Use(corsMiddleware)     @_add_@
     
         // setup context update  middleware     @_add_@
         dbService := db_service.NewMongoService[ambulance_wl.Ambulance](db_service.MongoServiceConfig{})     @_add_@
@@ -558,7 +560,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
         "github.com/gin-gonic/gin"
         "github.com/google/uuid" @_add_@
-        "github.com/<pfx>/ambulance-webapi/internal/db_service" @_add_@
+        "github.com/<github_id>/ambulance-webapi/internal/db_service" @_add_@
     )
 
     // CreateAmbulance - Saves new ambulance definition
@@ -697,7 +699,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         }    @_add_@
     ```
 
-9. Uložte zmeny. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte nasledujúce príkazi:
+9. Uložte zmeny. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte nasledujúce príkazy:
 
     ```ps
     go mod tidy
@@ -717,7 +719,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
        )
    }
 
-    Invoke-RestMethod -Method Post -Uri http://localhost:808/api/ambulance -Body ($Body | ConvertTo-Json) -ContentType "application/json"
+    Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/ambulance -Body ($Body | ConvertTo-Json) -ContentType "application/json"
     ```
 
     Výsledkom by mal byť výpis v tejto podobe:
@@ -734,9 +736,9 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     > curl -X POST -H "Content-Type: application/json" -d '{"id":"bobulova","name":"Dr.Bobulová","roomNumber":"123","predefinedConditions":>    [{"value":"Nádcha","code":"rhinitis"},{"value":"Kontrola","code":"checkup"}]}' http://localhost:8080/ambulance
     > ```
 
-   Týmto sme overili funkčnosť doteraz implmentovného kódu a zároveň sme vytvorili novú ambulanciu. V prehliadači otvorte stánku `http://localhost:8081/db/<pfx>-ambulance-wl/ambulance` a v zozname dokumento stlačte na prvý záznam.
+   Týmto sme overili funkčnosť doteraz implmentovného kódu a zároveň sme vytvorili novú ambulanciu. V prehliadači otvorte stánku `http://localhost:8081/db/<pfx>-ambulance-wl/ambulance` a v zozname dokumentov stlačte na prvý záznam.
 
-10. V prípade zostávajúcich obslužných metód bude ich funkcionalita v mnohom podobná. Najprv musíme získať dokument pre danú ambulanciu, upraviť ho, a následne ho pozmenený uložiť do databázy. Popritom musíme ošetriť možné chybové stavy. Aby sme zredukovali duplicitu kódu, pomôžeme si pomocnou funkciou. Vytvorte súbor `${WAC_ROOT}//ambulance-webapi/internal/ambulance_wl/utils_ambulance_updater.go` s nasledujúcim obsahom:
+10. V prípade zostávajúcich obslužných metód bude ich funkcionalita v mnohom podobná. Najprv musíme získať dokument pre danú ambulanciu, upraviť ho a následne ho pozmenený uložiť do databázy. Popritom musíme ošetriť možné chybové stavy. Aby sme zredukovali duplicitu kódu, pomôžeme si pomocnou funkciou. Vytvorte súbor `${WAC_ROOT}//ambulance-webapi/internal/ambulance_wl/utils_ambulance_updater.go` s nasledujúcim obsahom:
 
     ```go
     package ambulance_wl
@@ -745,7 +747,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
         "net/http"
 
         "github.com/gin-gonic/gin"
-        "github.com/<pfx>/ambulance-webapi/internal/db_service"
+        "github.com/<github-id>/ambulance-webapi/internal/db_service"
     )
 
     type ambulanceUpdater = func( @_important_@
@@ -854,7 +856,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
-    Všimnite si, že funkcia `updateAmbulanceFunc` akceptuje ako vstupný argument inú funkciu, declarovanú ako `ambulanceUpdater`. Funkcie sú v jazyku [go] plnohodnotnými typmi a preto ich je možné používať ako typy.
+    Všimnite si, že funkcia `updateAmbulanceFunc` akceptuje ako vstupný argument inú funkciu, deklarovanú ako `ambulanceUpdater`. Funkcie sú v jazyku [go] plnohodnotnými typmi a preto ich je možné používať ako typy.
 
 11. Teraz otvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_conditions.go` a upravte ho:
 
@@ -880,7 +882,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
     V tejto metóde sme použili funkciu `updateAmbulanceFunc` a ako jej argument sme poskytli anonymnú funkciu, ktorá vracia zoznam podmienok, ktoré sú priradené k ambulancii. Všimnite si, že v prípade, že ambulancia nemá priradené žiadne podmienky, vraciame prázdny zoznam.
 
-12. Trieda `implAmbulanceWaitingListAPI` upravuje zoznam čakajúcich v zvolenej ambulancii. Súčasťou aplikačnej logiky je zabezpečenie konzistentného zoznamu, to znamená, že po každej úprave potrebujeme upraviť dobu predpokladaného vstupu do ambulancie, ktorá nesmie byť skôr ako je daný okamžik, a ani sa nesmie prekrývať medzi dvoma pacientami. Toto zabezpečíme pomocou metódy `reconcileWaitingList` o ktorú rozšírime triedu `Ambulance`. Metódu vložíme do nového súboru, aby sme si neprepísali ručne vytvorený kód pri ďalšom použití nástroja [openapi-generator]. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/ext_model_ambulance.go` a vložte do neho nasledujúci kód:
+12. Trieda `implAmbulanceWaitingListAPI` upravuje zoznam čakajúcich v zvolenej ambulancii. Súčasťou aplikačnej logiky je zabezpečenie konzistentného zoznamu, to znamená, že po každej úprave potrebujeme upraviť dobu predpokladaného vstupu do ambulancie, ktorá nesmie byť skôr ako je daný okamžik a ani sa nesmie prekrývať medzi dvoma pacientami. Toto zabezpečíme pomocou metódy `reconcileWaitingList`, ktorú naimplementujeme v triede `Ambulance`. Metódu vložíme do nového súboru, aby sme si neprepísali ručne vytvorený kód pri ďalšom použití nástroja [openapi-generator]. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/ext_model_ambulance.go` a vložte do neho nasledujúci kód:
 
     ```go
     package ambulance_wl
@@ -888,7 +890,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     import (
         "time"
 
-        "golang.org/x/exp/slices"
+        "slices"
     )
 
     func (this *Ambulance) reconcileWaitingList() {
@@ -933,13 +935,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
 
     ```
 
-    Za účelom získania knižnice `golang.org/x/exp/slices` vykonajte na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` tento príkaz
-
-    ```ps
-    go mod tidy
-    ```
-
-    >info:> V nových vydania jazyka go, je balík `slices` súčasťou štandardnej distribúcie. V prípade, že používate novšiu verziu jazyka go, môžete balík `golang.org/x/exp/slices` odstrániť z `go.mod` súboru a v sekcii `import` uviesť balík `slices`.
+    >info:> V nových vydania jazyka go je balík `slices` súčasťou štandardnej distribúcie. V prípade, že import balíka `slices` nie je rozpoznaný, zrejme používate staršiu verziu jazyka go. V takom prípade buď prejdite na novšiu verziu alebo zameňte import balíka `slices` za `golang.org/x/exp/slices`. Za účelom získania knižnice `golang.org/x/exp/slices` vykonajte na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` príkaz `go mod tidy`.
 
 13. Teraz otvorte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_waiting_list.go` a upravte metódu `CreateWaitingList`:
 
@@ -949,9 +945,9 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     import (
         "net/http" 
 
-        "github.com/gin-gonic/gin"  @_add_@
+        "github.com/gin-gonic/gin"
         "github.com/google/uuid"  @_add_@
-        "golang.org/x/exp/slices"  @_add_@
+        "slices"  @_add_@
     )
 
     // CreateWaitingListEntry - Saves new entry into waiting list
@@ -1008,7 +1004,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
-    V tejto funkcii postupujeme obdobne ako v prípade funkcie `GetConditions`, musíme ale ošetriť situácie kedy je požiadavka neprípustna, napríklad odmietneme požiadavku na registráciu už čakajúceho pacienta, alebo požiadavku s duplikátnym identifikátorom. V prípade úspešného vytvorenia záznamu v zozname čakajúcich, zavoláme metódu `reconcileWaitingList` na objekte `Ambulance`, ktorá zabezpečí konzistentnosť časových značiek zoznamu.
+    V tejto funkcii postupujeme obdobne ako v prípade funkcie `GetConditions`, musíme ale ošetriť situácie, kedy je požiadavka neprípustná, napríklad odmietneme požiadavku na registráciu už čakajúceho pacienta, alebo požiadavku s duplikátnym identifikátorom. V prípade úspešného vytvorenia záznamu v zozname čakajúcich zavoláme metódu `reconcileWaitingList` na objekte `Ambulance`, ktorá zabezpečí konzistentnosť časových značiek zoznamu.
 
     Ďalej v tom istom súbore upravte metódu `DeleteWaitingListEntry`:
 
@@ -1046,7 +1042,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     }
     ```
 
-    V tomto prípade nás zaujíma najmä či daný záznam existuje, pokiaľ äno tak ho odstránime zo zoznamu a zavoláme metódu `reconcileWaitingList` na objekte `Ambulance`.
+    V tomto prípade nás zaujíma najmä či daný záznam existuje, pokiaľ áno, tak ho odstránime zo zoznamu a zavoláme metódu `reconcileWaitingList` na objekte `Ambulance`.
 
     Metódy `GetWaitingList` a `GetWaitingListEntry` sú pomerne priamočiare - vrátia aktuálny zoznam čakajúcich alebo požadovaný záznam pokiaľ existuje:
 
@@ -1157,7 +1153,7 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     ```
 
     Všimnite si, že podobne ako v ostatných metódach sa snažíme zabezpečiť platnosť vlastností `PatientId` a `Id` objektu `WaitingListEntry`. Z našej schémy ale vyplýva,
-    že tieto vlastnosti sú povinné, takže tento krok sa javí ako redundandný. Alternatívnym riešením by bolo použiť knižnicu na validáciu objektov podľa [JSONSchema] špecifikácii použitých v OpenAPi špecifikácii,
+    že tieto vlastnosti sú povinné, takže tento krok sa javí ako redundandný. Alternatívnym riešením by bolo použiť knižnicu na validáciu objektov podľa [JSONSchema] špecifikácii použitých v OpenAPI špecifikácii,
     ideálne už v kóde vygenerovanom nástrojom [openapi-generator]. Príkladom takejto knižnice je [github.com/santhosh-tekuri/jsonschema/v5](https://github.com/santhosh-tekuri/jsonschema).
     V každom prípade venujte konzistencii dát v databáze dostatočnú pozornosť.
 
@@ -1169,6 +1165,6 @@ Dokumentové databázy ukladajú vo svojej podstate dokumenty, ktoré sú zorade
     git push
     ```
 
-   Teraz máme naše WEB API implementované a môžeme ho použiť. V ďalšom kroku si pripravíme predpis pre jeho priebežnú integráciu a potom ho nasadíme do Kubernetes clustra.
+   Teraz máme naše WEB API implementované a môžeme ho použiť. V ďalšom kroku si pripravíme predpis pre jeho priebežnú integráciu a potom ho nasadíme do Kubernetes klastra.
 
    >home_work:> V tomto cvičení sme implementovali metódy potrebné pre funkcionalitu nášho web komponentu. Samostatne doplňte špecifikáciu a implementáciu pre úpravu a získanie ambulancie a pre prácu so zoznamom `predefinedConditions`.

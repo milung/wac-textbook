@@ -32,6 +32,7 @@
 [flux cd]:https://fluxcd.io/
 [gatewayapi]:https://gateway-api.sigs.k8s.io/
 [gateway api]:https://gateway-api.sigs.k8s.io/
+[generics]:https://go.dev/blog/intro-generics
 [gin]:https://gin-gonic.com/docs/
 [git]:https://git-scm.com/
 [github]:https://github.com/

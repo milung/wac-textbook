@@ -16,7 +16,7 @@ Okrem dokumentovej databázy sme mohli zvoliť [relačnú databázu](https://en.
 
 Pri použití MongoDB máme niekoľko možností. Môžme napríklad aplikáciu nainštalovať priamo na lokálny počítač alebo použiť kontajnerovú technológiu. Prípadne môžeme MongoDB nasadiť do nášho lokálneho klastra a pristúpiť k databáze prostredníctvom príkazu `kubectl proxy-forward`. Predtým si ale ukážeme ako naštartovať niekoľko kontajnerizovaných aplikácií pre lokálny vývoj s využitím nástroja [Docker Compose]. Našim cieľom je pripraviť konfiguráciu, ktorú potom môžeme jednoduchým spôsobom naštartovať v lokálnom prostredí, v ktorom je k dispozícii subsystém docker.
 
-1. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/docker-compose/compose.yaml` s nasledujúcim obsahom: 
+1. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/docker-compose/compose.yaml` s nasledujúcim obsahom:
 
     ```yaml
     services: 
@@ -66,6 +66,8 @@ Pri použití MongoDB máme niekoľko možností. Môžme napríklad aplikáciu 
 
     Následne v prehliadači prejdite na stránku [http://localhost:8081](http://localhost:8081). Prihláste sa pomocou údajov špecifikovaných v premených prostredia mongo express v súbore `compose.yaml`, `ME_CONFIG_BASICAUTH_USERNAME` a `ME_CONFIG_BASICAUTH_USERNAME`. Mali by ste vidieť používateľské rozhranie [MongoExpress].
 
+    >info:> V prípade, že sa vám nepodarí pripojiť na používateľské rozhranie MongoExpress a dostanete v prehliadači chybové hlásenie `Unauthorized`, skúste vyčistiť `Basic Authentication Details` v prehliadači.
+
     ![Používateľské rozhranie Mongo Express](./img/003-01.MongoExpress.png)
 
     >info:> [Docker Compose] umožňuje vytvárať aj komplikovanejšie konfigurácie poskytujúce rôzne ďalšie parametre prostredia. V našom prípade sme sa rozhodli použiť jednoduchú konfiguráciu, ktorá nám postačuje na lokálny vývoj a zároveň je dostatočná pre zachytenie hlavnej myšlienky pri používaní docker compose.
@@ -107,7 +109,13 @@ Pri použití MongoDB máme niekoľko možností. Môžme napríklad aplikáciu 
 
     Príkaz `scripts/run.ps1 start` teraz štartuje našu aplikáciu a databázu. Príkaz `scripts/run.ps1 mongo` štartuje len databázu.
 
-4. Zastavte bežiaci proces, v ktorom beží mongo a zavolajte príkaz `docker compose --file ./deployments/docker-compose/compose.yaml down`. Tento príkaz spraví presný opak variantu up. Všetky kontajnery, ktoré boli vytvorené príkazom `up` budú zastavené a odstránené. Všetky sieťové rozhrania, ktoré boli vytvorené príkazom `up` budú odstránené.
+4. Zastavte bežiaci proces, v ktorom beží mongo a zavolajte príkaz
+
+    ```ps
+    docker compose --file ./deployments/docker-compose/compose.yaml down
+    ```
+
+    Tento príkaz spraví presný opak variantu up. Všetky kontajnery, ktoré boli vytvorené príkazom `up` budú zastavené a odstránené. Všetky sieťové rozhrania, ktoré boli vytvorené príkazom `up` budú odstránené.
 
 5. Zmeny uložte a archivujte ich do git repozitára. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkazy:
 

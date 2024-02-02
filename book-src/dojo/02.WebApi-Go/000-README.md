@@ -16,7 +16,7 @@ v predchádzajúcom cvičení. Základná funkcionalita:
   * Ako pacient čakajúci v ambulancii chcem mať vizuálny prehľad o aktuálnom stave
   môjho poradia.
 * Ambulantná sestra
-  * Ako setra ambulancie chcem mať prehľad o počte a identite čakajúcich pacientov
+  * Ako sestra ambulancie chcem mať prehľad o počte a identite čakajúcich pacientov
   a ďalšom pacientovi v poradí.
   * Ako sestra ambulancie chcem vedieť koľko a ktorí pacienti čakajú na lekárske
   vyšetrenie, ktorí čakajú na prednostné ošetrenie, a ktorí čakajú na vybavenie
