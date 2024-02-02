@@ -1,16 +1,16 @@
-# Pridanie distribuovaneho sledovania do Web API služby
+# Pridanie distribuovaneho trasovania do Web API služby
 
 ---
 
 ```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-110
+devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-120
 ```
 
 ---
 
 V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé požiadavky pomocou distribuovaného trasovania, samotné záznamy boli ale pomerne hrubé a stále nemáme k dispozícii ďalšie detaily ohľadne prebiehajúceho výpočtu. VC tejto sekcii si ukážeme ako doplniť do aplikácie rozsahy - _span_ - vlastného výpočtu.
 
-1. Otvorte súbor `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go` a upravt ho
+1. Otvorte súbor `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go` a upravte ho
 
    ```go
    package main
@@ -21,6 +21,7 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"   @_add_@
        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"   @_add_@
        "go.opentelemetry.io/otel/sdk/trace"   @_add_@
+       "go.opentelemetry.io/otel/propagation"   @_add_@
    )
    
    // initialize OpenTelemetry instrumentations
@@ -59,7 +60,9 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
    
    }
    ```
-  
+
+   Upravte zároveň návratové hodnoty vo vynechaných riadkoch.
+
    Do funkcie `initTelemetry()` sme pridali inicializáciu [_TraceProvider_](https://opentelemetry.io/docs/concepts/signals/traces/#tracer-provider)-a. Samotnú konfiguráciu vykonáme neskôr pomocou premenných prostredia, doležité je, že túto sekciu vytvárame len v prípade, kedy je premenná prostredia `OTEL_TRACES_EXPORTER` explicitne nastavená na hodnotu `otlp` - žiadny iný spôsob ukladania záznamov nepodpúorujeme. Keďže [_Trace Exporter_](https://opentelemetry.io/docs/concepts/signals/traces/#trace-exporters) ukladá záznamy asynchrónne a v dávkach, je potrebné zabezpečiť, aby sa všetky záznamy uložili pred ukončením aplikácie. K tomu slúži funkcia `Shutdown()`, ktorej inštancia je návratou hodnotou funkcie `initTelemetry()`. V prípade, že nie je premenná prostredia `OTEL_TRACES_EXPORTER` nastavená na hodnotu `otlp`, vraciame funkciu, ktorá nič nerobí.
 
    V tom istom súbore `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go` upravte funkciu `main()`:
