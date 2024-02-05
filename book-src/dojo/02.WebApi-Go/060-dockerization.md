@@ -2,15 +2,13 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-api-060
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-api-060`
 
 ---
 
-Podarilo sa nám vytvoriť funkčné webové API. Pre jej nasadenie ešte potrebujeme vytvoriť softvérový kontajner a zabezpečiť priebežnú integráciu kódu.
-
-Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jednotné nasadenie do rôznych prostredí.
+Podarilo sa nám vytvoriť funkčné webové API. Pre jeho nasadenie ešte potrebujeme vytvoriť softvérový kontajner a zabezpečiť priebežnú integráciu kódu.
 
 ## Vytvorenie obrazu (image) softvérového kontajnera pre službu webového api
 
@@ -36,7 +34,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
    ############################################
    ```
 
-   V prvej fáze použijeme obraz [openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)  k tomu aby sme vygenerovali zdrojové súbory pre webové api. Využívame k tomu našu konfiguráciu a šablóny, ktoré sme vytvorili v predchádzajúcich kapitolách. Výsledkom je priečinok `/local/internal/ambulance_wl`, ktorý obsahuje zdrojové súbory pre webové api.
+   V prvej fáze použijeme obraz [openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli) k tomu, aby sme vygenerovali zdrojové súbory pre webové api. Využívame k tomu našu konfiguráciu a šablóny, ktoré sme vytvorili v predchádzajúcich kapitolách. Výsledkom je priečinok `/local/internal/ambulance_wl`, ktorý obsahuje zdrojové súbory pre webové api.
 
 2. Ďalej pridajte do súboru `${WAC_ROOT}/ambulance-webapi/build/docker/DockerFile` inštrukcie pre druhú fázu vytvorenia obrazu:
 
@@ -73,7 +71,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
    ############################################   @_add_@
    ```
 
-   V tejto časti využívame obraz [golang:latest](https://hub.docker.com/_/golang) na to aby sme skompilovali zdrojové súbory webového api. Všimnite si, že sme najprv použili len súbor `go.mod` a `go.sum` k získaniu knižníc od ktorých je náš kód závislý. Tieto súbory sa zvyknú meniť len zriedka, preto je relatívne veľká šanca, že pri lokálnom generovaní využijeme cache systému docker namiesto toho aby sme túto vrstvu museli znovu generovať. Ďalej sme skopírovali zdrojové súbory, vrátane súborov generovaných v predchádzajúcej fáze a vykonali sme testy. Až potom sme skompilovali zdrojové súbory do spustiteľného súboru. Pri kompilácii sme pritom použili nastavenia, ktoré vytvoria spustiteľný súbor, ktorý neobsahuje žiadne závislosti na dynamických knižniciach, ktoré by bolo potrebné nainštalovať do cieľového kontajnera. Výsledkom je súbor `ambulance-webapi-srv`, ktorý použijeme v tretej fáze.
+   V tejto časti využívame obraz [golang:latest](https://hub.docker.com/_/golang) na to, aby sme skompilovali zdrojové súbory webového api. Všimnite si, že sme najprv použili len súbor `go.mod` a `go.sum` k získaniu knižníc, od ktorých je náš kód závislý. Tieto súbory sa zvyknú meniť len zriedka, preto je relatívne veľká šanca, že pri lokálnom generovaní využijeme cache systému docker namiesto toho, aby sme túto vrstvu museli znovu generovať. Ďalej sme skopírovali zdrojové súbory, vrátane súborov generovaných v predchádzajúcej fáze a vykonali sme testy. Až potom sme skompilovali zdrojové súbory do spustiteľného súboru. Pri kompilácii sme pritom použili nastavenia, ktoré vytvoria spustiteľný súbor, ktorý neobsahuje žiadne závislosti na dynamických knižniciach, ktoré by bolo potrebné nainštalovať do cieľového kontajnera. Výsledkom je súbor `ambulance-webapi-srv`, ktorý použijeme v tretej fáze.
 
 3. Do súboru `${WAC_ROOT}/ambulance-webapi/build/docker/DockerFile` inštrukcie pre tretiu fázu 
 
@@ -109,7 +107,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
    ENTRYPOINT ["./ambulance-webapi-srv"]       @_add_@
    ```
 
-   Posledná fáza je založená na obraze [scratch](https://hub.docker.com/_/scratch), čo je obraz,, ktorý neobsahuje žiadnu pridanú vrstvu. Keďže náš kontajner bude obsahovať iba jeden spustiteľný súbor, tak je to ideálny kandidát. Okrem nastavenia premenných prostredia, ktoré budú použité pri spustení kontajnera a pridania značiek opisujúcich obsah obrazu, obsahuje táto fáza len jednu vrstvu vytvorenú príkazom `COPY --from=build /app/ambulance-webapi-srv ./`.
+   Posledná fáza je založená na obraze [scratch](https://hub.docker.com/_/scratch), čo je obraz, ktorý neobsahuje žiadnu pridanú vrstvu. Keďže náš kontajner bude obsahovať iba jeden spustiteľný súbor, tak je to ideálny kandidát. Okrem nastavenia premenných prostredia, ktoré budú použité pri spustení kontajnera a pridania značiek opisujúcich obsah obrazu, obsahuje táto fáza len jednu vrstvu vytvorenú príkazom `COPY --from=build /app/ambulance-webapi-srv ./`.
 
 4. Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/.dockerignore` a vložte do neho nasledujúci obsah:
 
@@ -139,13 +137,13 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
       ...
    ```
 
-   Upravte text `<docker-id>` tak aby obsahoval Vaše user id na stránke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
+   Upravte text `<docker-id>` tak, aby obsahoval Vaše user id na stránke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 
    ```powershell
    .\scripts\run.ps1 docker
    ```
 
-   Po úspešnom dokončení príkazu budete mať k dispozícii nový obraz softvérového kontainera s názvom `<docker-id>/ambulance-wl-webapi:local-build`. Skontrolujte to pomocou príkazu:
+   Po úspešnom dokončení príkazu budete mať k dispozícii nový obraz softvérového kontajnera s názvom `<docker-id>/ambulance-wl-webapi:local-build`. Skontrolujte to pomocou príkazu:
 
    ```powershell
    docker inspect <docker-id>/ambulance-wl-webapi:local-build
@@ -158,7 +156,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
    docker push <docker-id>/ambulance-wl-webapi:local-build
    ```
 
-6. Archivujte zmeny príkazmy v priečinku `${WAC_ROOT}/ambulance-webapi`
+6. Archivujte zmeny príkazmi v priečinku `${WAC_ROOT}/ambulance-webapi`
 
    ```powershell
    git add .
@@ -168,7 +166,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
 
 ## Priebežná integrácia
 
-Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie testov a vygenerovanie výsledných artefaktov (balíčky knižníc, obraz softvérového kontajnera a pod), v niektorých prípadoch aj automatické nasadenie aplikácie do cieľového prostredia. Podobne ako v prípade web komponentu aj tu využijeme službu [GitHub Actions](https://github.com/features/actions). Postačujúcim krokom by bolo zabezpečiť vytvorenie softvérového kontajnera, ktorý už v sebe obsahuje aj vykonanie testov. Pre názornosť ale vytvoríme predpis, ktorý vykoná generovanie kostry webového api, vykoná testy a až následne vytvorí softvérový kontajner. Tentokrát si ukážeme ako vytvoriť predpis pre priebežnú integráciu pomocou grafického editora na stránke [GitHub].
+Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie testov a vygenerovanie výsledných artefaktov (balíčky knižníc, obraz softvérového kontajnera a pod.), v niektorých prípadoch aj automatické nasadenie aplikácie do cieľového prostredia. Podobne ako v prípade web komponentu aj tu využijeme službu [GitHub Actions](https://github.com/features/actions). Postačujúcim krokom by bolo zabezpečiť vytvorenie softvérového kontajnera, ktorý už v sebe obsahuje aj vykonanie testov. Pre názornosť ale vytvoríme predpis, ktorý vykoná generovanie kostry webového api, vykoná testy a až následne vytvorí softvérový kontajner. Tentokrát si ukážeme, ako vytvoriť predpis pre priebežnú integráciu pomocou grafického editora na stránke [GitHub].
 
 1. Prejdite na stránku [GitHub] a otvorte repozitár `ambulance-webapi`. V hornej lište vyberte záložku `Actions`. Na stránke _Get started with GitHub Actions_ zvoľte tlačidlo _Configure_ v položke _GO_ v zozname odporúčaných predpisov.
 
@@ -222,7 +220,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
 
    ![Akcia OpenApi Generator](./img/060-01-GeneratorAction.png)
 
-4. Prejdite späť do vyhľadávania v _Marketplace_ (stlačte na odkaz _Marketplace_ v texte _Marketplace/Search results_ ) a vyhľadajte akcie podľa slova _docker_. Vyberte zo zoznamu položku _Docker Setup QUEMU_ a skopírujte kód tejto akcie na koniec Vášho predpisu. Upravte ho do tvaru: 
+4. Prejdite späť do vyhľadávania v _Marketplace_ (stlačte na odkaz _Marketplace_ v texte _Marketplace/Search results_ ) a vyhľadajte akcie podľa slova _docker_. Vyberte zo zoznamu položku _Docker Setup QUEMU_ a skopírujte kód tejto akcie na koniec Vášho predpisu. Upravte ho do tvaru:
 
    ```yaml
    ...
@@ -275,22 +273,22 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
            tags: ${{ steps.meta.outputs.tags }}       @_add_@
    ```
 
-   >info:> Väčšina uvedených krokov s kopírovaním kódu zo záložky _Marketplace_ by sa dala preskočiť a mohli by sme rovno pracovať so súborom `${WAC_ROOT}/ambulance-webapi/.github/workflows/ci.yml`. Zámerom ale bolo ukázať, akým spôsobom pracovať z grafickým editorom predpisov na stránke [GitHub], kde okrem získania aktuálnych šablón predpisu možete zároveň získať aj prehľad o množstve znovupoužiteľných akcií vytvorených pre automatizáciu najrozličnejších úloh v procese vývoja softvérových systémov.
+   >info:> Väčšina uvedených krokov s kopírovaním kódu zo záložky _Marketplace_ by sa dala preskočiť a mohli by sme rovno pracovať so súborom `${WAC_ROOT}/ambulance-webapi/.github/workflows/ci.yml`. Zámerom ale bolo ukázať, akým spôsobom pracovať s grafickým editorom predpisov na stránke [GitHub], kde okrem získania aktuálnych šablón predpisu možete zároveň získať aj prehľad o množstve znovupoužiteľných akcií vytvorených pre automatizáciu najrozličnejších úloh v procese vývoja softvérových systémov.
 
-5. Stlačte na tlačidlo _Commit changes ..._ v hornej časti stránky, zvoľte _Commit directly to main_ a opäť stlačte tlačidlo _Commit changes_. V repozitári prejdite do záložky _Actions_ a skontrolujte, že sa spustil predpis _Test and Publish WebAPi Container Image_. V tejto chvíli bude beh neúspešný pokiaľ sa dostane až ku kroku zverejnenia obrazu v registry Docker Hub a to z dôvodu nedostupnosti autorizačných práv.
+5. Stlačte na tlačidlo _Commit changes ..._ v hornej časti stránky, zvoľte _Commit directly to main_ a opäť stlačte tlačidlo _Commit changes_. V repozitári prejdite do záložky _Actions_ a skontrolujte, že sa spustil predpis _Test and Publish WebAPi Container Image_. V tejto chvíli bude beh neúspešný, konkrétne krok zverejnenia obrazu v registry Docker Hub a to z dôvodu nedostupnosti autorizačných práv.
 
-6. Pre úspešny beh priebežnej integrácie je nutné ešte nastaviť premenné `secrets.DOCKERHUB_USERNAME` a `secrets.DOCKERHUB_TOKEN`. Prejdite na stránku [Docker Hub], Rozbaľte menu označené názvom Vášho účtu a zvoľte _Account Settings_. V záložke _Security_ nájdete tlačidlo _New Access Token_.
+6. Pre úspešný beh priebežnej integrácie je nutné ešte nastaviť premenné `secrets.DOCKERHUB_USERNAME` a `secrets.DOCKERHUB_TOKEN`. Prejdite na stránku [Docker Hub], rozbaľte menu označené názvom Vášho účtu a zvoľte _Account Settings_. V záložke _Security_ nájdete tlačidlo _New Access Token_.
 
    ![Vytvorenie nového tokena pre Docker Hub](./img/060-03-AccountSecurity.png)
 
-   Vytvorte nový token s názvom `ambulance-webapi CI` a priradte mu práva `Read, Write, Delete` a stlačte tlačidlo _Generate_. Vygenerovaný token si skopírujte do schránky.
+   Vytvorte nový token s názvom `ambulance-webapi CI` a priraďte mu práva `Read, Write, Delete` a stlačte tlačidlo _Generate_. Vygenerovaný token si skopírujte do schránky.
 
-   Teraz prejdite do Vášho repozitára `<github-id>/ambulance-ufe` na stránke [GitHub]. V hornej lište zvoľte záložku _Settings_ a následne na bočnom panely zvoľte položku _Secrets and Variables_ -> _Actions_.
-   Na tejto stánke stlačte na tlačidlo _New repository secret_ a vytvorte novú premennú s názvom `DOCKERHUB_TOKEN` a ako hodnotu vložte zo schránky skopírovaný token. Opäť stlačte na tlačidlo _New repository secret_ a vytvorte premmenú s názvom `DOCKERHUB_USERNAME` a ako hodnotu vložte svoje používateľské meno na Docker Hub.
+   Teraz prejdite do Vášho repozitára `<github-id>/ambulance-ufe` na stránke [GitHub]. V hornej lište zvoľte záložku _Settings_ a následne na bočnom paneli zvoľte položku _Secrets and Variables_ -> _Actions_.
+   Na tejto stránke stlačte na tlačidlo _New repository secret_ a vytvorte novú premennú s názvom `DOCKERHUB_TOKEN` a ako hodnotu vložte zo schránky skopírovaný token. Opäť stlačte na tlačidlo _New repository secret_ a vytvorte premmenú s názvom `DOCKERHUB_USERNAME` a ako hodnotu vložte svoje používateľské meno na Docker Hub.
 
-   ![Premmenné a kľúče pre beh priebežnej integrácie](./img/060-04-GithubSecrets.png)
+   ![Premenné a kľúče pre beh priebežnej integrácie](./img/060-04-GithubSecrets.png)
 
-   Vytvorené premenné sú k dispozícii pre ďaľší beh našej priebežnej integrácie.
+   Vytvorené premenné sú k dispozícii pre ďalší beh našej priebežnej integrácie.
 
 7. V repozitári prejdite do záložky _Code_, stlačte na odkaz _0 tags_, a následne na tlačidlo _Create new release_. Zadajte do poľa _Choose tag_ hodnotu `v1.0.0`, do poľa _Release Title_ zadajte text `v1.0.0` a do poľa _Describe this release_ zadajte text `Initial version of Ambulance Waiting List API`. Stlačte na tlačidlo _Publish release_.
 
