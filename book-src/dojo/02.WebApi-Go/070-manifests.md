@@ -44,7 +44,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_PORT
                   value: "8080"
                 - name: AMBULANCE_API_MONGODB_HOST
-                  value: mongo
+                  value: mongodb
                 - name: AMBULANCE_API_MONGODB_PORT
                   value: "27017"
                   # change to actual value
@@ -144,7 +144,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_PORT    @_add_@
                   value: "8080"   @_add_@
                 - name: AMBULANCE_API_MONGODB_HOST    @_add_@
-                  value: mongo    @_add_@
+                  value: mongodb    @_add_@
                 - name: AMBULANCE_API_MONGODB_PORT    @_add_@
                   value: "27017"    @_add_@
                 - name: AMBULANCE_API_MONGODB_USERNAME    @_add_@
