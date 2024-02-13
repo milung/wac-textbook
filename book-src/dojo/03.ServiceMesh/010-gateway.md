@@ -135,6 +135,9 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
   spec:
     parentRefs:
       - name: wac-hospital-gateway
+        namespace: wac-hospital
+      - name: wac-hospital-gateway  # Hack to make it work for common cluster
+        namespace: wac-hospital-system
     rules:
       - matches:
           - path:
@@ -201,6 +204,9 @@ Postupne vytvoríme cesty - `HTTPRoute` - pre všetky služby, ktoré budú dost
    spec:
     parentRefs:
       - name: wac-hospital-gateway
+        namespace: wac-hospital-system
+      - name: wac-hospital-gateway  # Hack to make it work for common cluster
+        namespace: wac-hospital-system
     rules:
       - matches:
           - path:

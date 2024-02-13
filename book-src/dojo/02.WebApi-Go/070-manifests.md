@@ -44,7 +44,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_PORT
                   value: "8080"
                 - name: AMBULANCE_API_MONGODB_HOST
-                  value: mongo
+                  value: mongodb
                 - name: AMBULANCE_API_MONGODB_PORT
                   value: "27017"
                   # change to actual value
@@ -144,7 +144,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                 - name: AMBULANCE_API_PORT    @_add_@
                   value: "8080"   @_add_@
                 - name: AMBULANCE_API_MONGODB_HOST    @_add_@
-                  value: mongo    @_add_@
+                  value: mongodb    @_add_@
                 - name: AMBULANCE_API_MONGODB_PORT    @_add_@
                   value: "27017"    @_add_@
                 - name: AMBULANCE_API_MONGODB_USERNAME    @_add_@
@@ -281,6 +281,13 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
        literals:
          - database=<pfx>-ambulance
          - collection=ambulance
+   patches:
+    - path: patches/webapi.deployment.yaml
+      target:
+        group: apps
+        version: v1
+        kind: Deployment
+        name: <pfx>-ambulance-webapi
    ```
 
 6. Pretože vytvárame znovupoužiteľnú konfiguráciu, vytvoríme aj konfiguráciu pre nasadenie mongodb do klastra. V tomto prípade, ale nevieme či je databáza [MongoDB] už dostupná na predinštalovanom systéme, prípadne či nebude prístupna inou formou. Konfiguráciu preto definujeme ako [komponent systému Kustomize](https://kubectl.docs.kubernetes.io/guides/config_management/components/). Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/components/mongodb/deployment.yaml` s nasledujúcim obsahom:
@@ -397,13 +404,6 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
       literals:
       - username=admin
       - password=admin
-    patches:
-    - path: patches/webapi.deployment.yaml
-      target:
-        group: apps
-        version: v1
-        kind: Deployment
-        name: <pfx>-ambulance-webapi
     ```
 
    Okrem referencie na zdrojové manifesty konfigurácie obsahuje tento súbor aj deklaráciu [konfiguračnej mapy - _ConfigMap_](https://kubernetes.io/docs/concepts/configuration/configmap/) a objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/). Všimnite si, že tieto deklarácie majú nastavenú predvoľbu `disableNameSuffixHash: true`. Za normálnych okolností generovaná konfiguračná mapa obsahuje aj hash jej obsahu a upravené meno sa zamení na všetkých miestach jej použitia. To nampriklád umožňí automatický reštart podu pri zmene je manifestu - pretože so zmenou obsahu sa mení aj meno mapy a následne aj manifest Deployment-u, kde je táto mapa použitá. V niektorých prípadoch, pokiaľ je ale mapa použitá v rôznych štruktúrach manifestov - čo bude neskôr aj náš prípad napríklad pri nasadení do spoločného klastra, však potrebuje refrenciu abstraktnú, na mapu, alebo Secret s vopred neznámym obsahom. Použitá voľba nám teda umožní vygenerovať mapu s pevným menom, ktoré bude použité v rôznych štruktúrach manifestov.
@@ -412,7 +412,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
 
    >info:> Alternatívou by bolo vytvoriť dve záplaty typu [_strategic merge_](https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/patchesstrategicmerge/), pričom prvá by zmazala pôvodné záznamy v sekcii `env` pomocou `$patch: delete` directívy, a druhá záplata by ich pridala s použitím záznamov s vlatnosťou `valueFrom`. Z dôvodu ukážky použitia [JSONPatch]  sme tento spôsob nezvolili, hoci z hľadiska dlhodobého vývoja by bol asi primeranejší.
 
-   Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/components/mongodb/patches/webapi.deployment.yaml` s nasledujúcim obsahom:
+   Vytvorte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/patches/webapi.deployment.yaml` s nasledujúcim obsahom:
 
    ```yaml
    apiVersion: apps/v1

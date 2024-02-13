@@ -116,8 +116,6 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
     namespace: wac-hospital
    spec:
     wait: true
-    dependsOn: 
-    - name:  prepare
     interval: 42s
     path: clusters/wac-aks/install @_important_@
     prune: true
@@ -199,9 +197,11 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
 
    ```ps
    cp wac-202?-student.kubeconfig.yaml $HOME/.kube/wac-student.kubeconfig.yaml
-   $env:KUBECONFIG="$HOME/.kube/config:$HOME/.kube/wac-student.kubeconfig.yaml"
+   $env:KUBECONFIG="$HOME/.kube/config;$HOME/.kube/wac-student.kubeconfig.yaml"
    ```
 
+   >info:> V pripade systémov Linux a Mac pouzite miesto oddelovača ';' oddelovač ':'
+   
    Uvedená konfigurácia doplní do prostredia kubectl nový kontext `wac-student`, pomocou ktorého sa môžete pripojiť k spoločnému klastru.
 
    >info:> Odporúčame premennú `$env:KUBECONFIG` mať nastavenú trvalo, nie len pre danú inštanciu terminálu.  Pomocou príkazu `echo $profile` môžete získať cestu k Vášmu profilu pre powershell a doplniť do neho príkaz `$env:KUBECONFIG="$HOME/.kube/config:$HOME/.kube/wac-student.kubeconfig.yaml"` tak, aby sa spúšťal pri každom štarte terminálu PowerShell. Alternatívne inicializačné súbory existujú aj pre iné interpretery príkazového riadku.
@@ -209,7 +209,7 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
 7. V priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte príkazy:
 
    ```ps
-   kubectl config use-kontext wac-student
+   kubectl config use-kontext wac
    kubectl apply -k clusters/wac-aks
    ```
 
