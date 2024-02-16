@@ -154,10 +154,10 @@
    Overte, že sú Vaše zmeny aplikované v klastri príkazom:
 
    ```ps
-    kubectl get pods  -n wac
-    ```
+   kubectl get pods -n wac-hospital
+   ```
 
-8. Momentálne je náš frontend zabezpečený tak, že dovoluje načítavať requesty iba z rovnakého hosta. Aby sme mohli pristupovať na lokálne API na inom porte, musíme upraviť CSP hlavičku servera. Pridajte patch pre konfiguráciu CSP hlavičky do nášho lokálneho klastra. V súbore `clusters/localhost/prepare/kustomization.yaml` pridajte nasledovné riadky:
+8. Momentálne je náš frontend zabezpečený tak, že dovoľuje načítavať requesty iba z rovnakého hosta. Aby sme mohli pristupovať na lokálne API na inom porte, musíme upraviť CSP hlavičku servera. Pridajte patch pre konfiguráciu CSP hlavičky do nášho lokálneho klastra. V súbore `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml` pridajte nasledovné riadky:
 
   ```yaml
     apiVersion: kustomize.config.k8s.io/v1beta1
@@ -181,7 +181,7 @@
     ...
   ```
 
-   Tento súbor upraví definíciu deploymentu tak, aby bol vytvorený s CSP hlavičkou, ktorá umožní prístup na lokálne API na porte `30081`.
+   Tento súbor upraví definíciu deploymentu tak, aby bol vytvorený s CSP hlavičkou, ktorá umožní prístup na lokálne API na porte `30081`. Uložte zmeny do git repozitára a odovzdajte ich do vzdialeného repozitára.
 
 9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skúste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 

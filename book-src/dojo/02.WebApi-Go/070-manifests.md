@@ -115,7 +115,7 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                       cpu: "0.1"   @_add_@
     ```
 
-   Adresa `http://localhost:8080/.openapi/` ukazuje z pohľadu podu na to isté zariadenie, to znamená ten istý pod, akurát sa použije iný socket port.
+   Prístup na Swagger sidecar zatiaľ nebude fungovať. Sfunkčníme si ho v časti `Service Mesh`.
 
 3. Naša aplikácia predpokladá existenciu databázy určenej premennou prostredia `AMBULANCE_API_MONGODB_DATABASE` ako aj existenciu kolekcie dokumentov určenej premennou prostredia `AMBULANCE_API_MONGODB_COLLECTION`. Aby sme sa vyhli nutnosti manuálneho vytvárania tejto databázy/kolekcie, pomôžeme si [inicializačným kontajnerom](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/). Procesy inicializačných kontajnerov sú vykonané pred štartom procesov samotných kontajnerov podu, ktoré sa vytvoria len za predpokladu, že procesy inicializačných kontajnerov boli ukončené so stavovým kódom indikujúcim úspešné vykonanie procesu. V našom prípade chceme vykonať proces, ktorý overí či príslušná databáza a kolekcia údajov existuje a pokiaľ tomu tak nie je tak ich vytvorí a vloží do databázy počiatočné údaje. K tomu využijeme nástroj [MongoDb-Shell](https://www.mongodb.com/docs/mongodb-shell/), ktorý je súčasťou kontajnera [mongo](https://hub.docker.com/_/mongo). Do súboru `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/deployment.yaml` pridajte nasledujúci kód:
 

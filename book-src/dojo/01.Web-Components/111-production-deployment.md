@@ -209,20 +209,20 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
 7. V priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte príkazy:
 
    ```ps
-   kubectl config use-kontext wac
+   kubectl config use-context wac
    kubectl apply -k clusters/wac-aks
    ```
 
    Overte stav nasadenia aplikácie príkazmi:
 
    ```ps
-   kubectl get gitrepository <pfx>-git-repo -n wac-hospital
+   kubectl get gitrepository <pfx>-gitops-repo -n wac-hospital
    kubectl get kustomization <pfx>-cd -n wac-hospital
    kubectl get kustomization <pfx>-install -n wac-hospital
    ```
 
    Pokiaľ je stav `READY` na hodnote `True`, znamená to, že Flux CD úspešne
-   nasadil konfiguráciu do klastra. 
+   nasadil konfiguráciu do klastra.
 
    >build_circle:> Ak je stav `READY` na hodnote `False`, skontrolujte 
    položku `Status` vo výpise príkazu `kubectl describe kustomization <name> -n wac-hospital`
@@ -235,12 +235,12 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
    kubectl get all -n wac-hospital
    ```
 
-   Výstup by mal okrem iného obsahovať Váš deployment `<pfx>-ambulance-ufe-deployment` a k tomu zodpovedajúci pod. Pokiaľ sú oba nasadené, môžete prejsť na stránku spoločného klastra, kde v zozname aplikácií uvidíte aj svoju aplikáciu.
+   Výstup by mal okrem iného obsahovať Váš deployment `<pfx>-ambulance-ufe-deployment` a k tomu zodpovedajúci pod. Pokiaľ sú oba nasadené, môžete prejsť na stránku [spoločného klastra](https://wac-24.westeurope.cloudapp.azure.com/ui/), kde v zozname aplikácií uvidíte aj svoju aplikáciu.
 
    Zmeňte kubectl kontext späť na lokálny klaster:
 
    ```ps
-   kubectl config use-kontext docker-desktop
+   kubectl config use-context docker-desktop
    ```
 
    Vďaka konfigurácii priebežného nasadenia teraz bude postačovať vykonať zmeny vo Vašom repozitári `ambulance-gitops`. Operátor [Flux CD] zabezpečí aplikáciu zmien priamo do klastra. Nezabudnite ale, že v prípade, že chcete zmeniť verziu docker obrazu, musíte vytvoriť nové vydanie v repozitári `ambulance-ufe` a zmeniť verziu v súbore `${WAC_ROOT}/ambulance-gitops/components/version-release/kustomization.yaml`. 
