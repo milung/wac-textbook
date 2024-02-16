@@ -2,15 +2,15 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-api-080`
 
 ---
 
-Ďalším krokom je nasadenie pripravených manifestov do lokálneho klastra. Tentokrát využijeme manifesty ktoré sme pripravili v predchádzajúcom cvičení.
+Ďalším krokom je nasadenie pripravených manifestov do lokálneho klastra. Tentokrát využijeme manifesty, ktoré sme pripravili v predchádzajúcom cvičení.
 
->info:> Pamätajte, že [konfigurácia aplikácie má byť oddelená od zdrojového kódu aplikácie](https://12factor.net/build-release-run). Manifesty v repozitári `ambulance-webapi` sú preto len odporučeným predpisom, nie súčasťou konfigurácie Vášho systému. V typických prípadoch tento predpis môže byť vhodný, pri iných prípadoch je potrebné ho upraviť. Tento príklad slúži i len ako ukážka možností konfigurácie jednotlivých komponentov s využitím distribuovaných repozítarov.
+>info:> Pamätajte, že [konfigurácia aplikácie má byť oddelená od zdrojového kódu aplikácie](https://12factor.net/build-release-run). Manifesty v repozitári `ambulance-webapi` sú preto len odporučeným predpisom, nie súčasťou konfigurácie Vášho systému. V typických prípadoch tento predpis môže byť vhodný, pri iných prípadoch je potrebné ho upraviť. Tento príklad slúži len ako ukážka možností konfigurácie jednotlivých komponentov s využitím distribuovaných repozitárov.
 
 1. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/kustomization.yaml` a vložte do neho nasledujúci obsah - upravte názov repozitára podľa toho, ako ste ho nazvali:
 
@@ -22,7 +22,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
    - 'https://github.com/<github-id>/ambulance-webapi//deployments/kustomize/install' # ?ref=v1.0.1
    ```
 
-   >info:> Dva po sebe idúce znaky `//` oddeľujú URL repozitára od cesty k repozitáru. Pokiaľ by ste chceli získať konkrétnu verziu - git tag allebo commit - pridajte za na koniec URL  `?ref=<tag>`.
+   >info:> Dva po sebe idúce znaky `//` oddeľujú URL repozitára od cesty k repozitáru. Pokiaľ by ste chceli získať konkrétnu verziu - git tag alebo commit - pridajte na koniec URL  `?ref=<tag>`.
 
 2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/install/patches/ambulance-webapi.service.yaml` s nasledujúcim obsahom:
 
@@ -61,7 +61,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
     - path: patches/ambulance-webapi.service.yaml @_add_@
    ```
 
-   Pretože v našom lokálnom klastri máme len jednu službu využívajúcu [MongoDB], aplikuje priamo manifesty uvedené v repozítary `ambulance-gitops`. Pri spoločnom klastri, alebo v prípade viacerých služieb využívajúcich [MongoDB] budeme postupovať odlišne, a manifesty v repozitári  `ambulance-webapi` nám poslúžia len ako príklad konfigurácie.
+   Pretože v našom lokálnom klastri máme len jednu službu využívajúcu [MongoDB], aplikuje priamo manifesty uvedené v repozitári `ambulance-gitops`. Pri spoločnom klastri alebo v prípade viacerých služieb využívajúcich [MongoDB] budeme postupovať odlišne a manifesty v repozitári  `ambulance-webapi` nám poslúžia len ako príklad konfigurácie.
 
 4. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-ufe/webcomponent.yaml` a upravte atribút `api-base`:
 
@@ -80,7 +80,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
    Týmto sme nášmu mikro frontendu povedali, že má komunikovať s webapi na porte `30081`.
 
-5. V tomto kroku pripravíme manifesty pre sledovanie zmien v registry kontainerov. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/ambulance-webapi.image-repository.yaml`:
+5. V tomto kroku pripravíme manifesty pre sledovanie zmien v registri kontajnerov. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/gitops/ambulance-webapi.image-repository.yaml`:
 
    ```yaml
    apiVersion: image.toolkit.fluxcd.io/v1beta2
@@ -157,7 +157,7 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
     kubectl get pods  -n wac
     ```
 
-8. Momentálne je náš frontend zabezpečený tak že dovoluje načítavať requesty iba z rovnakého hosta. Aby sme mohli pristupovat na lokane API na inom porte musime upravit CSP hlavičku servera. Pridajte patch pre configuraciu CSP hlavičky do nášho lokálneho klastra. V súbore `clusters/localhost/prepare/kustomization.yaml` pridajte nasledovné riadky:
+8. Momentálne je náš frontend zabezpečený tak, že dovoluje načítavať requesty iba z rovnakého hosta. Aby sme mohli pristupovať na lokálne API na inom porte, musíme upraviť CSP hlavičku servera. Pridajte patch pre konfiguráciu CSP hlavičky do nášho lokálneho klastra. V súbore `clusters/localhost/prepare/kustomization.yaml` pridajte nasledovné riadky:
 
   ```yaml
     apiVersion: kustomize.config.k8s.io/v1beta1
@@ -183,8 +183,8 @@ devcontainer templates apply -t registry-1.docker.io/milung/wac-api-080
 
    Tento súbor upraví definíciu deploymentu tak, aby bol vytvorený s CSP hlavičkou, ktorá umožní prístup na lokálne API na porte `30081`.
 
-9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skuste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
+9. V prehliadači otvorte stránku [http://localhost:30331](http://localhost:30331), na ktorej uvidíte aplikačnú obálku s integrovanou mikro aplikáciou. Mikro aplikácia sa pokúsi načítať dáta z webapi, ktoré však zatiaľ neexistujú. Vytvorte ich pomocou zobrazeného rozhrania. Skúste reštartovať Váš klaster a overte, že dáta sú stále dostupné.
 
 <hr/>
 
-Týmto krokom máme front-end aj webapi nasadené v lokálnom klastri. Nevýhodou tohto nasadenia je, že tieto služby sú dostupné na rôznych portoch, čo z pohľadu prehliadača je považované za rôzne inštancie servera. Navyše by tento prístup bol problematický pri nasadení na verejne URL, pretože väčšina sietí implicitne blokuje HTTP prístup na porty mimo portov 80 a 443. V ďalšej časti si vysvetlíme ako tento problém vyriešiť a zostaviť z jednotlivých mikroslužieb takzvaný [Service Mesh], ktorý vo výsledku bude tvoriť jeden konzistentný celok aj z pohľadu používateľa.
+Týmto krokom máme front-end aj webapi nasadené v lokálnom klastri. Nevýhodou tohto nasadenia je, že tieto služby sú dostupné na rôznych portoch, čo je z pohľadu prehliadača považované za rôzne inštancie servera. Navyše by tento prístup bol problematický pri nasadení na verejné URL, pretože väčšina sietí implicitne blokuje HTTP prístup na porty mimo portov 80 a 443. V ďalšej časti si vysvetlíme, ako tento problém vyriešiť a zostaviť z jednotlivých mikroslužieb takzvaný [Service Mesh], ktorý vo výsledku bude tvoriť jeden konzistentný celok aj z pohľadu používateľa.
