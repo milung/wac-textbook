@@ -92,7 +92,7 @@ Na základe skúseností z implementácie [_Ingress_], sa začala pripravovať n
          kind: Deployment    @_add_@
          name: ufe-controller    @_add_@
          namespace: wac-hospital         @_add_@
-     interval: 42s
+     interval: 120s
      ...
    ```
 
@@ -159,8 +159,6 @@ spec:
           path:
             type: ReplaceFullPath
             replaceFullPath: /ui
-          scheme: https
-          port: 443
 ```
 
    Vo všeobecnosti platí, že každá požiadavka musí byť spracovaná jedným alebo žiadny pravidlom uvedeným v objektoch `HTTRoute` pre daný `Gateway` objekt.  Tento manifest špecifikuje, že všetky požiadavky pri ktorých cesta začína segmentom `/ui` budú presmerované na službu `ufe-controller`. Požiadavky na root dokument `/` budú vrátené klientovi so stavom `303 -Redirect` a presmerovaním na cestu `/ui`.
@@ -204,7 +202,7 @@ spec:
    spec:
     parentRefs:
       - name: wac-hospital-gateway
-        namespace: wac-hospital-system
+        namespace: wac-hospital
       - name: wac-hospital-gateway  # Hack to make it work for common cluster
         namespace: wac-hospital-system
     rules:
@@ -365,4 +363,4 @@ spec:
    git push
    ```
 
-   Potom, čo [flux] aplikuje zmeny vo Vašom lokálnom klastri, otvorte v prehliadači stránku [http://localhost](http://localhost). Mali by ste vidieť našu aplikáciu, ktorá je schopná komunikovať s WebAPI. Pokiaľ prejdete na stránku [http://localhost/<pfx>-openapi](http://localhost/<pfx>-openapi), mali by ste vidieť popis nášho WebAPI v rozhraní [Swagger UI](https://swagger.io/tools/swagger-ui/).
+   Potom, čo [flux] aplikuje zmeny vo Vašom lokálnom klastri, otvorte v prehliadači stránku [http://localhost](http://localhost). Mali by ste vidieť našu aplikáciu, ktorá je schopná komunikovať s WebAPI. Pokiaľ prejdete na stránku `http://localhost/<pfx>-openapi-ui`, mali by ste vidieť popis nášho WebAPI v rozhraní [Swagger UI](https://swagger.io/tools/swagger-ui/).

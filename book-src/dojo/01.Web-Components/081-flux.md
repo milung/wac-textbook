@@ -93,7 +93,7 @@ uložíme do git repozitára, aby boli pripravené pre priebežné nasadenie do 
      namespace: wac-hospital
    spec:
      wait: true
-     interval: 42s
+     interval: 120s
      path: clusters/localhost/prepare
      prune: true
      sourceRef:
@@ -116,7 +116,7 @@ uložíme do git repozitára, aby boli pripravené pre priebežné nasadenie do 
      force: true 
      dependsOn:  @_important_@
      - name: prepare @_important_@
-     interval: 42s
+     interval: 120s
      path: clusters/localhost/install
      prune: true
      sourceRef:

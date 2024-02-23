@@ -116,7 +116,7 @@ Z bezpečnostných dôvodov je GitOps git repozitár pre produkčný klaster pri
     namespace: wac-hospital
    spec:
     wait: true
-    interval: 42s
+    interval: 120s
     path: clusters/wac-aks/install @_important_@
     prune: true
     sourceRef:
