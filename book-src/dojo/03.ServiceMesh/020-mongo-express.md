@@ -1,15 +1,14 @@
 # (Voliteľné - samostatná práca) Nasadenie Mongo Express
 
+---
+
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-mesh-030`
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-030
-```
-
----
-
-Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre túto potrebu je možné použiť nástroj [Mongo Express][mongoexpress], ktorý je možné nasadiť do kubernetes klastra. V tejto chvíli už máte všetky potrebné poznatky aby ste to dokázali samostatne. Vyskúšajte nasadiť Mongo Express do kubernetes klastra na základe informácií, ktoré už máte k dispozícii, tak aby bola táto aplikácia obslúžena na ceste `/mongo-express`, a následne porovnajte výsledok s tu uvedeným postupom, ktorý obsahuje aj nasadenie prístupu k aplikácii formou mikro frontend aplikácie.
+Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre túto potrebu je možné použiť nástroj [Mongo Express][mongoexpress], ktorý je možné nasadiť do kubernetes klastra. V tejto chvíli už máte všetky potrebné poznatky, aby ste to dokázali samostatne. Vyskúšajte nasadiť Mongo Express do kubernetes klastra na základe informácií, ktoré už máte k dispozícii tak, aby bola táto aplikácia obslúžená na ceste `/mongo-express` a následne porovnajte výsledok s tu uvedeným postupom, ktorý obsahuje aj nasadenie prístupu k aplikácii formou mikro frontend aplikácie.
 
 1. V adresári `${WAC_ROOT}/ambulance-gitops/apps/mongo-express` vytvorte súbor `deployment.yaml` s obsahom:
 
@@ -67,7 +66,7 @@ Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre t
                 memory: '128M'
     ```
 
-    Všimnite si, že sa odkazujeme na secret `mongodb-auth` a configmap `mongodb-connection`. Tieto objekty sme už prevzali z konfigurácie webapi služby. Tu využijeme fakt, že sme pri týchto objektoch potlačili generovanie mena s hashom. Nastaveniem premenných prostredia `ME_CONFIG_BASICAUTH_...` na prázdny reťazec, sme zároveň potlačili authentifikáciu pri prístupe na túto službu. Predpokladáme, že autentifikácia a autorizácia bude zabezpečená na úrovni kubernetes klastra - viď nasledujúce kapitoly. Premennou prostredia `ME_CONFIG_SITE_BASEURL` sme nastavili cestu pre [&lt;base&gt; element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base), čo zabezpečí správne načítavanie zdrojov tejto aplikácie
+    Všimnite si, že sa odkazujeme na secret `mongodb-auth` a configmap `mongodb-connection`. Tieto objekty sme už prevzali z konfigurácie webapi služby. Tu využijeme fakt, že sme pri týchto objektoch potlačili generovanie mena s hashom. Nastavením premenných prostredia `ME_CONFIG_BASICAUTH_...` na prázdny reťazec sme zároveň potlačili autentifikáciu pri prístupe na túto službu. Predpokladáme, že autentifikácia a autorizácia bude zabezpečená na úrovni kubernetes klastra - viď nasledujúce kapitoly. Premennou prostredia `ME_CONFIG_SITE_BASEURL` sme nastavili cestu pre [&lt;base&gt; element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base), čo zabezpečí správne načítavanie zdrojov tejto aplikácie.
 
 2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/mongo-express/service.yaml` s obsahom:
 
