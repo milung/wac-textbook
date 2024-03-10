@@ -17,13 +17,13 @@
 2. Vytvorte priečinok `${WAC_ROOT}/ambulance-webapi` a na príkazovom riadku vykonajte v tomto adresári nasledujúci príkaz:
 
     ```ps
-    go mod init github.com/<pfx>/ambulance-webapi
+    go mod init github.com/<github-id>/ambulance-webapi
     ```
 
     Príkaz vytvorí súbor `${WAC_ROOT}/ambulance-webapi/go.mod` s obsahom v tvare:
 
     ```go
-    module github.com/<pfx>/ambulance-webapi
+    module github.com/<github-id>/ambulance-webapi
 
     go 1.21
     ```
