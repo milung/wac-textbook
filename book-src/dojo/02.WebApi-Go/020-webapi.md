@@ -161,7 +161,7 @@ Na generovanie kódu využijeme generátor [go-gin-server](https://openapi-gener
       {{/operation}}    @_add_@
     }    @_add_@
 
-    {{#operations}}
+    {{/operations}}
     ```
 
    Nakoniec do súboru `${WAC_ROOT}/ambulance-webapi/scripts/templates/controller-api.mustache` vložte kód, ktorý vygeneruje (zakomentovanú) ukážku implementácie metód pre jednotlivé operácie:
