@@ -16,7 +16,7 @@
 
 2. Vytvorte priečinok `${WAC_ROOT}/ambulance-webapi` a na príkazovom riadku vykonajte v tomto adresári nasledujúci príkaz:
 
-    ```ps
+    ```
     go mod init github.com/<github-id>/ambulance-webapi
     ```
 
