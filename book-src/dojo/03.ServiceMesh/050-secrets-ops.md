@@ -2,19 +2,19 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-050
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-mesh-050`
 
 ---
 
-Pred tým než pristúpime k autentifikácii používateľov, si pripravíme spôsob ako bezpečne nasadiť citlivé informácie do nášho kubernetes klastra. V našom prípade sa zatiaľ jedná o prihlasovacie údaje do databázy a o _Personal Access Token_ k repozitári. S tým ako budú pribúdať citlivé údaje, je ich správa na lokálnom disku, bez archivácie čoraz menej efektívna. Riešením je pre nás použitie metódy [_Secrets Ops_][sops]. Ich princíp spočíva v použití asymetrických kľúčov na šifrovanie citlivých informácií pomocou verejného kľúča a schopnosť ich rozšifrovania len pri použití súkromného kľúča. Súkromný kľúč je ručne uložený na príslušný klaster. Verejný kľúč a zašifrované údaje potom môžme bezpečne uložiť a archivovať v našom repozitári. Zároveň využijeme zabudovanú vlastnosť [Flux CD](https://fluxcd.io/flux/guides/mozilla-sops/), ktorá umožňuje aby Flux automaticky dešifroval tieto údaje pri ich nasadení do klastra.
+Pred tým, než pristúpime k autentifikácii používateľov, si pripravíme spôsob, ako bezpečne nasadiť citlivé informácie do nášho kubernetes klastra. V našom prípade sa zatiaľ jedná o prihlasovacie údaje do databázy a o _Personal Access Token_ k repozitáru. S tým, ako budú pribúdať citlivé údaje, je ich správa na lokálnom disku bez archivácie čoraz menej efektívna. Riešením je pre nás použitie metódy [_Secrets Ops_][sops]. Ich princíp spočíva v použití asymetrických kľúčov na šifrovanie citlivých informácií pomocou verejného kľúča a schopnosť ich rozšifrovania len pri použití súkromného kľúča. Súkromný kľúč je ručne uložený na príslušný klaster. Verejný kľúč a zašifrované údaje potom môžme bezpečne uložiť a archivovať v našom repozitári. Zároveň využijeme zabudovanú vlastnosť [Flux CD](https://fluxcd.io/flux/guides/mozilla-sops/), ktorá umožňuje, aby Flux automaticky dešifroval tieto údaje pri ich nasadení do klastra.
 
 1. K využitiu tejto techniky potrebujete mať nainštalované nástroje [sops] zo stránky [https://github.com/getsops/sops/releases](https://github.com/getsops/sops/releases). V tomto cvičení budeme ako šifrovací nástroj používať [AGE], ktorý si môžete nainštalovať zo stránky [https://github.com/FiloSottile/age/releases/tag/v1.1.1](https://github.com/FiloSottile/age/releases). Oba nástroje sa dajú nainštalovať aj pomocou správcu balíčku [Chocolatey]. Nástroj [AGE] možno nainštalovať príkazom `apt-get` na systémoch linux.
 
-   >info:> Nástroj [sops] podporuje aj iné spôsoby šifrovania a ukladania kľúčov, napríklad pomocou [GPG](https://www.gnupg.org/), alebo [Azure KeyVault](https://learn.microsoft.com/en-us/azure/key-vault/general/) a podobne. V závislosti od cieľových požiadavkach môžete použiť iný nástroj na šifrovanie, postup bude vo všetkých prípadoch obdobný, až na konfiguráciu sops parametrov.
+   >info:> Nástroj [sops] podporuje aj iné spôsoby šifrovania a ukladania kľúčov, napríklad pomocou [GPG](https://www.gnupg.org/) alebo [Azure KeyVault](https://learn.microsoft.com/en-us/azure/key-vault/general/) a podobne. V závislosti od cieľových požiadavok môžete použiť iný nástroj na šifrovanie, postup bude vo všetkých prípadoch obdobný, až na konfiguráciu sops parametrov.
 
-2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params/repository-pat.env` s obsahom zodpovedajkúcim Vášmu _Personal Access Token_ k repozitáru. Tieto údaje by ste mali mať v súbore `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/repository-pat.yaml`. Obsah súboru `repository-pat.env` by mal vyzerať nasledovne:
+2. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params/repository-pat.env` s obsahom zodpovedajúcim Vášmu _Personal Access Token_ k repozitáru. Tieto údaje by ste mali mať v súbore `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/repository-pat.yaml`. Obsah súboru `repository-pat.env` by mal vyzerať nasledovne:
 
    ```env
    username=<github-id>
@@ -23,7 +23,7 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
 
    >info:>  _Personal Access Token_ podľa [návodu](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) alebo podľa postupu v kapitole [Kontinuálne nasadenie pomocou nástroja Flux](../01.Web-Components/081-flux.md).
 
-   Zmažte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/repository-pat.yaml` - **YAML**, a upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/kustomization.yaml` tak, aby obsahoval:
+   Zmažte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/repository-pat.yaml` a upravte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/kustomization.yaml` tak, aby obsahoval:
 
    ```yaml
    ...
@@ -96,7 +96,7 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
    AGE-SECRET-KEY-sukromny_hexa_kluc
    ```
 
-   Skopírujte a uchovajte na bezpečnom mieste súkromný kľúč - budete ho potrebovať aj v prípadoch keď budete chcieť opätovne nasadiť Váš klaster. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params/.sops.yaml` s obsahom:
+   Skopírujte a uchovajte na bezpečnom mieste súkromný kľúč - budete ho potrebovať aj v prípadoch, keď budete chcieť opätovne nasadiť Váš klaster. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params/.sops.yaml` s obsahom:
 
    ```yaml
    creation_rules:
@@ -105,9 +105,9 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
 
    Tento súbor slúži na šifrovanie kľúčov uložených v tomto adresári.
 
-   >warning:> Každý klaster môže mať asociovaný jeden alebo viac šifrovacích kľúčov, tieto kľúče ale z bezpečnostných dôvodov nesmú byť zdieľané medzi rôznymi klastrami. Azda jedinú výnimku tvorí prípad, kedy zdieľate privátný kľúč medzi vývojarmi produktu, tak aby si mohli všetci vývojari nasadiť vlastný lokálny klaster, v ktorom sa predpokladá len prítomnosť testovacích údajov.
+   >warning:> Každý klaster môže mať asociovaný jeden alebo viac šifrovacích kľúčov, tieto kľúče ale z bezpečnostných dôvodov nesmú byť zdieľané medzi rôznymi klastrami. Azda jedinú výnimku tvorí prípad, kedy zdieľate privátny kľúč medzi vývojármi produktu tak, aby si mohli všetci vývojári nasadiť vlastný lokálny klaster, v ktorom sa predpokladá len prítomnosť testovacích údajov.
    >
-   > Z rovnakého dôvodu vytvárame všetky objekty typu _Secret_ nezávisle pre každý klaster, a ich aktuálne hodnoty by sa mali odlišovať - t.j jedinečné heslo, meno používateľa, alebo klientský identifikátor.
+   > Z rovnakého dôvodu vytvárame všetky objekty typu _Secret_ nezávisle pre každý klaster a ich aktuálne hodnoty by sa mali odlišovať t.j jedinečné heslo, meno používateľa alebo klientský identifikátor.
 
    Aplikujte súkromný kľúč do klastra pomocou príkazu:
 
@@ -161,7 +161,7 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
             name: sops-age @_add_@
 ```
 
-   Táto úprava pridá do všetkých objektov typu [_Kustomization_](https://fluxcd.io/flux/components/kustomize/kustomizations/), konfiguráciu pre dešifrovanie súborov pomocou nástroja [sops] s použitím nami vytvoreného objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) `sops-age`. Navyše sme pridali automatizáciu pre nasadenie citlivých údajov do klastra, čo sme doteraz museli vykonávať manuálne.
+   Táto úprava pridá do všetkých objektov typu [_Kustomization_](https://fluxcd.io/flux/components/kustomize/kustomizations/) konfiguráciu pre dešifrovanie súborov pomocou nástroja [sops] s použitím nami vytvoreného objektu [_Secret_](https://kubernetes.io/docs/concepts/configuration/secret/) `sops-age`. Navyše sme pridali automatizáciu pre nasadenie citlivých údajov do klastra, čo sme doteraz museli vykonávať manuálne.
 
 5. Zašifrujte súbory s citlivými údajmi. Otvorte okno príkazového riadku v adresári `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/params` a vykonajte príkazy:
 
@@ -170,9 +170,9 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
    sops --encrypt --in-place mongodb-auth.env
    ```
 
-   Pokiaľ teraz otvoríte súbory `repository-pat.env` a `mongodb-auth.env`, uvidíte, že ich obsah je zašifrovaný. Pridanné prepenné umožňujú identifikovať ktorým kľúčom a verziou nástroja [sops] boli zašifrované.
+   Pokiaľ teraz otvoríte súbory `repository-pat.env` a `mongodb-auth.env`, uvidíte, že ich obsah je zašifrovaný. Pridané premenné umožňujú identifikovať, ktorým kľúčom a verziou nástroja [sops] boli zašifrované.
 
-6. Zmažte súbory `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/.gitignore`. Archivujte zmeny a odvzdajte ich do vzdialeného repozitára. V priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte príkazy:
+6. Zmažte súbor `${WAC_ROOT}/ambulance-gitops/clusters/localhost/secrets/.gitignore`. Archivujte zmeny a odovzdajte ich do vzdialeného repozitára. V priečinku `${WAC_ROOT}/ambulance-gitops` vykonajte príkazy:
 
    ```ps
    git add .
@@ -180,19 +180,19 @@ Pred tým než pristúpime k autentifikácii používateľov, si pripravíme sp�
    git push
    ```
 
-7. Overte či sú naše objekty typu [Kustomization](https://fluxcd.io/flux/components/kustomize/kustomizations/) správne nasadené:
+7. Overte, či sú naše objekty typu [Kustomization](https://fluxcd.io/flux/components/kustomize/kustomizations/) správne nasadené:
 
    ```ps
    kubectl get kustomization -n wac-hospital
    ```
 
-Odteraz možeme vykonať zmenu v súboroch s citlivými údajmi a po ich zašifrovaní a odovzdaní do repozitára, budú automaticky nasadené do klastra. V prípade opätovného nasadenia nám postačuje nasadiť len súkromný kľúč, ktorý sme si uložili na bezpečné miesto. Pri prvom nasadení na prázdny klaster musíme nasadiť aj nezašifrovaný objekt `repository-pat`, aby bol FluxCD schopný stiahnuť zdrojový kód z repozitára. Všetky ostatné citlivé údaje už ale môžeme udržiavať v šifrovanej podobe priamo v repozitári, medzi nimi aj `repository-pat` a teoreticky aj _Secret `sops-age`, tu však z dôvodou, že môže obsahovať rôzne kategórie kľúčov, to nedoporučujeme.
+Odteraz možeme vykonať zmenu v súboroch s citlivými údajmi a po ich zašifrovaní a odovzdaní do repozitára budú automaticky nasadené do klastra. V prípade opätovného nasadenia nám postačuje nasadiť len súkromný kľúč, ktorý sme si uložili na bezpečné miesto. Pri prvom nasadení na prázdny klaster musíme nasadiť aj nezašifrovaný objekt `repository-pat`, aby bol FluxCD schopný stiahnuť zdrojový kód z repozitára. Všetky ostatné citlivé údaje už ale môžeme udržiavať v šifrovanej podobe priamo v repozitári, medzi nimi aj `repository-pat` a teoreticky aj _Secret_ `sops-age`, tu to však nedoporučujeme z dôvodu, že môže obsahovať rôzne kategórie kľúčov.
 
 >warning:> Pri tímovej práci sa môže stať, že niektorý člen tímu nechtiac archivuje aj nezašifrované heslá. V takom prípade je nutné vykonať zmenu prihlasovacích údajov. Tiež odporúčame v repozitári implementovať vhodný [_pre-commit hook_](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks), ktorý zabráni odovzdaniu nezašifrovaných súborov do repozitára.
 
 ## Automatizácia nasadenia do klastra pre vývojárov
 
-Pre informáciu tu uvádzam skript, ktorý môžete použiť pre automatizovanie nasadenia do prázdneho klastra pre vývojárov. Tento skript predpokladá, že členovia tímu zdieľajú privátny kľuč pre nasadenia do lokálneho klastra. Skript automatizuje nasadenie zdorja `sops-age` a `repository-pat`, následné nasadenie Flux CD a nasadenie objektov _kustomization_ pri vytvorení alebo obnove lokálneho klastra. Script môžete uložiť napríklad do súboru `${WAC_ROOT}/ambulance-gitops/scripts/developer-deploy.ps1`:
+Pre informáciu tu uvádzam skript, ktorý môžete použiť pre automatizovanie nasadenia do prázdneho klastra pre vývojárov. Tento skript predpokladá, že členovia tímu zdieľajú privátny kľuč pre nasadenia do lokálneho klastra. Skript automatizuje nasadenie zdroja `sops-age` a `repository-pat`, následné nasadenie Flux CD a nasadenie objektov _kustomization_ pri vytvorení alebo obnove lokálneho klastra. Script môžete uložiť napríklad do súboru `${WAC_ROOT}/ambulance-gitops/scripts/developer-deploy.ps1`:
 
 ```ps
 param (
