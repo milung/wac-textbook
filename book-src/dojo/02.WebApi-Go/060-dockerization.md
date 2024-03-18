@@ -123,7 +123,7 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
 
 5. Otvorte súbor `${WAC_ROOT}/ambulance-webapi/scripts/run.ps1` a pridajte príkaz na vytvorenie obrazu kontajnera:
 
-   ```powershell
+   ```shell
    ...
    switch ($command) {
       ...
@@ -139,26 +139,26 @@ Jednou z hlavných výhod kontajnerizovanej aplikácie je jej jednoduché a jedn
 
    Upravte text `<docker-id>` tak, aby obsahoval Vaše user id na stránke [Docker Hub] a uložte zmeny. Naštartujte subsystém docker a na príkazovom riadku v priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 
-   ```powershell
+   ```shell
    .\scripts\run.ps1 docker
    ```
 
    Po úspešnom dokončení príkazu budete mať k dispozícii nový obraz softvérového kontajnera s názvom `<docker-id>/ambulance-wl-webapi:local-build`. Skontrolujte to pomocou príkazu:
 
-   ```powershell
+   ```shell
    docker inspect <docker-id>/ambulance-wl-webapi:local-build
    ```
 
    Obraz môžete zverejniť na stránke [Docker Hub] pomocou príkazu:
 
-   ```powershell
+   ```shell
    docker login
    docker push <docker-id>/ambulance-wl-webapi:local-build
    ```
 
 6. Archivujte zmeny príkazmi v priečinku `${WAC_ROOT}/ambulance-webapi`
 
-   ```powershell
+   ```shell
    git add .
    git commit -m "Added dockerization"
    git push
@@ -325,6 +325,6 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
 
 10. Prevezmite si zmeny zo svojho [GitHub] repozitára. V priečinku `${WAC_ROOT}/ambulance-webapi` vykonajte príkaz:
 
-   ```powershell
+   ```shell
    git pull
    ```
