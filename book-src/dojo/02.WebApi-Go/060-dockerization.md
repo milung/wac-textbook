@@ -202,9 +202,10 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
          id: get_go_version    @_add_@
          run: echo "go_version=$(grep -m1 'go ' go.mod | awk '{print $2}')" >> $GITHUB_OUTPUT    @_add_@
          
-      - name: Set up Go    @_add_@
-         uses: actions/setup-go@v4    @_add_@
-         with:    @_add_@
+      - name: Set up Go
+         uses: actions/setup-go@v4
+         with:
+           go-version: 1.21 @_remove_@
            go-version: ${{ steps.get_go_version.outputs.go_version }}    @_add_@
    ...      
    ```
