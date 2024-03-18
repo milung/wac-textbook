@@ -205,7 +205,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
       - name: Set up Go    @_add_@
          uses: actions/setup-go@v4    @_add_@
          with:    @_add_@
-         go-version: ${{ steps.get_go_version.outputs.go_version }}    @_add_@
+           go-version: ${{ steps.get_go_version.outputs.go_version }}    @_add_@
    ...      
    ```
 
@@ -229,7 +229,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
        - name: Set up Go
          uses: actions/setup-go@v4
          with:
-           go-version: '1.21'
+           go-version: ${{ steps.get_go_version.outputs.go_version }}
 
        - name: Generate api controllers interfaces    @_add_@
          uses: craicoverflow/openapi-generator-generate-action@v1.2.1    @_add_@
