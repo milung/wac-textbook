@@ -218,7 +218,7 @@ Priebežná integrácia je proces, ktorý zabezpečuje automatické spustenie te
      - name: Build
          run: go build -v ./... @_remove_@
          # build api service 
-         run: go build -v ./cmd/ambulance-api-serviceň @_add_@
+         run: go build -v ./cmd/ambulance-api-service @_add_@
      ...      
    ```
 
