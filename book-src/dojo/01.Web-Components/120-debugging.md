@@ -27,6 +27,8 @@ V tomto kroku si ukážeme, ako ladiť aplikáciu v _Nástrojoch vývojára_.
        this.entry.estimatedStart = (await this.assumedEntryDateAsync()).toISOString(); @_add_@
        return this.entry;
      }
+
+     ...
    }
    ```
 
