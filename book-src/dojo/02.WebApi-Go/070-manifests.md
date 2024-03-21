@@ -165,10 +165,10 @@ Na rozdiel od prvého cvičenia nezačneme naše manifesty vytvárať priamo v r
                   value: "5"    @_add_@
              resources:        @_add_@
                requests:        @_add_@
-                 memory: "16Mi"        @_add_@
+                 memory: "128Mi"        @_add_@
                  cpu: "0.01"        @_add_@
                limits:        @_add_@
-                 memory: "64Mi"        @_add_@
+                 memory: "256Mi"        @_add_@
                  cpu: "0.1"        @_add_@
            containers:
             ...
