@@ -137,7 +137,21 @@ Za účelom vydávania certifikátov nasadíme do klastra službu [cert-manager]
 
    Pomocou bloku anotácií informujeme _cert-manager_ o tom, že má vytvoriť certifikát pre doménu `wac-hospital.loc` a pre doménu `localhost`. V prípade produkčného klastra by sme museli zmeniť vydavateľa certifikátov na `letsencrypt-issuer` a zmeniť emailovú adresu, ako aj zmeniť doménu na verejne dostupnú doménu. Doménu `wac-hospital.loc` využijeme v ďalšej časti, kedy bude potrebná pre správnu komunikáciu s [OpenID] poskytovateľom.
 
-6. Overte správnosť konfigurácie príkazom v priečinku `${WAC_ROOT}/ambulance-gitops`
+6. Ďalej upravte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/ufe-controller/http-route.yaml`:
+
+```yaml
+      ...
+      filters:
+      - type: RequestRedirect
+        requestRedirect:
+          path:
+            type: ReplaceFullPath
+            replaceFullPath: /ui
+          scheme: https   @_add_@
+          port: 443   @_add_@
+```
+
+7. Overte správnosť konfigurácie príkazom v priečinku `${WAC_ROOT}/ambulance-gitops`
 
    ```ps
    kubectl kustomize clusters/localhost/prepare
@@ -157,7 +171,7 @@ Za účelom vydávania certifikátov nasadíme do klastra službu [cert-manager]
    kubectl get pods -n cert-manager
    ```
 
-7. V prehliadači otvorte stránku [https://localhost/ui/](https://localhost/ui/). Prehliadač Vás upozorní na neplatný certifikát, pretože je vydávaný _self-signed certificate_:
+8. V prehliadači otvorte stránku [https://localhost/ui/](https://localhost/ui/). Prehliadač Vás upozorní na neplatný certifikát, pretože je vydávaný _self-signed certificate_:
 
    ![Nebezpečný certifikát](./img/040-01-SelfSignde-Cert.png)
 

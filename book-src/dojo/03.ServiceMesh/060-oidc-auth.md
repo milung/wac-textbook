@@ -363,7 +363,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
     >info:> V prípade, že sa stav nemení na Programmed je potrebné reštartovať pody envoy gateway.
 
     ```ps
-    kubectl -n wac-hospital get epp
+    kubectl -n wac-hospital get epp -o=yaml
     ```
 
 8. Otvorte v prehliadači novú záložku a otvorte _Nástroje pre vývojárov -> Sieť_.  V tejto záložke prejdite na stránku [https://wac-hospital.loc](https://wac-hospital.loc) a zvoľte voľbu _Protokol natrvalo_ (respektíve _Zachovať denník_). Nezabudnite, že v súbore `etc/host` musíte mať správne pridelenú IP adresu k záznamu `wac-hospital.loc`. Prehliadač vás upozorní na bezpečnostné riziko z dôvodu použitia neovereného TLS certifikátu. Zvoľte _Pokračovať_ a _Rozumiem bezpečnostnému riziku_.
@@ -489,7 +489,7 @@ Pre účely autentifikácie použijeme službu [oauth2-proxy](https://oauth2-pro
    Overte, že sa aplikujú najnovšie zmeny vo Vašom klastri
 
     ```ps
-    kubectl -n wac-hospital get kustomization -w
+    kubectl -n wac-hospital get pods -w
     ```
 
     Prejdite na stránku [https://wac-hospital.loc/http-echo](https://wac-hospital.loc/http-echo) a prezrite si vygenerovaný JSON súbor. V časti `headers` si všimnite hlavičky `x-auth-request-email`, a `x-auth-request-user`, ktoré boli do požiadavky doplnené službou `oauth2-proxy`.
