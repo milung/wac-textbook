@@ -2,106 +2,106 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-070
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-mesh-070`
 
 ---
 
 Autentifikácia používateľov ešte nerieši riadenie prístupu k jednotlivým zdrojom v našej aplikácii. V praxi môžeme napríklad požadovať, aby k jednotlivým ambulanciám mali prístup len používatelia s rolou `hospital-supervisor` alebo `general-practitioner` - takzvané [_Role-Based Access Control_](https://en.wikipedia.org/wiki/Role-based_access_control), alebo aby sa do čakárne mohli v určitý deň prihlasovať len pacienti s príznakom `pregnant-women` - takzvaný [_Attribute-Based Access Control_](https://en.wikipedia.org/wiki/Attribute-based_access_control).
 
-Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, ale pre definovanie takzvaných _policy rules_ vo všeobecnosti, použijeme [Open Policy Agent](https://www.openpolicyagent.org/). V našom prípade sa pokusíme nastaviť politiku, ktorá zabráni prístupu k mikroslužbe `http-echo` pre všetkých používateľov, okrem tých, ktorý majú našou politikou prístupu priradenú rolu "admin".
+Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, ale pre definovanie takzvaných _policy rules_ vo všeobecnosti, použijeme [Open Policy Agent](https://www.openpolicyagent.org/). V našom prípade sa pokúsime nastaviť politiku, ktorá zabráni prístupu k mikroslužbe `http-echo` pre všetkých používateľov, okrem tých, ktorí majú našou politikou prístupu priradenú rolu "admin".
 
 >info:> Službu [OPA Envoy Plugin](https://www.openpolicyagent.org/docs/latest/envoy-introduction/) možno použiť ako _side-car_ špecifickej služby, to znamená kontrolu dodržania politiky prístupu tesne pred prístupom k špecifickej mikroslužbe, čo z hľadiska bezpečnosti zabráni, aby škodliví aktéri obišli našu autorizáciu. Neskôr si ukážeme ako zabrániť nežiadúcej komunikácii v rámci nášho service mesh-u. Konkrétne riešenie a konfigurácia systému sa v praxi budú líšiť v závislosti od konkrétnych požiadaviek riešenia, častokrát to bude kombinácia rôznych politík a mechanizmov riadenia prístupov.
 
 1. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/deployment.yaml` s nasledujúcim obsahom:
 
-```yaml
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: &PODNAME opa-plugin
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        pod: *PODNAME
-    template:
-      metadata: 
-        labels:
-          pod: *PODNAME
+    ```yaml
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: &PODNAME opa-plugin
       spec:
-        volumes:   
-        - name: opa-policy 
-          configMap:
-            name: opa-policy
-        - name: opa-config
-          configMap:
-            name: opa-config
-        containers:
-        - name: *PODNAME
-          image: openpolicyagent/opa:latest-envoy  @_important_@
-          securityContext:
-            runAsUser: 1111
-          volumeMounts:
-            - readOnly: true
-              mountPath: /policy  @_important_@
-              name: opa-policy
-            - readOnly: true
-              mountPath: /config
-              name: opa-config @_important_@
-          args:
-            - "run"
-            - "--server"
-            - "--config-file=/config/config.yaml"  @_important_@
-            - "--addr=localhost:8181"
-            - "--diagnostic-addr=0.0.0.0:8282"
-            - "--ignore=.*"
-            - "/policy/policy.rego"  @_important_@
-          ports: 
-            - containerPort: 8181
-              name: opa-rest
-            - containerPort: 8282
-              name: opa-diag
-            - containerPort: 9191
-              name: envoy-plugin   
-          resources:
-            limits:
-              cpu: '0.5'
-              memory: '320M'
-            requests:
-              cpu: '0.01'
-              memory: '128M'
-          livenessProbe:
-            httpGet:
-              path: /health?plugins
-              scheme: HTTP
-              port: 8282
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /health?plugins
-              scheme: HTTP
-              port: 8282
-            initialDelaySeconds: 5
-            periodSeconds: 5  
-```
+        replicas: 1
+        selector:
+          matchLabels:
+            pod: *PODNAME
+        template:
+          metadata: 
+            labels:
+              pod: *PODNAME
+          spec:
+            volumes:   
+            - name: opa-policy 
+              configMap:
+                name: opa-policy
+            - name: opa-config
+              configMap:
+                name: opa-config
+            containers:
+            - name: *PODNAME
+              image: openpolicyagent/opa:latest-envoy  @_important_@
+              securityContext:
+                runAsUser: 1111
+              volumeMounts:
+                - readOnly: true
+                  mountPath: /policy  @_important_@
+                  name: opa-policy
+                - readOnly: true
+                  mountPath: /config
+                  name: opa-config @_important_@
+              args:
+                - "run"
+                - "--server"
+                - "--config-file=/config/config.yaml"  @_important_@
+                - "--addr=localhost:8181"
+                - "--diagnostic-addr=0.0.0.0:8282"
+                - "--ignore=.*"
+                - "/policy/policy.rego"  @_important_@
+              ports: 
+                - containerPort: 8181
+                  name: opa-rest
+                - containerPort: 8282
+                  name: opa-diag
+                - containerPort: 9191
+                  name: envoy-plugin   
+              resources:
+                limits:
+                  cpu: '0.5'
+                  memory: '320M'
+                requests:
+                  cpu: '0.01'
+                  memory: '128M'
+              livenessProbe:
+                httpGet:
+                  path: /health?plugins
+                  scheme: HTTP
+                  port: 8282
+                initialDelaySeconds: 5
+                periodSeconds: 5
+              readinessProbe:
+                httpGet:
+                  path: /health?plugins
+                  scheme: HTTP
+                  port: 8282
+                initialDelaySeconds: 5
+                periodSeconds: 5  
+    ```
 
-   Všimnite si položky `volumes` a `volumeMounts`, ktoré budú priraďovať konfiguračné mapy do súborového systému.
+    Všimnite si položky `volumes` a `volumeMounts`, ktoré budú priraďovať konfiguračné mapy do súborového systému.
 
-   Vytvorte súbor  `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/service.yaml` s nasledujúcim obsahom:
+    Vytvorte súbor  `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/service.yaml` s nasledujúcim obsahom:
 
-   ```yaml
-   apiVersion: v1
-   kind: Service
-   metadata:
-     name: opa-plugin
-   spec: 
-     ports:
-     - name: http
-       port: 9191
-       targetPort: 9191
+    ```yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: opa-plugin
+    spec: 
+      ports:
+      - name: http
+        port: 9191
+        targetPort: 9191
     ```
 
 2. Teraz pristúpime ku konfigurácii `opa-envoy-plugin` služby. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/opa-config.yaml`. Všimnite si, že sme priradili port `9191` pre `envoy_ext_authz_grpc` plugin a nastavili sme cestu k pravidlu vyhodnotenia autorizačnej politiky (_policy_).
@@ -117,7 +117,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
 
    Všimnite si, že sme priradili port `9191` pre `envoy_ext_authz_grpc` plugin - rovnaký port ako je uvedený v objekte typu [_Service_](https://kubernetes.io/docs/concepts/services-networking/service/) a nastavili sme cestu k pravidlu vyhodnotenia autorizačnej politiky (_policy_) - `wac/authz/result`.
 
-3. Ďaľším krokom je definícia  politiky oprávnených prístupov pre náš systém. Keďže pracujeme na lokálnom klastri s pomerne jednoduchou aplikáciou, bude naša politika slúžiť len ako ukážka pre účely jej otestovania. Ako demonštráciu použijeme k aplikácii `http-echo`, ku ktorej povolíme prístup len niektorým zo svojich kolegov, alebo prístup pre požiadavky so špeciálnym príznakom. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/policy.rego` a v jazyku [Rego](https://www.openpolicyagent.org/docs/latest/policy-language/) zadefinujeme našu testovaciu politiku. V prvom kroku vytvoríme pravidla pre získanie informácií o používateľovi, ktorý sa prihlásil do systému:
+3. Ďalším krokom je definícia  politiky oprávnených prístupov pre náš systém. Keďže pracujeme na lokálnom klastri s pomerne jednoduchou aplikáciou, bude naša politika slúžiť len ako ukážka pre účely jej otestovania. Ako príklad použijeme aplikáciu `http-echo`, ku ktorej povolíme prístup len niektorým zo svojich kolegov alebo prístup pre požiadavky so špeciálnym príznakom. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/policy.rego` a v jazyku [Rego](https://www.openpolicyagent.org/docs/latest/policy-language/) zadefinujeme našu testovaciu politiku. V prvom kroku vytvoríme pravidlá pre získanie informácií o používateľovi, ktorý sa prihlásil do systému:
 
    >info:> Pre pokročilejšiu práco s Rego jazykom môžete využiť [Visual Studio Code rozšírenie](https://marketplace.visualstudio.com/items?itemName=tsandall.opa).
 
@@ -137,7 +137,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    }
    ```
 
-   Vyššie uvedený zápis vytvára pravidlo `is_valid_user`, ktoré je splnené za predpokladu, že v prichádzajúcej požiadavke sa nachádza hlavička s názvom `x-auth-request-email`. Praivdlo `user` vytvára objekt, ktorý obsahuje informácie o používateľovi, ktorý sa prihlásil do systému. Ďalej na koniec toho istého súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/policy.rego` pridajte definíciu pravidiel pre požadované oprávnenia (role) pre špecifické požiadavky:
+   Vyššie uvedený zápis vytvára pravidlo `is_valid_user`, ktoré je splnené za predpokladu, že v prichádzajúcej požiadavke sa nachádza hlavička s názvom `x-auth-request-email`. Pravidlo `user` vytvára objekt, ktorý obsahuje informácie o používateľovi, ktorý sa prihlásil do systému. Ďalej na koniec toho istého súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/policy.rego` pridajte definíciu pravidiel pre požadované oprávnenia (role) pre špecifické požiadavky:
 
    ```rego
    # define required roles for paths
@@ -159,13 +159,13 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    }
    ```
 
-   Prvé pravidlo `request_allowed_role["admin"]` určuje, že akákoľvek požiadavka je povolená s rolou `admin`, ďaľsie pravidlo `request_allowed_role["monitoring"]` určuje, že pre prístup k ceste začínajúcej sa na `/monitoring` je potrebná rola `monitoring`. Posledné pravidlo `request_allowed_role["user"]` určuje, že pre prístup k akejkoľvek ceste, ktorá nie je `/monitoring` ani `/http-echo` je potrebná rola `user`.
+   Prvé pravidlo `request_allowed_role["admin"]` určuje, že akákoľvek požiadavka je povolená s rolou `admin`, ďalšie pravidlo `request_allowed_role["monitoring"]` určuje, že pre prístup k ceste začínajúcej sa na `/monitoring` je potrebná rola `monitoring`. Posledné pravidlo `request_allowed_role["user"]` určuje, že pre prístup k akejkoľvek ceste, ktorá nie je `/monitoring` ani `/http-echo` je potrebná rola `user`.
   
-   >info:> V praxi by sme mali definovať pravidlá pre explicitne povolené cesty, nie pre všetky ostatné. Tiež je súbor pravidiel veľmi zjednodušený, nedodržuje prístup [_Princíp najnižšieho privilégia_](https://sk.wikipedia.org/wiki/Princ%C3%ADp_najni%C5%BE%C5%A1ieho_privil%C3%A9gia) a granularitu prístupových práv.
+   >info:> V praxi by sme mali definovať pravidlá pre explicitne povolené cesty, nie pre všetky ostatné. Náš súbor pravidiel je veľmi zjednodušený, nedodržuje prístup [_Princíp najnižšieho privilégia_](https://sk.wikipedia.org/wiki/Princ%C3%ADp_najni%C5%BE%C5%A1ieho_privil%C3%A9gia) a granularitu prístupových práv.
 
-   Na koniec toho istého súboru pridajte pravidlá pre priradenie rolí používateľom: 
+   Na koniec toho istého súboru pridajte pravidlá pre priradenie rolí používateľom:
 
-   ```rego
+   ```shell
    # define roles for user
 
    # any user with valid email is user
@@ -173,7 +173,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
        user.valid
    }
    
-   # !!! DEMONSTRATION ONLY: backdoor for admin role @_important_@
+   # !!! DEMONSTRATION ONLY: backdoor for admin role
    user_role[ "admin" ] { 
        [_, query] := split(http_request.path, "?")
        glob.match("am-i-admin=yes", [], query)
@@ -181,16 +181,18 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    
    # this are admin users
    user_role[ "admin" ] { 
-       user.email == "\<kolegov@email\>"
+       user.email == "<kolegov@email>" @_important_@
    }
    
    # this are users with access to monitoring actions
    user_role[ "monitoring" ] { 
-       user.email == "\<your github account\>" @_important_@
+       user.email == "<your_github_account@email>" @_important_@
    }
    ```
 
-   Prvé pravidlo určuje, že každý prihlásený používateľ má rolu `user`. Ďaľšie dve pravidlá priraďujú rolu `admin` pre požiadavky s explicitne definovaným parametrom `am-i-admin=yes` v [_Query_ parametroch](https://en.wikipedia.org/wiki/Query_string) alebo pre používateľa s emailom Vášho kolegu - toto slúži len pre demonštráciu funkcionality v ďaľších odsekoch. 
+    >info:> Nahraďte hodnoty v označených riadkoch.
+
+   Prvé pravidlo určuje, že každý prihlásený používateľ má rolu `user`. Ďalšie dve pravidlá priraďujú rolu `admin` pre požiadavky s explicitne definovaným parametrom `am-i-admin=yes` v [_Query_ parametroch](https://en.wikipedia.org/wiki/Query_string) alebo pre používateľa s emailom Vášho kolegu - toto slúži len pre demonštráciu funkcionality v ďalších odsekoch.
 
    Ďalej na koniec súboru pridajte pravidlá pre vyhodnotenie prístupových práv:
 
@@ -210,7 +212,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    }
    ```
 
-   Pravidlo `action_allowed` určuje, že daná akcia je povolená pokiaľ existuje taká (_`some`_) rola (`role`), ktorá je v prístupových právach pre danú cestu (`request_allowed_role[role]`) a zároveň je táto rola priradená používateľovi (`user_role[role]`). Pravidlo `allow` potom určuje, že ak je používateľ autentifikovaný a ak je akcia povolená, tak je povolený aj prístup k nášmu systému.
+   Pravidlo `action_allowed` určuje, že daná akcia je povolená, pokiaľ existuje taká (_`some`_) rola (`role`), ktorá je v prístupových právach pre danú cestu (`request_allowed_role[role]`) a zároveň je táto rola priradená používateľovi (`user_role[role]`). Pravidlo `allow` potom určuje, že ak je používateľ autentifikovaný a ak je akcia povolená, tak je povolený aj prístup k nášmu systému.
 
    Nakoniec pridajte pravidlá pre vytvorenie odpovede pre  [_External Authorization Filter_](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/ext_authz/v3/ext_authz.proto) v [Envoy Proxy]:
 
@@ -229,7 +231,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    result["headers"] := headers
    ```
 
-   Ako ste už mohli postrehnúť, pri full-stack vývoji potrebuje byť softvérový inžinier zbehlý v rôznych programovacích jazykov. [Rego] je logický a _rule-based_ programovací jazyk vychádzajúci z jazyka [datalog](https://datalog.sourceforge.net/). Vo vyššie uvedenom programe sú sady pravidiel, pomocou ktorých sa snažíme dospieť k výsledku pravidla `allow` - buď `true` alebo `false`. Vysledná hodnota určí, či bude povolené pokračovať v spracovaní požiadavky. Zároveň sa snažíme vytvoriť hlavičky odpovede, ktoré budú obsahovať informácie o používateľovi a jeho oprávneniach. V praxi sú pravidlá ako `request_allowed_role` a `user_role` definované v externých úložiskách (databázach) a sú dynamicky načítavané do služby - pre podrobnosti pozri [návod](https://www.openpolicyagent.org/docs/latest/external-data/) .
+   Ako ste už mohli postrehnúť, pri full-stack vývoji potrebuje byť softvérový inžinier zbehlý v rôznych programovacích jazykoch. [Rego] je logický a _rule-based_ programovací jazyk vychádzajúci z jazyka [datalog](https://datalog.sourceforge.net/). Vo vyššie uvedenom programe sú sady pravidiel, pomocou ktorých sa snažíme dospieť k výsledku pravidla `allow` - buď `true` alebo `false`. Výsledná hodnota určí, či bude povolené pokračovať v spracovaní požiadavky. Zároveň sa snažíme vytvoriť hlavičky odpovede, ktoré budú obsahovať informácie o používateľovi a jeho oprávneniach. V praxi sú pravidlá ako `request_allowed_role` a `user_role` definované v externých úložiskách (databázach) a sú dynamicky načítavané do služby - pre podrobnosti pozri [návod](https://www.openpolicyagent.org/docs/latest/external-data/) .
 
 4. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/kustomization.yaml`
 
@@ -253,7 +255,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
        - config.yaml=params/opa-config.yaml
    - name: opa-policy
      files: 
-     - params/policy.rego
+       - params/policy.rego
    ```
 
     a do súboru `${WAC_ROOT}/ambulance-gitops/clusters/localhost/prepare/kustomization.yaml` pridajte referenciu:
@@ -304,20 +306,20 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
    Overte, že sa aplikujú najnovšie zmeny vo Vašom klastri
 
     ```ps
-    kubectl -n wac-hospital get kustomization -w
+    kubectl -n wac-hospital get pods -w
     ```
 
     Overte, že stav objektu _Envoy Patch Policy_ je `Programmed`
-    
-    >info:> V pripade že sa stav nemení na Programmed je potrebné reštartovať pody envoy gateway.
+
+    >info:> V prípade, že sa stav nemení na Programmed, je potrebné reštartovať pody envoy gateway.
 
     ```ps
-    kubectl -n wac-hospital get epp
+    kubectl -n wac-hospital get epp -o=yaml
     ```
 
-7. V prehliadači prejdite na stránku [https://wac-hospital.loc](https://wac-hospital.loc), ktorá by mala byť zobrazená bez zmeny. Teraz prejdite na stránku [https://wac-hospital.loc/http-echo](https://wac-hospital.loc/http-echo) - stránka je prázdna a v _Nástrojoch vývojarov -> Sieť_ možete vidieť odpoveď `403 Unauthorized`. Prejdite na stránku [https://wac-hospital.loc/http-echo?am-i-admin=yes](https://wac-hospital.loc/http-echo?am-i-admin=yes). V tomto prípade sa zobrazí odozva mikroslužby `http-echo`. Podobne môžete otvoriť v prehliadači súkromné okno a požiadať kolegu, ktorého e-mail ste zadali v politike prístupov, aby sa prihlásil na stránku [https://wac-hospital.loc/http-echo](https://wac-hospital.loc/http-echo). V tomto prípade by mal tiež vidieť odozvu služby `http-echo`.
+7. V prehliadači prejdite na stránku [https://wac-hospital.loc](https://wac-hospital.loc), ktorá by mala byť zobrazená bez zmeny. Teraz prejdite na stránku [https://wac-hospital.loc/http-echo](https://wac-hospital.loc/http-echo) - stránka je prázdna a v _Nástrojoch vývojárov -> Sieť_ možete vidieť odpoveď `403 Unauthorized`. Prejdite na stránku [https://wac-hospital.loc/http-echo?am-i-admin=yes](https://wac-hospital.loc/http-echo?am-i-admin=yes). V tomto prípade sa zobrazí odozva mikroslužby `http-echo`. Podobne môžete otvoriť v prehliadači súkromné okno a požiadať kolegu, ktorého e-mail ste zadali v politike prístupov, aby sa prihlásil na stránku [https://wac-hospital.loc/http-echo](https://wac-hospital.loc/http-echo). V tomto prípade by mal tiež vidieť odozvu služby `http-echo`.
 
-   Prezrite si odozvu zo služby `http-echo`. Medzi hlavičkami požiadavky, prichádzajúcej na službu `http-echo` by ste mali nájsť aj nasledovné:
+   Prezrite si odozvu zo služby `http-echo`. Medzi hlavičkami požiadavky prichádzajúcej na službu `http-echo` by ste mali nájsť aj nasledovné:
 
    ```json
    ...
