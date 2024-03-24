@@ -115,6 +115,8 @@ Na základe skúseností z implementácie [_Ingress_], sa začala pripravovať n
 
    a prípadne otvoriť v prehliadači stránku `http://localhost`, ktorá ale bude zatiaľ poskytovať len chybové hlásenie `404 Not Found`
 
+   >info:> Na získanie IP adresy prístupnej mimo cluster [Envoy Gateway] využíva servis typu `loadbalancer`. Ak kluster ktorý používate nemá nastavený východzí loadbalancer, bude ho potrebné nakonfigurovať. Napríklad pre kluster typu __microk8s__ je potrebné loadbalancer povoliť pomocou príkazu `microk8s enable metallb:127.0.0.1-127.0.0.1` (rozsah IP adries môžete zmeniť podľa ich dostupnosti na lokálnej sieti).
+
 ## Smerovanie požiadaviek
 
 V našom klastri máme k dispozícii tieto služby, ku ktorým by sme sa mohli pripojiť z vonkajšej siete:
