@@ -2,19 +2,19 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-090
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-mesh-090`
 
 ---
 
-Pokiaľ sú naše logy vhodne vytvorené, môžeme z nich okrem analýzy problémov získať aj dostatok informácii o aktuálnom stave systému. Logy však primárne neriešia túto úlohu a vo väčšine prípadov nie sú najvhodnejším spôsobom na sledovanie rôznych výkonnvých parametrov systému a a iných metrík systému  vo všeobecnosti. V tejto časti si ukážeme ako náš systém obohatiť o zber metrík formou časových sérií aktuálneho stavu systému. Na začiatok si ukážeme ako zozbierať tieto metriky pre samotný klaster, a v ďaľšej časti si ukážeme postup ako generovať špecifické metriky pre našu aplikáciu. Pre účel zberu metrík využijeme nástroj [Prometheus] a pre ich vizualizáciu nástroj [Grafana](https://grafana.com/).
+Pokiaľ sú naše logy vhodne vytvorené, môžeme z nich okrem analýzy problémov získať aj dostatok informácií o aktuálnom stave systému. Logy však primárne neriešia túto úlohu a vo väčšine prípadov nie sú najvhodnejším spôsobom na sledovanie rôznych výkonových parametrov systému a iných metrík systému vo všeobecnosti. V tejto časti si ukážeme, ako náš systém obohatiť o zber metrík formou časových sérií aktuálneho stavu systému. Na začiatok si ukážeme, ako zozbierať tieto metriky pre samotný klaster a v ďalšej časti si ukážeme postup, ako generovať špecifické metriky pre našu aplikáciu. Pre účel zberu metrík využijeme nástroj [Prometheus] a pre ich vizualizáciu nástroj [Grafana](https://grafana.com/).
 
-Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monitorovanie stavu komplexných systémov. Zaznamenáva merania získavané z rôznych zdrojov, pričom každému meraniu priradí časovú značku, čím vznikne časová séria takýchto meraní. Meraním môže byť objem alokovanej pamäti, oneskorenie odpovede na HTTP požiadavku, a mnoho ďaších ukozaovateľov. Jednotlivé merania potom možno zo zystému získať, vzájomne kombinovať alebo agregovať dotazovacieho jazyka [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/). [Prometheus] obsahuje aj jednoduché rozhranie na získanie a vizualizáciu údajov, vo všeobecnosti sa ale na účely vizualizácie stavu systému využívaju špecializované nástroje, v našom prípade to bude nástroj [Grafana].
+Nástroj [Prometheus] patrí medzi najčastejšie využívané nástroje na monitorovanie stavu komplexných systémov. Zaznamenáva merania získavané z rôznych zdrojov, pričom každému meraniu priradí časovú značku, čím vznikne časová séria takýchto meraní. Meraním môže byť objem alokovanej pamäti, oneskorenie odpovede na HTTP požiadavku a mnoho ďaších ukazovateľov. Jednotlivé merania potom možno zo systému získať, vzájomne kombinovať alebo agregovať pomocou dotazovacieho jazyka [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/). [Prometheus] obsahuje aj jednoduché rozhranie na získanie a vizualizáciu údajov, vo všeobecnosti sa ale na účely vizualizácie stavu systému využívajú špecializované nástroje, v našom prípade to bude nástroj [Grafana].
 
 >info:> Metriky zo služby [Prometheus] je možné sprístupniť aj v službe [OpenSearch], avšak v dobe písania tohto textu - november 2023 - táto funkcionalita bola ešte limitovaná a nie celkom stabilná. Aktuálny stav a návod na použitie nájdete v [dokumentácii](https://opensearch.org/docs/latest/observing-your-data/prometheusmetrics/).
 
-1. Pri nasadení [Prometheus] na kubernetes klaster je potrebné zvoliť vhodný spôsob nasadenia. V našom prípade použijeme [Helm] chart [prometheus-community/prometheus](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus), ktorý okrem konfigurácie servera _Prometheus_ zabezpečí aj nasadenie ďaľších komponentov, v našom prípade je asi najdôležitejšou služba [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics#readme), ktorá zabezpečí zber metrík z kubernetes klastera. Nasadenie budeme vykonávať použitím objektov operátora [FluxCD].
+1. Pri nasadení [Prometheus] na kubernetes klaster je potrebné zvoliť vhodný spôsob nasadenia. V našom prípade použijeme [Helm] chart [prometheus-community/prometheus](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus), ktorý okrem konfigurácie servera _Prometheus_ zabezpečí aj nasadenie ďalších komponentov, v našom prípade je asi najdôležitejšou služba [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics#readme), ktorá zabezpečí zber metrík z kubernetes klastra. Nasadenie budeme vykonávať použitím objektov operátora [flux cd].
 
    Vytvorte adresár `${WAC_ROOT}/ambulance-gitops/infrastructure/prometheus` a v ňom súbor `${WAC_ROOT}ambulance-gitops/infrastructure/prometheus/helm-repository.yaml` s nasledujúcim obsahom:
 
@@ -29,7 +29,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
      url: https://prometheus-community.github.io/helm-charts
    ```
 
-   Objekt [_HelmRepository_](https://fluxcd.io/flux/components/source/helmrepositories/) slúži systému [FluxCD] ako referencia zdroja - repozitára - [Helm] balíčkov.
+   Objekt [_HelmRepository_](https://fluxcd.io/flux/components/source/helmrepositories/) slúži systému [flux cd] ako referencia zdroja - repozitára - [Helm] balíčkov.
 
    Ďalej vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/prometheus/helm-release.yaml` s nasledujúcim obsahom:
 
@@ -43,8 +43,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
       interval: 1m
       chart:
         spec:
-          chart: prometheus   
-
+          chart: prometheus
           sourceRef:
             kind: HelmRepository
             name: prometheus-community @_important_@
@@ -57,7 +56,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
             mountPropagation: false # required on docker-desktop kluster 
       ```
 
-   Pomocou objektu [_HelmRelease_](https://fluxcd.io/flux/components/source/helmcharts/) systému [FluxCD] predpisujeme aby na cieľovam klastri nainštaloval balíček `prometheus` z repozitára určeného objektom `prometheus-community` typu [_HelmRepository_](https://fluxcd.io/flux/components/source/helmrepositories/).
+   Pomocou objektu [_HelmRelease_](https://fluxcd.io/flux/components/helm/helmreleases/) systému [flux cd] predpisujeme, aby na cieľovom klastri nainštaloval balíček `prometheus` z repozitára určeného objektom `prometheus-community` typu [_HelmRepository_](https://fluxcd.io/flux/components/source/helmrepositories/).
 
    Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/prometheus/kustomization.yaml` a zintegrujte predchádzajúce manifesty.
 
@@ -189,11 +188,11 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
          incrementalQueryOverlapWindow: 10m
    ```
 
-   [Grafana] umožňuje konfigurovať zdroj údajov cez používateľské rozhranie, alebo formou automatického nastavenia -  [_provisioning_](https://grafana.com/docs/grafana/latest/administration/provisioning/), ktorý umožňuje predpripraviť konfiguráciu známych zdrojov údajov. Táto konfigurácia sa aplikuje pri štarte služby _Grafana_. V našom prípade sme konfigurovali zdroj údajov pre nástroj [Prometheus], ktorý sme nasadili v predchádzajúcom kroku.
+   [Grafana] umožňuje konfigurovať zdroj údajov cez používateľské rozhranie alebo formou automatického nastavenia -  [_provisioning_](https://grafana.com/docs/grafana/latest/administration/provisioning/), ktorý umožňuje predpripraviť konfiguráciu známych zdrojov údajov. Táto konfigurácia sa aplikuje pri štarte služby _Grafana_. V našom prípade sme konfigurovali zdroj údajov pre nástroj [Prometheus], ktorý sme nasadili v predchádzajúcom kroku.
 
-   >info:> [Grafana] podporuje aj automatické nastavenie údajových panelov - _dashboards_. V cvičení budeme postupovať manuálnym vytváranim údajových panelov. Ich konfiguráciu vo forme JSON špecifikácií si potom môžete zobraziť v používateľskom rozhraní, uložiť a použiť pre automatické nastavenie. Tieto špecifikácie musia byť uložené v adresári `/etc/grafana/provisioning/dashboards` - _mountPath_ parameter kontajnera `grafana`.
+   >info:> [Grafana] podporuje aj automatické nastavenie údajových panelov - _dashboards_. V cvičení budeme postupovať manuálnym vytváraním údajových panelov. Ich konfiguráciu vo forme JSON špecifikácií si potom môžete zobraziť v používateľskom rozhraní, uložiť a použiť pre automatické nastavenie. Tieto špecifikácie musia byť uložené v adresári `/etc/grafana/provisioning/dashboards` - _mountPath_ parameter kontajnera `grafana`.
 
-   Pripravíme konfiguráciu pre [_Persistent Volume Claim_](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims). vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/pvc.yaml`:
+   Pripravíme konfiguráciu pre [_Persistent Volume Claim_](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims). Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/pvc.yaml`:
 
    ```yaml
    apiVersion: v1
@@ -222,7 +221,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
          targetPort: http-grafana
    ```
 
-   Nakoniec všetky konfiguráčné súbory integrujte pomocou súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/kustomization.yaml`:
+   Nakoniec všetky konfiguračné súbory integrujte pomocou súboru `${WAC_ROOT}/ambulance-gitops/infrastructure/grafana/kustomization.yaml`:
 
    ```yaml
    apiVersion: kustomize.config.k8s.io/v1beta1
@@ -248,7 +247,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
        - params/prometheus-datasource.yaml
    ```
 
-3. Vytvorte objekt [_HTTPRoute_](https://gateway-api.sigs.k8s.io/docs/concepts/httproute/) v súbore `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/grafana.http-route.yaml`:
+3. Vytvorte objekt [_HTTPRoute_](https://gateway-api.sigs.k8s.io/api-types/httproute/) v súbore `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/grafana.http-route.yaml`:
 
    ```yaml
    apiVersion: gateway.networking.k8s.io/v1
@@ -270,7 +269,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
              port: 80
    ```
 
-   Vytvorte súbor `${WAC_ROOT}/apps/observability-webc/grafana.webcomponent.yaml`:
+   Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/observability-webc/grafana.webcomponent.yaml`:
 
    ```yaml
    apiVersion: fe.milung.eu/v1
@@ -309,7 +308,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
    ...
    resources:
    ...
-   - ../../../infrastructure/fluentbit
+   - ../../../infrastructure/monitoring-opensearch
    - ../../../infrastructure/prometheus @_add_@
    - ../../../infrastructure/grafana @_add_@
    ...
@@ -322,7 +321,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
    kubectl kustomize clusters/localhost/install
    ```
 
-   Archivujte Vaše zmeny príkazmy:
+   Archivujte Vaše zmeny príkazmi:
 
    ```ps
    git add .
@@ -330,17 +329,20 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
    git push
    ```
 
-   Vyčkajte kým sa zmeny prejavia v klastri:
+   Vyčkajte, kým sa zmeny prejavia v klastri:
 
    ```ps
-   flux get kustomizations --namespace wac-hospital
+   kubectl get kustomizations --namespace wac-hospital
+   kubectl get pods -n wac-hospital
    ```
 
-6. Otvorte prehliadač a zobrazte si nástroj [Grafana] na adrese [https://wac-hospital.loc/grafana](https://localhost/grafana). Otvorte bočný navigačný panel, zvoľte položku _Connection_ a následne položku _Data Sources_.V zozname zdrojov by ste mali vidieť zdroj údajov pre nástroj [Prometheus], nastavený na adresu `http://prometheus-server.wac-hospital`.
+   Mali by ste vidieť 5 podov s menom začínajúcim na `prometheus` a 1 pod s menom začínajúcim na `grafana`.
+
+6. Otvorte prehliadač a navigujte sa na stránku [https://wac-hospital.loc/grafana](https://localhost/grafana). Ak budete vyzvaný, zadajte svoje GitHub prihlasovacie údaje. Kliknite na dlaždicu `System Dashboards`. Otvorte bočný navigačný panel, zvoľte položku _Connection_ a následne položku _Data Sources_. V zozname zdrojov by ste mali vidieť zdroj údajov pre nástroj [Prometheus], nastavený na adresu `http://prometheus-server.wac-hospital`.
 
    ![Grafana - zdroje údajov](img/090-01-GrafanaDataSources.png)
 
-   Stlačte na tlačidlo _Explore_ v sekcii _Prometheus_. Zobrazí sa Vám okno v ktorom môžete vyhľadávať jednotlivé dostupné metriky a vytvárať ich agregácie a grafy. Prepnite mód zobrazenie z _Builder_ na _Code_ a do vstupného poľa označeného _Enter PromQL query ..._ zadajte nasledujúci dotaz:
+   Stlačte na tlačidlo _Explore_ v sekcii _Prometheus_. Zobrazí sa Vám okno, v ktorom môžete vyhľadávať jednotlivé dostupné metriky a vytvárať ich agregácie a grafy. Prepnite mód zobrazenia z _Builder_ na _Code_ a do vstupného poľa označeného _Enter PromQL query ..._ zadajte nasledujúci príkaz:
 
    ```plain
    irate(container_cpu_usage_seconds_total{namespace="wac-hospital"}[10m])
@@ -356,8 +358,8 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívane nástroje na monit
 
    Stlačte na ikonu _Save dashboard_ a uložte si údajový panel pod názvom `WAC Hospital CPU`. Následne stlačte na tlačidlo _Save_. Pokiaľ teraz prejdete na úvodnú stránku [https://wac-hospital.loc/grafana](https://wac-hospital.loc/grafana), uvidíte v zozname panelov - _dashboards_ - aj Vami uložený panel `WAC Hospital CPU`.
 
-   >homework:> Rozšírte údajový panel o ďaľšie metriky, napríklad o aktuálne vyťaženie pamäte, alebo o aktuálne vyťaženie CPU jednotlivých podov v [_namespace_](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) `wac-hospital`. (Hľadajte metriku `container_memory_usage_bytes`). Vyskúšajte rôzne spôsoby vizualizácie metrík. Viac podrobností o možnostiach vizualizácie metrík nájdete v [dokumentácii nástroja Grafana](https://grafana.com/docs/grafana/latest/panels/visualizations/).
+   >homework:> Rozšírte údajový panel o ďalšie metriky, napríklad o aktuálne vyťaženie pamäte alebo o aktuálne vyťaženie CPU jednotlivých podov v [_namespace_](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) `wac-hospital`. (Hľadajte metriku `container_memory_usage_bytes`). Vyskúšajte rôzne spôsoby vizualizácie metrík. Viac podrobností o možnostiach vizualizácie metrík nájdete v [dokumentácii nástroja Grafana](https://grafana.com/docs/grafana/latest/panels/visualizations/).
 
-Metriky V kombinácii s analýzou logov dávajú tímom pracujúcim technikou DevOps okamžitý náhľad na operačný stav aplikácie nasadenej v dátovom centre. Môžu sledovať priebeh jej zaťaženia, reakcie systému na zmeny v aktuálnom zaťažení a optimalizovať implementáciu systému. Metriky ktoré máme momentálne k dispozícii sú generované najme službou [_node-exporter_](https://github.com/prometheus/node_exporter) a [_kube-state-metrics_](https://github.com/kubernetes/kube-state-metrics). V nasledujúcej časti si ukážeme ako generovať metriky špecifické pre našu aplikáciu.
+Metriky v kombinácii s analýzou logov dávajú tímom pracujúcim technikou DevOps okamžitý náhľad na operačný stav aplikácie nasadenej v dátovom centre. Môžu sledovať priebeh jej zaťaženia, reakcie systému na zmeny v aktuálnom zaťažení a optimalizovať implementáciu systému. Metriky, ktoré máme momentálne k dispozícii, sú generované najmä službou [_node-exporter_](https://github.com/prometheus/node_exporter) a [_kube-state-metrics_](https://github.com/kubernetes/kube-state-metrics). V nasledujúcej časti si ukážeme, ako generovať metriky špecifické pre našu aplikáciu.
 
->info:> Tu uvádzané nastroje sú ukážkou populárnych nástrojov na monitorovanie systémov, pravdaže nie sú jedinými.  V prípade, že máte záujem aj o iné nástroje, môžete si ich vyhľadať na stránke [CNCF Landscape](https://landscape.cncf.io/card-mode?category=observability-and-analysis&grouping=category).
+>info:> Tu uvádzané nástroje sú ukážkou populárnych nástrojov na monitorovanie systémov, pravdaže nie sú jedinými.  V prípade, že máte záujem aj o iné nástroje, môžete si ich vyhľadať na stránke [CNCF Landscape](https://landscape.cncf.io/) v časti `Observability and Analysis`.
