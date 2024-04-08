@@ -338,7 +338,7 @@ Nástroj [Prometheus] patrí medzi najčastejšie využívané nástroje na moni
 
    Mali by ste vidieť 5 podov s menom začínajúcim na `prometheus` a 1 pod s menom začínajúcim na `grafana`.
 
-6. Otvorte prehliadač a navigujte sa na stránku [https://wac-hospital.loc/grafana](https://localhost/grafana). Ak budete vyzvaný, zadajte svoje GitHub prihlasovacie údaje. Kliknite na dlaždicu `System Dashboards`. Otvorte bočný navigačný panel, zvoľte položku _Connection_ a následne položku _Data Sources_. V zozname zdrojov by ste mali vidieť zdroj údajov pre nástroj [Prometheus], nastavený na adresu `http://prometheus-server.wac-hospital`.
+6. Otvorte prehliadač a navigujte sa na stránku [https://wac-hospital.loc/ui/grafana](https://wac-hospital.loc/ui/grafana). Ak budete vyzvaný, zadajte svoje GitHub prihlasovacie údaje. Kliknite na dlaždicu `System Dashboards`. Otvorte bočný navigačný panel, zvoľte položku _Connection_ a následne položku _Data Sources_. V zozname zdrojov by ste mali vidieť zdroj údajov pre nástroj [Prometheus], nastavený na adresu `http://prometheus-server.wac-hospital`.
 
    ![Grafana - zdroje údajov](img/090-01-GrafanaDataSources.png)
 
