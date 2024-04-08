@@ -1,14 +1,14 @@
-# Pridanie distribuovaneho trasovania do Web API služby
+# Pridanie distribuovaného trasovania do Web API služby
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-120
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-mesh-120`
 
 ---
 
-V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé požiadavky pomocou distribuovaného trasovania, samotné záznamy boli ale pomerne hrubé a stále nemáme k dispozícii ďalšie detaily ohľadne prebiehajúceho výpočtu. VC tejto sekcii si ukážeme ako doplniť do aplikácie rozsahy - _span_ - vlastného výpočtu.
+V predchádzajúcej sekcii sme videli, ako môžeme analyzovať jednotlivé požiadavky pomocou distribuovaného trasovania, samotné záznamy boli ale pomerne hrubé a stále nemáme k dispozícii ďalšie detaily ohľadne prebiehajúceho výpočtu. V tejto sekcii si ukážeme, ako doplniť do aplikácie rozsahy - _span_ - vlastného výpočtu.
 
 1. Otvorte súbor `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go` a upravte ho
 
@@ -17,7 +17,6 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
    
    import (
        ...
-       "time"   @_add_@
        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"   @_add_@
        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"   @_add_@
        "go.opentelemetry.io/otel/sdk/trace"   @_add_@
@@ -27,9 +26,25 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
    // initialize OpenTelemetry instrumentations
    func initTelemetry()  error { @_remove_@
    func initTelemetry() (func(context.Context) error, error) { @_add_@
-       ...
-       metricProvider := metric.NewMeterProvider(metric.WithReader(metricExporter), metric.WithResource(res))
-       otel.SetMeterProvider(metricProvider)
+        ctx := context.Background()
+        res, err := resource.New(ctx,
+        resource.WithAttributes(semconv.ServiceNameKey.String("Ambulance WebAPI Service")),
+        resource.WithAttributes(semconv.ServiceNamespaceKey.String("WAC Hospital")),
+        resource.WithSchemaURL(semconv.SchemaURL),
+        resource.WithContainer(),
+        )
+    
+        if err != nil {
+          return nil, err     @_important_@
+        }
+    
+        metricExporter, err := prometheus.New()
+        if err != nil {
+          return nil, err     @_important_@
+        }
+    
+        metricProvider := metric.NewMeterProvider(metric.WithReader(metricExporter), metric.WithResource(res))
+        otel.SetMeterProvider(metricProvider)
    
        // setup trace exporter, only otlp supported      @_add_@
        // see also https://github.com/open-telemetry/opentelemetry-go-contrib/tree/main/exporters/autoexport      @_add_@
@@ -57,13 +72,11 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
            noopShutdown := func(context.Context) error { return nil }      @_add_@
            return noopShutdown, nil      @_add_@
        }      @_add_@
-   
+       return nil @_remove_@
    }
    ```
 
-   Upravte zároveň návratové hodnoty vo vynechaných riadkoch.
-
-   Do funkcie `initTelemetry()` sme pridali inicializáciu [_TraceProvider_](https://opentelemetry.io/docs/concepts/signals/traces/#tracer-provider)-a. Samotnú konfiguráciu vykonáme neskôr pomocou premenných prostredia, doležité je, že túto sekciu vytvárame len v prípade, kedy je premenná prostredia `OTEL_TRACES_EXPORTER` explicitne nastavená na hodnotu `otlp` - žiadny iný spôsob ukladania záznamov nepodpúorujeme. Keďže [_Trace Exporter_](https://opentelemetry.io/docs/concepts/signals/traces/#trace-exporters) ukladá záznamy asynchrónne a v dávkach, je potrebné zabezpečiť, aby sa všetky záznamy uložili pred ukončením aplikácie. K tomu slúži funkcia `Shutdown()`, ktorej inštancia je návratou hodnotou funkcie `initTelemetry()`. V prípade, že nie je premenná prostredia `OTEL_TRACES_EXPORTER` nastavená na hodnotu `otlp`, vraciame funkciu, ktorá nič nerobí.
+   Do funkcie `initTelemetry()` sme pridali inicializáciu [_TraceProvider_](https://opentelemetry.io/docs/concepts/signals/traces/#tracer-provider)-a. Samotnú konfiguráciu vykonáme neskôr pomocou premenných prostredia, doležité je, že túto sekciu vytvárame len v prípade, kedy je premenná prostredia `OTEL_TRACES_EXPORTER` explicitne nastavená na hodnotu `otlp` - žiadny iný spôsob ukladania záznamov nepodporujeme. Keďže [_Trace Exporter_](https://opentelemetry.io/docs/concepts/signals/traces/#trace-exporters) ukladá záznamy asynchrónne a v dávkach, je potrebné zabezpečiť, aby sa všetky záznamy uložili pred ukončením aplikácie. K tomu slúži funkcia `Shutdown()`, ktorej inštancia je návratovou hodnotou funkcie `initTelemetry()`. V prípade, že nie je premenná prostredia `OTEL_TRACES_EXPORTER` nastavená na hodnotu `otlp`, vraciame funkciu, ktorá nič nerobí.
 
    V tom istom súbore `${WAC_ROOT}/ambulance-webapi/cmd/ambulance-api-service/main.go` upravte funkciu `main()`:
 
@@ -71,11 +84,11 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
    func main() {
        
        // setup telemetry
-       err := initTelemetry() @_remove_@
+       initTelemetry() @_remove_@
        shutdown, err := initTelemetry() @_add_@
-       if err != nil {
-           log.Fatalf("Failed to initialize telemetry: %v", err)
-       }
+       if err != nil { @_add_@
+           log.Fatalf("Failed to initialize telemetry: %v", err) @_add_@
+       } @_add_@
        defer func() { _ = shutdown(context.Background()) }() @_add_@
    
        // instrument gin engine
@@ -98,6 +111,8 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
 
    ```go
    ...
+   "go.opentelemetry.io/otel/codes" @_add_@
+   ...
    var (
        dbMeter           = otel.Meter("waiting_list_access")
        dbTimeSpent       metric.Float64Counter
@@ -111,8 +126,10 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
         // to the updater function    @_add_@
         spanctx, span := tracer.Start(ctx.Request.Context(), "updateAmbulanceFunc")    @_add_@
         ctx.Request = ctx.Request.WithContext(spanctx)    @_add_@
-       ..
+        defer span.End()    @_add_@
+       ...
    
+       span.AddEvent("updateAmbulanceFunc: finding document in database") @_add_@
        start := time.Now()
        ambulance, err := db.FindDocument(ctx, ambulanceId) @_remove_@
        ambulance, err := db.FindDocument(spanctx, ambulanceId) @_add_@
@@ -130,27 +147,27 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
        ...
    
        if updatedAmbulance != nil {
-           span.AddEvent("updateAmbulanceFunc: updating ambulance in database")
+           span.AddEvent("updateAmbulanceFunc: updating ambulance in database") @_add_@
            start := time.Now()
            err = db.UpdateDocument(ctx, ambulanceId, updatedAmbulance) @_remove_@
            err = db.UpdateDocument(spanctx, ambulanceId, updatedAmbulance) @_add_@
+           dbTimeSpent.Add(ctx, float64(float64(time.Since(start)))/float64(time.Millisecond), metric.WithAttributes(
+               attribute.String("operation", "update"),
+               attribute.String("ambulance_id", ambulanceId),
+               attribute.String("ambulance_name", ambulance.Name),
+           ))
+           if err != nil { @_add_@
+               span.SetStatus(codes.Error, err.Error()) @_add_@
+           } @_add_@
            ...
-       } else {
-           err = nil // redundant but for clarity
        }
-   
-       if err != nil {   @_add_@
-           span.SetStatus(codes.Error, err.Error())   @_add_@
-       }   @_add_@
-       
-       switch err {
        ...
    }
    ```
 
-   Na začiatku funkcie `updateAmbulanceFunc()` sme vytvorili nový rozsah výpočtu. [_Span Context_](https://opentelemetry.io/docs/concepts/signals/traces/#span-context), to znamená _trace id_ a nadradený _span id_ sú prenesené do funkcie `tracer.Start()` ako atribút premennej `ctx`. Rozsah výpočtu je ukončený volaním funkcie `span.End()`. Všimnite si ako sme vytvorili nový rozsah výpočtu aj pre volanie funkcie `db.FindDocument()` a `db.UpdateDocument()`. V prípade, že sa vyskytne chyba, nastavíme status rozsahu výpočtu na `Error` a do atribútu `status` pridáme chybovú správu. Tieto atribúty sa neskôr zobrazia v nástroji [Jaeger].
+   Na začiatku funkcie `updateAmbulanceFunc()` sme vytvorili nový rozsah výpočtu. [_Span Context_](https://opentelemetry.io/docs/concepts/signals/traces/#span-context), to znamená _trace id_ a nadradený _span id_ sú prenesené do funkcie `tracer.Start()` ako atribút premennej `ctx`. Rozsah výpočtu je ukončený volaním funkcie `span.End()`. Všimnite si, ako sme vytvorili nový rozsah výpočtu aj pre volanie funkcie `db.FindDocument()` a `db.UpdateDocument()`. V prípade, že sa vyskytne chyba, nastavíme status rozsahu výpočtu na `Error` a do atribútu `status` pridáme chybovú správu. Tieto atribúty sa neskôr zobrazia v nástroji [Jaeger].
 
-   Upravte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/`. Ukážeme si ako pridať záznamy pre rozsahy výpočtu do funkcie `UpdateWaitingListEntry()`, ostatné funkcie upravte obdobným spôsobom:
+   Upravte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_waiting_list.go`. Ukážeme si ako pridať záznamy pre rozsahy výpočtu do funkcie `UpdateWaitingListEntry()`, ostatné funkcie upravte obdobným spôsobom:
 
    ```go
    package ambulance_wl
@@ -188,7 +205,7 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
 
    Vo väčšine prípadov budeme vytvárať nový rozsah výpočtu vždy, keď vstúpime do novej funkcie a pomocou operátora `defer` zabezpečíme ukončenie rozsahu výpočtu. [_Span Context_](https://opentelemetry.io/docs/concepts/signals/traces/#span-context) je propagovaný medzi funkciami pomocou premennej `ctx`.
 
-   >homework:> Samostatne doplňte záznamy pre rozsahy výpočtu do ostatných funkcií v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/`. Pokiaľ to je relevantné, nastavte chybový status rozsahu pomocou funkcie `span.SetStatus()`, prípadne pridajte dôležité udalosti výpočtu pomocou funkcie `span.AddEvent()`.
+   >homework:> Samostatne doplňte záznamy pre rozsahy výpočtu do ostatných funkcií v súbore `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/impl_ambulance_waiting_list.go`. Pokiaľ to je relevantné, nastavte chybový status rozsahu pomocou funkcie `span.SetStatus()`, prípadne pridajte dôležité udalosti výpočtu pomocou funkcie `span.AddEvent()`.
 
    Nakoniec upravte súbor `${WAC_ROOT}/ambulance-webapi/internal/ambulance_wl/ext_model_ambulance.go`:
 
@@ -223,7 +240,7 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
     git push
     ```
 
-4. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/patches/ambulance-webapi.deployment.yaml` a doplňte do konfigurácie premenná prostredia potrebné pre pripojenie _Open Telemetry SDK_ k službe `jaeger-collector`:
+4. Otvorte súbor `${WAC_ROOT}/ambulance-gitops/apps/<pfx>-ambulance-webapi/patches/ambulance-webapi.deployment.yaml` a doplňte do konfigurácie premenné prostredia potrebné pre pripojenie _Open Telemetry SDK_ k službe `jaeger-collector`:
 
    ```yaml
    ...
@@ -231,7 +248,7 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
      template:
        spec:
          containers:
-           - name: milung-ambulance-wl-webapi-container    @_add_@
+           - name: <pfx>-ambulance-wl-webapi-container    @_add_@
              env:    @_add_@
                - name: OTEL_TRACES_EXPORTER    @_add_@
                  value: otlp    @_add_@
@@ -257,17 +274,17 @@ V predchádzajúcej sekcii sme videli ako môžeme analyzovať jednotlivé poži
 
    Počkajte kým sa všetky zmeny aplikujú v klastri.
 
-5. Prejdite na stránku [https://wac-hospital.loc/ui](https://wac-hospital.loc/ui), otvorte Vašu aplikáciu _Zoznam čakajúcich pacientov_ a vytvorte, uoravte, alebo zmeňte zoznam čakajúcich pacientov. Následne prejdite do aplikácie _Distribuované trasovanie_ - [https://wac-hospital.loc/ui/jaeger](https://wac-hospital.loc/ui/jaeger). V rozbaľovacom pli vyberte službu _Ambulance WEBAPI Service_ a vyhľadajte záznamy.
+5. Prejdite na stránku [https://wac-hospital.loc/ui](https://wac-hospital.loc/ui), otvorte Vašu aplikáciu _Zoznam čakajúcich pacientov_ a vytvorte, upravte alebo zmeňte zoznam čakajúcich pacientov. Následne prejdite do aplikácie _Distribuované trasovanie_ - [https://wac-hospital.loc/ui/jaeger](https://wac-hospital.loc/ui/jaeger). V rozbaľovacom paneli vyberte službu _Ambulance WEBAPI Service_ a vyhľadajte záznamy.
 
     ![Zobrazenie záznamov pre službu Ambulance WEBAPI Service](./img/120-01-Tracing-records.png)
 
-   Vyberte niektorý zo záznamov, najlepšie taký u ktorého je vidieť najviac rozsahov - _Spans_ a zobrazte si detaily.
+   Vyberte niektorý zo záznamov, najlepšie taký, u ktorého je vidieť najviac rozsahov - _Spans_ a zobrazte si detaily.
 
    ![Detaily rozsahu výpočtu požiadavky](./img/120-02-SpanDetails.png)
 
-   V detailoch rozsahu výpočtu môžete vidieť pre danú požiadavku vidieť všetky rozsahy a im priradené atribúty, ktoré sme v našej aplikácii vytvorili. Vidíme aký je podieľ jednotlivých služieb na celkovom čase výpočtu. Stále nám chýbaju detaily niektorých služieb - napríklad pre MongoDB, túto skutočnosť budeme adresovať v ďalších sekciách, potom ako nasadíme systém [Linkerd].
+   V detailoch rozsahu výpočtu môžete pre danú požiadavku vidieť všetky rozsahy a im priradené atribúty, ktoré sme v našej aplikácii vytvorili. Vidíme, aký je podiel jednotlivých služieb na celkovom čase výpočtu. Stále nám chýbajú detaily niektorých služieb - napríklad pre MongoDB, túto skutočnosť budeme adresovať v ďalších sekciách, potom ako nasadíme systém [Linkerd].
 
-   >homework:> Vykonajte analýzu požiadaviek na službu _Ambulance WEBAPI Service_. Skúste zistiť v ktorých častiach kódu sa stráca najviac času, a ako by tieto časti bolo možné optimalizovať. Sú informačné záznamy dostatočne detailné? Ak nie, skúste doplniť ďalšie informácie a rozsahy do Vašej aplikácie. _Do záznamov nikdy nevkladajte údaje ktoré by mohli narušiť súkromie používateľov!_.
+   >homework:> Vykonajte analýzu požiadaviek na službu _Ambulance WEBAPI Service_. Skúste zistiť, v ktorých častiach kódu sa stráca najviac času a ako by tieto časti bolo možné optimalizovať. Sú informačné záznamy dostatočne detailné? Ak nie, skúste doplniť ďalšie informácie a rozsahy do Vašej aplikácie. __Do záznamov nikdy nevkladajte údaje, ktoré by mohli narušiť súkromie používateľov!__.
 
    &nbsp;
 
