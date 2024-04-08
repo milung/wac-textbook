@@ -2,24 +2,24 @@
 
 ---
 
-```ps
-devcontainer templates apply -t registry-1.docker.io/milung/wac-mesh-100
-```
+>info:>
+Šablóna pre predvytvorený kontajner ([Detaily tu](../99.Problems-Resolutions/01.development-containers.md)):
+`registry-1.docker.io/milung/wac-mesh-100`
 
 ---
 
-V predchádzajúcej sekcii sme nasadili do nášho systému služby [Prometheus] a [Grafana], čo nám umožnilo zbierať a zobrazovať rôzne operačné metriky nášho systému, prevažne získané sledovaním parametrov kubernetes systému. Nie vždy sú však tieto metriky dostatočné, pretože nezahŕňajú metriky z našej aplikácie, ktoré sú pre nás dôležité. V tejto časti si ukážeme ako môžeme vytvoriť vlastné operačné metriky. K tomuto účelu musíme upraviť náš zdrojový kód. V našom prípade budeme využívať knižnicu [OpenTelemetry], ktorá nám umožní vytvárať vlastné metriky a zároveň ich exportovať do formátu, ktorý dokáže sapracovať služba [Prometheus].
+V predchádzajúcej sekcii sme nasadili do nášho systému služby [Prometheus] a [Grafana], čo nám umožnilo zbierať a zobrazovať rôzne operačné metriky nášho systému, prevažne získané sledovaním parametrov kubernetes systému. Nie vždy sú však tieto metriky dostatočné, pretože nezahŕňajú metriky z našej aplikácie, ktoré sú pre nás dôležité. V tejto časti si ukážeme ako môžeme vytvoriť vlastné operačné metriky. K tomuto účelu musíme upraviť náš zdrojový kód. V našom prípade budeme využívať knižnicu [OpenTelemetry], ktorá nám umožní vytvárať vlastné metriky a zároveň ich exportovať do formátu, ktorý dokáže spracovať služba [Prometheus].
 
-Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, ktoré sa zaoberajú monitorovaním aplikácií. Výsledkom je jednotná knižnica, ktorá umožňuje vytvárať metriky, distribuované trasovanie, generovanie záznamov - logov, vo všeobecnosti nazývanými [_Signals_](https://opentelemetry.io/docs/concepts/signals/metrics/). Tieto signály je potom možné exportovať do rôznych formátov. Formát a [špecifikácia OpenTelemetry](https://opentelemetry.io/docs/specs/) je podporovaná väčšinou známych knižníc a integrovateľná so službami rôznych poskytovateľov. SDK je implementované v rôznych programovacích jazykoch, v našom prípade budeme využívať implementáciu pre jazyk [Go](https://opentelemetry.io/docs/instrumentation/go/). V tejto časti sa budeme zaoberať len kate
+Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, ktoré sa zaoberajú monitorovaním aplikácií. Výsledkom je jednotná knižnica, ktorá umožňuje vytvárať metriky, distribuované trasovanie, generovanie záznamov - logov, vo všeobecnosti nazývanými [_Signals_](https://opentelemetry.io/docs/concepts/signals/metrics/). Tieto signály je potom možné exportovať do rôznych formátov. Formát a [špecifikácia OpenTelemetry](https://opentelemetry.io/docs/specs/) sú podporované väčšinou známych knižníc a integrovateľné so službami rôznych poskytovateľov. SDK je implementované v rôznych programovacích jazykoch, v našom prípade budeme využívať implementáciu pre jazyk [Go](https://opentelemetry.io/docs/instrumentation/go/).
 
 1. V prvom kroku musíme pripraviť inštrumentalizáciu (zber rôznych meraní a záznamov - signálov) programu. Otvorte súbor `${WAC_ROOT}}/ambulance-webapi/cmd/ambulance-api-service/main.go` a upravte ho:
 
    ```go
    import (
       "context"
-      _ "embed"
-      "log" @_add_@
-      "net/http"
+      "time"
+      "log"
+      "net/http" @_add_@
       "os"
       "strings"
      
@@ -37,6 +37,8 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
       semconv "go.opentelemetry.io/otel/semconv/v1.21.0"     @_add_@
    )
    
+   ...
+
    // initialize OpenTelemetry instrumentations   @_add_@
    func initTelemetry() error {   @_add_@
      ctx := context.Background()   @_add_@
@@ -62,7 +64,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
    }   @_add_@
    ```
 
-   Funkcia `initTelemetry()` pripravuje globálnu inštanciu metrického poskytovateľa - [_metric provider_](https://opentelemetry.io/docs/concepts/signals/metrics/#meter-provider), ktorý bude zodpovedný za zber metrík a ich exportovanie. Všetky naše metriky (a neskôr [_traces_](https://opentelemetry.io/docs/concepts/signals/traces/) ) budú asociované s objektom, ktorý je opísaný inštanciou vytvorenou volaním funkcie `resource.New`, a ktorému priraďujeme atribúty, pomocou ktorých tento objekt môžeme identifikovať.
+   Funkcia `initTelemetry()` pripravuje globálnu inštanciu poskytovateľa metrík - [_metric provider_](https://opentelemetry.io/docs/concepts/signals/metrics/#meter-provider), ktorý bude zodpovedný za zber metrík a ich exportovanie. Všetky naše metriky (a neskôr [_traces_](https://opentelemetry.io/docs/concepts/signals/traces/) ) budú asociované s objektom, ktorý je opísaný inštanciou vytvorenou volaním funkcie `resource.New`, a ktorému priraďujeme atribúty, pomocou ktorých tento objekt môžeme identifikovať.
 
    Zároveň sme vytorili inštanciu `metricExporter`, ktorá je zodpovedná za poskytnutie - [_export_](https://opentelemetry.io/docs/concepts/components/#exporters) metrík vo formáte, ktorý je schopná spracovať služba [Prometheus].
 
@@ -96,19 +98,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
            }),    @_add_@
        ))    @_add_@
     
-       // setup context update  middleware
-       dbService := db_service.NewMongoService[ambulance_wl.Ambulance](db_service.MongoServiceConfig{})
-       defer dbService.Disconnect(context.Background())
-       engine.Use(func(ctx *gin.Context) {
-           ctx.Set("db_service", dbService)
-           ctx.Next()
-       })
-    
-       // request routings
-       ambulance_wl.AddRoutes(engine)
-    
-       // openapi spec endpoint
-       engine.GET("/openapi", api.HandleOpenApi)
+       ...
     
        // metrics endpoint   @_add_@
        promhandler := promhttp.Handler()   @_add_@
@@ -122,9 +112,9 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
 
    Okrem vyvolania samotnej funkcie `initTelemetry()` sme zabezpečili inštrumentalizáciu knižnice [gin] pomocou funkcie `otelginmetrics.Middleware()`. Táto funkcia je zodpovedná za zber metrík pre každú požiadavku, ktorá prejde cez náš server, ako napríklad objem prenesených údajov, či počet aktívnych požiadaviek v danom čase. Nakoniec sme pridali aj endpoint `/metrics`, ktorý bude slúžiť na čítanie metrík službou [Prometheus].
 
-   Pokiaľ by sme teraz naše úpravy ukončili, získali by sme sadu ďaľších metrík, ktoré by sme mohli zobraziť v službe [Grafana]. Zároveň by sme mohli pristúpiť k ceste `/metrics`, kde by sme videli jednotlivé záznamy meraní vo formáte služby _Prometheus_.
+   Pokiaľ by sme teraz naše úpravy ukončili, získali by sme sadu ďalších metrík, ktoré by sme mohli zobraziť v službe [Grafana]. Zároveň by sme mohli pristúpiť k ceste `/metrics`, kde by sme videli jednotlivé záznamy meraní vo formáte služby _Prometheus_.
 
-2. Našim cieľom je vygenerovať dve doplňujúce metriky: Celková doba strávená čakaním na odozvu databázy, a momentálny počet čakajúcich pacientov v jednotlivých ambulanciách. Druhá z týchto metrík nie je celkom _operačnou_ metrikou, ukážeme si ju hlavne ako príklad asynchrónnej metriky. [OpenTelemetry] rozlišuje medzi synchrónnymi a asynchronnými metrikami. Synchrónne merania sa vytvárajú a ukladajú synchrónne s prebiehajúcim výpočtom, zatiaľ čo asynchronne merania sa získavajú len v prípade, že ich klient potrebuje - meranie sa vyvolá asynchrónne pomocou _callback_ funkcie.
+2. Našim cieľom je vygenerovať dve doplňujúce metriky: celková doba strávená čakaním na odozvu databázy a momentálny počet čakajúcich pacientov v jednotlivých ambulanciách. Druhá z týchto metrík nie je celkom _operačnou_ metrikou, ukážeme si ju hlavne ako príklad asynchrónnej metriky. [OpenTelemetry] rozlišuje medzi synchrónnymi a asynchrónnymi metrikami. Synchrónne merania sa vytvárajú a ukladajú synchrónne s prebiehajúcim výpočtom, zatiaľ čo asynchrónne merania sa získavajú len v prípade, že ich klient potrebuje - meranie sa vyvolá asynchrónne pomocou _callback_ funkcie.
 
    Upravte súbor `${WAC_ROOT}}/ambulance-webapi/internal/ambulance_wl/utils_ambulance_updater.go`:
 
@@ -132,14 +122,14 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
    package ambulance_wl
 
    import (
-       "context"
        "fmt" @_add_@
        "log" @_add_@
        "net/http"
        "time"  @_add_@
+       "context"  @_add_@
    
        "github.com/gin-gonic/gin"
-       "github.com/milung/ambulance-webapi/internal/db_service"
+       "github.com/<github_id>/ambulance-webapi/internal/db_service" @important
        "go.opentelemetry.io/otel"   @_add_@
        "go.opentelemetry.io/otel/attribute"   @_add_@
        "go.opentelemetry.io/otel/metric"   @_add_@
@@ -238,7 +228,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
    }
    ```
 
-   Zmeny v tejto funkcii teraz merajú čas strávený volaním databázy pri čítaní a zmene údajov v zozname čakajúcich a synchrónne tieto zmeny zaznamenávajú v metrike `dbTimeSpent`. Zároveň sa pre každú ambulanciu dynamicky vytvára asynchrónna metrika `newGauge`, a registruje sa _callback_ funkcia, ktorá bude poskytovať aktuálny počet čakajúcich pacientov v danej ambulancii na základe posledne známej hodnoty. Táto metrika je asynchrónna, pretože sa poskytuje len v prípade, že klient požiada o jej hodnotu.
+   Zmeny v tejto funkcii teraz merajú čas strávený volaním databázy pri čítaní a zmene údajov v zozname čakajúcich a synchrónne tieto zmeny zaznamenávajú v metrike `dbTimeSpent`. Zároveň sa pre každú ambulanciu dynamicky vytvára asynchrónna metrika `newGauge` a registruje sa _callback_ funkcia, ktorá bude poskytovať aktuálny počet čakajúcich pacientov v danej ambulancii na základe poslednej známej hodnoty. Táto metrika je asynchrónna, pretože sa poskytuje len v prípade, že klient požiada o jej hodnotu.
 
 3. Uložte zmeny a v priečinku `${WAC_ROOT}}/ambulance-webapi` vykonajte nasledujúce príkazy:
 
@@ -251,7 +241,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
    V prehliadači otvorte stránku [http://localhost:8080/metrics](http://localhost:8080/metrics), ktorá zobrazí existujúce metriky vo formáte [Prometheus]. Zatiaľ nie sú viditeľné metriky vytvorené pre rozsah  `waiting_list_access`.
    Zastavte proces.
 
-4. Aby systém [Prometheus] vedel o nových metrikách, musíme upraviť konfiguráciu nasadenia našej aplikácie, konrétne musíme pridať na náš pod špecifické anotácie. Služba _Prometheus_ je konfigurovaná tak aby vyhľadávala objekty typu [_Service_](https://kubernetes.io/docs/concepts/services-networking/service/) a typu [_Pod_](https://kubernetes.io/docs/concepts/workloads/pods/) s anotáciami určenými v konfigurácii služby `prometheus-server`. Upravte súbor `${WAC_ROOT}/deployments/kustomize/install/deployment.yaml`:
+4. Aby systém [Prometheus] vedel o nových metrikách, musíme upraviť konfiguráciu nasadenia našej aplikácie, konkrétne musíme pridať na náš pod špecifické anotácie. Služba _Prometheus_ je konfigurovaná tak, aby vyhľadávala objekty typu [_Service_](https://kubernetes.io/docs/concepts/services-networking/service/) a typu [_Pod_](https://kubernetes.io/docs/concepts/workloads/pods/) s anotáciami určenými v konfigurácii služby `prometheus-server`. Upravte súbor `${WAC_ROOT}/ambulance-webapi/deployments/kustomize/install/deployment.yaml`:
 
    ```yaml
    ...
@@ -281,14 +271,14 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
    git push
    ```
 
-   Overte, že boli naše zmeny úspešne nasadené príkazom
+   Overte, že boli naše zmeny úspešne nasadené a pod pre webapi bol reštartovaný:
 
    ```ps
-   kubectl get kustomization -n wac-hospital
+   kubectl get pods -n wac-hospital
    ```
 
-   Prejdite na stránku [https://wac-hospital.loc/ui/](https://wac-hospital.loc/ui/) a v svojej aplikácii _Zoznam čakajúcich <pfx>_ vytvorte niekoľko záznamov Vyčakjte približne 2 minúty, kým služba [Prometheus] aktivuje proces načítania metrík. Prejdite na aplikáciu _System Dashboards_ a v ľavom navigačnom panely zvoľte položku _Explore_. V poli _Metric_ vyhľadajte merania `bobulova_waiting_patients` a stlačte tlačidlo _Run query_. V grafe by ste mali vidieť hodnoty zodpovedajúce aktuálnemu počtu čakajúcich pacientov. Pokiaľ budete ďalej vytvárať alebo mazať záznamy v zozname čakajúcich, budú na to hodnoty v grafe náležite reagovať, s príslušným oneskorením. Podobným spôsobom možete sledovať aj metriku `ambulance_wl_time_spent_in_db_milliseconds_total`, ktorá zobrazuje celkový čas strávený čítaním a zápisom do databázy.
+   Prejdite na stránku [https://wac-hospital.loc/ui/](https://wac-hospital.loc/ui/) a vo svojej aplikácii _Zoznam čakajúcich <pfx>_ vytvorte niekoľko záznamov Vyčkajte približne 2 minúty, kým služba [Prometheus] aktivuje proces načítania metrík. Prejdite na aplikáciu _System Dashboards_ a v ľavom navigačnom paneli zvoľte položku _Explore_. V poli _Metric_ vyhľadajte merania `bobulova_waiting_patients` a stlačte tlačidlo _Run query_. V grafe by ste mali vidieť hodnoty zodpovedajúce aktuálnemu počtu čakajúcich pacientov. Pokiaľ budete ďalej vytvárať alebo mazať záznamy v zozname čakajúcich, budú na to hodnoty v grafe náležite reagovať (s príslušným oneskorením). Podobným spôsobom možete sledovať aj metriku `ambulance_wl_time_spent_in_db_milliseconds_total`, ktorá zobrazuje celkový čas strávený čítaním a zápisom do databázy.
 
    ![Graf metriky bobulova_waiting_patients](./img/100-01-AmbulanceWaitingListMetric.png)
 
-   >homework:> Výtvorte údajové panely pre tieto metriky v aplikácii _System Dashboards_ - [Grafana]. Vyskúšajte aj metriky začínajúce prefixom `http_server_` a `promhttp_`.
+   >homework:> Vytvorte údajové panely pre tieto metriky v aplikácii _System Dashboards_ - [Grafana]. Vyskúšajte aj metriky začínajúce prefixom `http_server_` a `promhttp_`.
