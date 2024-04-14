@@ -54,6 +54,8 @@ Pri vývoji aplikácie je vhodné mať možnosť sledovať stav databázy. Pre t
               value: "" @_important_@
             - name: ME_CONFIG_BASICAUTH_PASSWORD
               value: "" @_important_@
+            - name: ME_CONFIG_BASICAUTH
+              value: "false"
             ports:
             - name: http
               containerPort: 8081
