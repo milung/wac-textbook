@@ -104,7 +104,7 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
         targetPort: 9191
     ```
 
-2. Teraz pristúpime ku konfigurácii `opa-envoy-plugin` služby. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/opa-config.yaml`. Všimnite si, že sme priradili port `9191` pre `envoy_ext_authz_grpc` plugin a nastavili sme cestu k pravidlu vyhodnotenia autorizačnej politiky (_policy_).
+2. Teraz pristúpime ku konfigurácii `opa-envoy-plugin` služby. Vytvorte súbor `${WAC_ROOT}/ambulance-gitops/infrastructure/opa-plugin/params/opa-config.yaml` s nasledujúcim obsahom:
 
    ```yaml
    plugins:

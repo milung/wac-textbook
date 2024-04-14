@@ -243,7 +243,7 @@ THIS IS A FAST DEPLOYMENT SCRIPT FOR DEVELOPERS!
 
 The script shall be running **only on fresh local cluster** **!
 After initialization, it **uses gitops** controlled by installed flux cd controller.
-To do some local fine tuning get familiarized with flux, kustomize, and kubernetes
+To do some local fine tuning get familiar with flux, kustomize, and kubernetes
 
 Verify that your context is coresponding to your local development cluster:
 
