@@ -282,7 +282,7 @@ V predchádzajúcej sekcii sme videli, ako môžeme analyzovať jednotlivé pož
 
    ![Detaily rozsahu výpočtu požiadavky](./img/120-02-SpanDetails.png)
 
-   V detailoch rozsahu výpočtu môžete pre danú požiadavku vidieť všetky rozsahy a im priradené atribúty, ktoré sme v našej aplikácii vytvorili. Vidíme, aký je podiel jednotlivých služieb na celkovom čase výpočtu. Stále nám chýbajú detaily niektorých služieb - napríklad pre MongoDB, túto skutočnosť budeme adresovať v ďalších sekciách, potom ako nasadíme systém [Linkerd].
+   V detailoch rozsahu výpočtu môžete pre danú požiadavku vidieť všetky rozsahy a im priradené atribúty, ktoré sme v našej aplikácii vytvorili. Vidíme, aký je podiel jednotlivých služieb na celkovom čase výpočtu.
 
    >homework:> Vykonajte analýzu požiadaviek na službu _Ambulance WEBAPI Service_. Skúste zistiť, v ktorých častiach kódu sa stráca najviac času a ako by tieto časti bolo možné optimalizovať. Sú informačné záznamy dostatočne detailné? Ak nie, skúste doplniť ďalšie informácie a rozsahy do Vašej aplikácie. __Do záznamov nikdy nevkladajte údaje, ktoré by mohli narušiť súkromie používateľov!__.
 
