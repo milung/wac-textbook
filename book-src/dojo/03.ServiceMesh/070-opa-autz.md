@@ -179,12 +179,12 @@ Pre riadenie politiky prístupu, nielen v rámci autorizácie používateľov, a
        glob.match("am-i-admin=yes", [], query)
    }
    
-   # this are admin users
+   # these are admin users
    user_role[ "admin" ] { 
        user.email == "<kolegov@email>" @_important_@
    }
    
-   # this are users with access to monitoring actions
+   # these are users with access to monitoring actions
    user_role[ "monitoring" ] { 
        user.email == "<your_github_account@email>" @_important_@
    }
