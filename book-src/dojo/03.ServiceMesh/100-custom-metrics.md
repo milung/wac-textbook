@@ -34,7 +34,7 @@ Knižnica - SDK - [OpenTelemetry] je výsledkom integrácie rôznych projektov, 
       "go.opentelemetry.io/otel/exporters/prometheus"     @_add_@
       "go.opentelemetry.io/otel/sdk/metric"     @_add_@
       "go.opentelemetry.io/otel/sdk/resource"     @_add_@
-      semconv "go.opentelemetry.io/otel/semconv/v1.21.0"     @_add_@
+      semconv "go.opentelemetry.io/otel/semconv/v1.24.0"     @_add_@
    )
    
    ...
