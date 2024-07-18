@@ -1,3 +1,9 @@
+# Repository Transition
+
+**We have transitioned the development of the textbook to a [new repository](https://github.com/wac-fiit/wac-textbook). This repository is now archived, and all subsequent updates will be made in the forked repository, maintained by owners of [wac-fiit organization](https://github.com/wac-fiit). Please update your bookmarks and references accordingly.**
+
+---
+
 # Zdrojové materiály k skriptám k predmetu Vývoj webových aplikácii v prostredí Cloud
 
 __English summary__: This repository contains the source materials for the book "Vývoj webových aplikácii v prostredí Cloud" (Development of web applications in the Cloud environment) written in Slovak language. The book is available at http://wac-fiit.milung.eu/ .
